@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AZ Companion - Case Management &amp; AI Assistant</title>
+  <!-- Google Fonts: Outfit for headings, Inter for body -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+          <span class="logo-text">AZ Companion</span>
+        </div>
+      </div>
+      
+      <nav class="nav-menu">
+        <button class="nav-item active" data-page="my-cases">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          <span>My Cases</span>
+        </button>
+        <button class="nav-item" data-page="case-cards">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line><line x1="9" y1="17" x2="11" y2="17"></line></svg>
+          <span>Case Card</span>
+        </button>
+        <button class="nav-item" data-page="ai-chat">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span>AI Chat</span>
+        </button>
+        <button class="nav-item" data-page="resources">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Resources</span>
+        </button>
+        <button class="nav-item" data-page="family-report">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Family Report</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">
+            <span>JD</span>
+          </div>
+          <div class="user-info">
+            <span class="user-name">Jane Doe</span>
+            <span class="user-role">Case Manager</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navbar Header -->
+      <header class="top-header">
+        <div class="header-search">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="global-search" placeholder="Search families, cases, templates...">
+        </div>
+        <div class="header-actions">
+          <div class="date-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span id="current-date-text">June 18, 2026</span>
+          </div>
+          <button class="header-btn" title="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="btn-badge"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Page Viewport -->
+      <div class="viewport">
+        
+        <!-- PAGE 1: MY CASES (DASHBOARD) -->
+        <section id="page-my-cases" class="page-view active">
+          <div class="page-title-row">
+            <h1>Dashboard</h1>
+            <button class="btn btn-primary" id="btn-dashboard-new-case">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>New Case</span>
+            </button>
+          </div>
+
+          <!-- Stats Widgets Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Active Cases</span>
+                <span class="stat-trend up">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                  <span>12%</span>
+                </span>
+              </div>
+              <div class="stat-body">
+                <span class="stat-value" id="stat-cases-count">8</span>
+                <div class="sparkline-wrapper">
+                  <svg class="sparkline" viewBox="0 0 100 30">
+                    <path d="M0,25 Q15,5 30,20 T60,10 T90,15 T100,5" fill="none" stroke="url(#blue-grad)" stroke-width="2.5" stroke-linecap="round"></path>
+                    <defs>
+                      <linearGradient id="blue-grad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#3b82f6"></stop>
+                        <stop offset="100%" stop-color="#60a5fa"></stop>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Completed Reports</span>
+                <span class="stat-badge success">Quarterly</span>
+              </div>
+              <div class="stat-body">
+                <span class="stat-value">1</span>
+                <div class="sparkline-wrapper">
+                  <svg class="sparkline" viewBox="0 0 100 30">
+                    <path d="M0,28 Q20,28 40,15 T80,12 T100,2" fill="none" stroke="url(#green-grad)" stroke-width="2.5" stroke-linecap="round"></path>
+                    <defs>
+                      <linearGradient id="green-grad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#10b981"></stop>
+                        <stop offset="100%" stop-color="#34d399"></stop>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Pending Reports</span>
+                <span class="stat-badge warning">Urgent</span>
+              </div>
+              <div class="stat-body">
+                <span class="stat-value">1</span>
+                <div class="sparkline-wrapper">
+                  <svg class="sparkline" viewBox="0 0 100 30">
+                    <path d="M0,20 Q20,10 40,25 T80,8 T100,22" fill="none" stroke="url(#amber-grad)" stroke-width="2.5" stroke-linecap="round"></path>
+                    <defs>
+                      <linearGradient id="amber-grad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#f59e0b"></stop>
+                        <stop offset="100%" stop-color="#fbbf24"></stop>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Families Section -->
+          <div class="section-card">
+            <div class="card-header">
+              <div class="header-left">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <h2>Families Under Care</h2>
+              </div>
+              <span class="badge" id="families-badge">3 Families</span>
+            </div>
+            
+            <div class="families-list" id="families-dashboard-list">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE 2: CASE CARDS BOARD / NEW FORM -->
+        <section id="page-case-cards" class="page-view">
+          <div class="page-title-row">
+            <h1 id="case-cards-title">Case Cards</h1>
+            <div class="btn-group">
+              <button class="btn btn-secondary active" id="tab-btn-list">All Cards</button>
+              <button class="btn btn-primary" id="tab-btn-new">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Create New Card
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 1: CASE CARDS BOARD -->
+          <div id="subview-cards-list" class="sub-view active">
+            <div class="cards-grid" id="case-cards-container">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+
+          <!-- SUB-VIEW 2: CREATE CASE CARD FORM -->
+          <div id="subview-create-form" class="sub-view">
+            <div class="form-container-card">
+              <h2>New Case Registration</h2>
+              <p class="form-subtitle">Complete this form to create a new interactive Case Card for a family.</p>
+              
+              <form id="new-case-form">
+                <div class="form-group">
+                  <label for="case-name">Family / Case Name <span class="required">*</span></label>
+                  <input type="text" id="case-name" placeholder="e.g. Smith Family" required>
+                  <span class="input-helper">Use the format '[Last Name] Family'.</span>
+                </div>
+                
+                <div class="form-group">
+                  <label for="case-details">Primary Contact / Case Summary <span class="required">*</span></label>
+                  <input type="text" id="case-details" placeholder="e.g. Intake Active &bull; Primary Caregiver: John Smith" required>
+                  <span class="input-helper">A short descriptive summary of the contact and case status.</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="case-intake">Initial Intake Form / Clinical Notes</label>
+                  <textarea id="case-intake" rows="8" placeholder="Enter patient clinical background, caregiver feedback, dementia stage info, and any immediate support needs..."></textarea>
+                </div>
+                
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary" id="btn-cancel-create">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Create Case</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE 3: AI CHAT -->
+        <section id="page-ai-chat" class="page-view">
+          <div class="page-title-row">
+            <h1>AI Chat Assistant</h1>
+            <div class="chat-header-actions">
+              <button class="btn btn-secondary btn-sm" id="btn-new-chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                New Chat
+              </button>
+              <span class="status-indicator">
+                <span class="pulse-dot"></span>
+                AI Companion Connected
+              </span>
+            </div>
+          </div>
+
+          <div class="chat-container">
+            <!-- Messages pane -->
+            <div class="chat-messages" id="chat-messages-box">
+              <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Chat input bar -->
+            <div class="chat-input-area">
+              <!-- Suggestion Container -->
+              <div class="chat-suggestions-container" id="chat-suggestions-box">
+                <!-- Dynamically populated suggestions -->
+              </div>
+              
+              <div class="input-row">
+                <div class="input-avatar">JD</div>
+                <textarea id="chat-input" placeholder="Ask AI Companion about cases or select a suggestion above..." rows="1"></textarea>
+                
+                <div class="chat-controls">
+                  <!-- Model Selector Dropdown -->
+                  <div class="model-select-wrapper">
+                    <select id="chat-model-select" class="custom-select">
+                      <option value="hybrid">Hybrid Engine</option>
+                      <option value="standard">Standard GPT</option>
+                      <option value="deep">Deep Analysis</option>
+                    </select>
+                  </div>
+                  
+                  <button class="btn btn-primary" id="btn-chat-generate">
+                    <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <span>Generate</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE 4: RESOURCES -->
+        <section id="page-resources" class="page-view">
+          <div class="page-title-row">
+            <h1>Curated Resources</h1>
+            <div class="filter-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="resource-search" placeholder="Filter resources...">
+            </div>
+          </div>
+
+          <div class="resources-layout">
+            <!-- ADRD Resources Column -->
+            <div class="resource-column">
+              <div class="column-title-bar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <h2>ADRD Resources</h2>
+              </div>
+              <div class="resource-list-container" id="adrd-resources-list">
+                <!-- Hardcoded high-fidelity cards that are filterable -->
+                <div class="resource-card-item" data-text="Alzheimer's Caregiver Support Groups local networks respite care">
+                  <h3>Caregiver Support Directory</h3>
+                  <p>Comprehensive catalog of online and local support meetings for family members dealing with primary care fatigue.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Support</span>
+                    <span class="mini-tag">Caregiver</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-text="Early ADRD Signs detection diagnosis cognitive decline guidelines">
+                  <h3>Early ADRD Signs &amp; Guidelines</h3>
+                  <p>Clinical instructions on tracking early-stage Alzheimer's indicators, memory lapses, and communication guidelines.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Clinical</span>
+                    <span class="mini-tag">Guides</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-text="Safety and Wandering Prevention sensors alarm door gps tags home safety">
+                  <h3>Safety &amp; Wandering Prevention</h3>
+                  <p>Practical checklist for safety-proofing homes, installing tracking wristbands, and motion sensors.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Home Safety</span>
+                    <span class="mini-tag">Devices</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-text="Cognitive stimulation activities sensory games puzzles therapy">
+                  <h3>Cognitive Stimulation Activities</h3>
+                  <p>Activities, puzzle layouts, and visual stimulation guides designed for moderate-stage Alzheimer's patients.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Therapy</span>
+                    <span class="mini-tag">Engagement</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Approved Practices Column -->
+            <div class="resource-column">
+              <div class="column-title-bar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <h2>Approved Practices</h2>
+              </div>
+              <div class="resource-list-container" id="practices-resources-list">
+                
+                <div class="resource-card-item" data-text="Intake Assessment protocol screening dementia testing forms">
+                  <h3>Approved Intake Protocols</h3>
+                  <p>Official organization instructions on documenting initial clinical intake interviews, consent forms, and evaluations.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Standard</span>
+                    <span class="mini-tag">Intake</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-text="Shared Decision Making family consultation care coordination consensus">
+                  <h3>Shared Decision Making Guide</h3>
+                  <p>A step-by-step consensus guide to navigating multi-caregiver disputes and aligns clinical and family strategies.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Consult</span>
+                    <span class="mini-tag">Coordination</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-text="Sundowning Behavioral management sensory light routines care plans">
+                  <h3>Sundowning Mitigation Standards</h3>
+                  <p>Best practices for managing late-afternoon agitation including calming routine structures and sensory light schedules.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Behavioral</span>
+                    <span class="mini-tag">Approved</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PAGE 5: FAMILY REPORT -->
+        <section id="page-family-report" class="page-view">
+          <div class="page-title-row">
+            <h1>Generated Reports</h1>
+            <p class="subtitle">Access and generate official reports, assessment timelines, and compliance reviews.</p>
+          </div>
+
+          <div class="report-list-card">
+            <div class="report-table-header">
+              <div class="col-family">Family Name</div>
+              <div class="col-period">Active Period</div>
+              <div class="col-status">Status</div>
+              <div class="col-action">Action</div>
+            </div>
+
+            <div class="report-rows-container" id="report-rows-list">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </section>
+        
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL 1: REPORT VIEWER & CALENDAR MODAL -->
+  <div class="modal-overlay" id="modal-report-viewer">
+    <div class="modal-box report-modal">
+      <div class="modal-header">
+        <h3 id="report-modal-title">Rivera Family - Q2 2024 Report</h3>
+        <button class="modal-close" id="btn-close-report-modal">&times;</button>
+      </div>
+      <div class="modal-body report-split">
+        <!-- Left Pane: Written Report Content -->
+        <div class="report-text-pane">
+          <h4>Clinical Summary Report</h4>
+          <p class="report-meta">Generated on: June 18, 2026 &bull; Evaluator: Jane Doe, Case Manager</p>
+          
+          <div id="report-modal-text-content">
+            <!-- Dynamically injected report text -->
+          </div>
+        </div>
+        
+        <!-- Right Pane: Interactive Calendar -->
+        <div class="report-calendar-pane">
+          <div class="calendar-card">
+            <div class="calendar-header">
+              <span class="calendar-month">JUNE 2026</span>
+            </div>
+            <div class="calendar-days-grid">
+              <div class="day-name">S</div>
+              <div class="day-name">M</div>
+              <div class="day-name">T</div>
+              <div class="day-name">W</div>
+              <div class="day-name">T</div>
+              <div class="day-name">F</div>
+              <div class="day-name">S</div>
+              
+              <!-- Blank days for start of month (June 1st, 2026 is Monday) -->
+              <div class="day empty"></div>
+              
+              <!-- June days -->
+              <div class="day">1</div>
+              <div class="day">2</div>
+              <div class="day">3</div>
+              <div class="day">4</div>
+              <div class="day">5</div>
+              <div class="day">6</div>
+              <div class="day">7</div>
+              <div class="day">8</div>
+              <div class="day">9</div>
+              <div class="day">10</div>
+              <div class="day">11</div>
+              <div class="day">12</div>
+              <div class="day">13</div>
+              <div class="day">14</div>
+              <div class="day">15</div>
+              <div class="day">16</div>
+              <div class="day">17</div>
+              <div class="day active-date">18</div> <!-- Highlighted current date -->
+              <div class="day">19</div>
+              <div class="day">20</div>
+              <div class="day">21</div>
+              <div class="day">22</div>
+              <div class="day">23</div>
+              <div class="day">24</div>
+              <div class="day">25</div>
+              <div class="day">26</div>
+              <div class="day">27</div>
+              <div class="day">28</div>
+              <div class="day">29</div>
+              <div class="day">30</div>
+            </div>
+          </div>
+          <div class="calendar-action-note">
+            <p class="small-text">Current system date highlighted. Select date range to filter report log entries.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary text-red" id="btn-close-case-from-report">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+          Close Case
+        </button>
+        <div class="footer-right">
+          <button class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
+          <button class="btn btn-primary" id="btn-modal-download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download Report PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SHARE CASE CARD DIALOG -->
+  <div class="modal-overlay" id="modal-share-card">
+    <div class="modal-box share-modal">
+      <div class="modal-header">
+        <h3 id="share-modal-title">Share Case Card</h3>
+        <button class="modal-close" id="btn-close-share-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="share-preview-box">
+          <span class="preview-badge">Shared Preview</span>
+          <p id="share-preview-text">...</p>
+        </div>
+        
+        <div class="form-group margin-top-lg">
+          <label for="share-search">Search users within organization</label>
+          <div class="input-search-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="share-search" placeholder="Type name, email, or role...">
+          </div>
+        </div>
+        
+        <div class="share-users-list" id="share-users-choices">
+          <div class="user-select-row" data-name="Dr. Marcus Aurelius Physician Specialist">
+            <input type="checkbox" id="user-check-1" value="marcus">
+            <label for="user-check-1" class="user-checkbox-label">
+              <div class="avatar sm">MA</div>
+              <div class="user-desc">
+                <span class="name">Dr. Marcus Aurelius</span>
+                <span class="role">Lead Neurologist</span>
+              </div>
+            </label>
+          </div>
+          
+          <div class="user-select-row" data-name="Sarah Connor Care Coordinator Assistant">
+            <input type="checkbox" id="user-check-2" value="sarah">
+            <label for="user-check-2" class="user-checkbox-label">
+              <div class="avatar sm">SC</div>
+              <div class="user-desc">
+                <span class="name">Sarah Connor</span>
+                <span class="role">Care Coordinator</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="user-select-row" data-name="Robert Mercer Social Worker Supervisor">
+            <input type="checkbox" id="user-check-3" value="robert">
+            <label for="user-check-3" class="user-checkbox-label">
+              <div class="avatar sm">RM</div>
+              <div class="user-desc">
+                <span class="name">Robert Mercer</span>
+                <span class="role">Social Worker</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-share">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-share">Share Case Card</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

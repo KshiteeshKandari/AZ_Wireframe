@@ -1,7 +1,7 @@
 /* 
   AZ Companion Custom Stylesheet
   Light Palette (Sage, Lavender, Periwinkle, Charcoal)
-  Includes Custom Background/Header Texture Images & Fluid Layouts
+  Utilizes User's Uploaded Backgrounds & Responsive Grid Components
 */
 
 /* Core CSS Variables for Theme & Sizing */
@@ -127,11 +127,11 @@ a:hover {
   overflow: hidden;
 }
 
-/* Sidebar Styling with Custom Image Overlay Texture */
+/* Sidebar with User's Uploaded Behind-Navbar Image */
 .sidebar {
   width: var(--sidebar-width);
   background-color: var(--bg-secondary);
-  background-image: linear-gradient(rgba(210, 212, 200, 0.94), rgba(210, 212, 200, 0.94)), url('images/header_bg.png');
+  background-image: linear-gradient(rgba(210, 212, 200, 0.92), rgba(210, 212, 200, 0.92)), url('Images/behind_nav%20bar.png');
   background-size: cover;
   background-position: center;
   border-right: 1px solid var(--border-color);
@@ -203,7 +203,7 @@ a:hover {
 }
 
 .nav-item.active {
-  color: #483961; /* Dark contrast purple */
+  color: #483961;
   background-color: rgba(255, 255, 255, 0.75);
   border-left: 4px solid var(--color-primary);
   padding-left: 12px;
@@ -270,24 +270,24 @@ a:hover {
   color: var(--text-secondary);
 }
 
-/* Main Content Area with Background Image Texture */
+/* Main Content Area with User's Uploaded Background Image */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
   height: 100%;
   background-color: var(--bg-viewport);
-  background-image: linear-gradient(rgba(245, 246, 243, 0.85), rgba(245, 246, 243, 0.85)), url('images/layout_bg.png');
+  background-image: linear-gradient(rgba(245, 246, 243, 0.88), rgba(245, 246, 243, 0.88)), url('Images/backround.png');
   background-size: cover;
   background-position: center;
   overflow: hidden;
 }
 
-/* Top Header with Custom Image Overlay Texture */
+/* Top Header with User's Uploaded Icons Image */
 .top-header {
   height: var(--header-height);
   background-color: var(--bg-primary);
-  background-image: linear-gradient(to right, rgba(224, 226, 219, 0.9), rgba(224, 226, 219, 0.7)), url('images/header_bg.png');
+  background-image: linear-gradient(to right, rgba(224, 226, 219, 0.9), rgba(224, 226, 219, 0.7)), url('Images/Icons%20on%20the%20background.png');
   background-size: cover;
   background-position: center;
   border-bottom: 1px solid var(--border-color);
@@ -387,6 +387,105 @@ a:hover {
   background-color: var(--color-danger);
   border-radius: 50%;
   border: 1.5px solid #ffffff;
+  display: none; /* Controlled dynamically by JS (shows when unread notifications are present) */
+}
+
+/* Notification Dropdown Component */
+.notifications-container {
+  position: relative;
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 320px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: none;
+  z-index: 100;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.notifications-dropdown.active {
+  display: block;
+}
+
+.notifications-dropdown-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-card-alt);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.text-btn {
+  background: transparent;
+  border: none;
+  color: #6d5494;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.text-btn:hover {
+  text-decoration: underline;
+}
+
+.notifications-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background-color: var(--bg-card-alt);
+}
+
+.notification-item.unread {
+  background-color: rgba(156, 137, 184, 0.06);
+  border-left: 3px solid var(--color-primary);
+}
+
+.noti-icon {
+  color: var(--color-primary);
+  margin-top: 2px;
+  display: flex;
+}
+
+.noti-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.noti-text {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.noti-time {
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
 /* Viewport Page Container */
@@ -535,7 +634,7 @@ a:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .stat-title {
@@ -562,6 +661,7 @@ a:hover {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  min-height: 42px;
 }
 
 .stat-value {
@@ -570,17 +670,6 @@ a:hover {
   font-weight: 800;
   color: var(--text-primary);
   line-height: 1.1;
-}
-
-.sparkline-wrapper {
-  width: 90px;
-  height: 30px;
-}
-
-.sparkline {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
 }
 
 /* Badges & Tags */
@@ -700,6 +789,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 
 .family-name {
@@ -729,21 +819,6 @@ a:hover {
   color: var(--text-secondary);
 }
 
-.family-visual {
-  width: 120px;
-  height: 40px;
-}
-
-.visual-graph {
-  width: 100%;
-  height: 100%;
-  stroke: var(--border-color);
-}
-
-.family-item:hover .visual-graph {
-  stroke: var(--color-primary);
-}
-
 /* Case Cards Tabbed Grid styling */
 .cards-grid {
   display: grid;
@@ -760,8 +835,9 @@ a:hover {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 340px;
+  min-height: 320px;
   transition: transform var(--transition-fast), border-color var(--transition-fast);
+  cursor: pointer; /* clickable to maximize */
 }
 
 .case-card-item:hover {
@@ -801,6 +877,8 @@ a:hover {
   padding: 6px;
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  position: relative;
+  z-index: 5; /* click on share shouldn't trigger card maximization */
 }
 
 .card-share-btn:hover {
@@ -815,6 +893,8 @@ a:hover {
   padding: 4px;
   margin-bottom: 16px;
   border: 1px solid var(--border-color);
+  position: relative;
+  z-index: 5; /* click on tabs shouldn't trigger card maximization */
 }
 
 .card-tab {
@@ -992,6 +1072,142 @@ a:hover {
   color: var(--text-secondary);
 }
 
+/* Maximized Card Editor Modal Layout styles */
+.editor-modal {
+  width: 720px;
+}
+
+.editor-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+  gap: 8px;
+}
+
+.editor-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.editor-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.editor-tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.editor-pane {
+  display: none;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.editor-pane.active {
+  display: block;
+}
+
+.timeline-editor-list,
+.resources-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-bottom: 12px;
+}
+
+.edit-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background-color: var(--bg-card-alt);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.edit-row input {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  flex: 1;
+}
+
+.btn-remove-row {
+  background: transparent;
+  border: none;
+  color: var(--color-danger);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.btn-remove-row:hover {
+  opacity: 0.8;
+}
+
+/* In-Chat Choice Options Blocks */
+.chat-options-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chat-option-choice-btn {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.chat-option-choice-btn:hover {
+  background-color: var(--color-primary-glow);
+  border-color: var(--color-primary);
+  color: var(--text-primary);
+  transform: translateX(2px);
+}
+
+/* Resources Page Design Tag Filters */
+.resources-filter-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.tag-select-wrapper {
+  position: relative;
+}
+
+.scrollable-select {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 /* Create Case Card Form Panel CSS */
 .sub-view {
   display: none;
@@ -1083,12 +1299,6 @@ a:hover {
   height: calc(100vh - var(--header-height) - 130px);
   overflow: hidden;
   box-shadow: var(--shadow-md);
-}
-
-.chat-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
 }
 
 .chat-messages {
@@ -1458,107 +1668,20 @@ a:hover {
   border-color: var(--color-accent);
 }
 
-.suggestion-btn.back {
-  background-color: var(--bg-hover);
-  border-color: var(--border-color);
-  font-weight: 700;
-}
-
-/* Resources Page Design */
-.filter-search-box {
+/* Resources Page Design Tag Filters */
+.resources-filter-bar {
   display: flex;
+  gap: 12px;
   align-items: center;
-  gap: 10px;
-  background-color: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 8px 16px;
-  width: 280px;
-  box-shadow: var(--shadow-sm);
 }
 
-.filter-search-box input {
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  font-size: 13px;
-  width: 100%;
+.tag-select-wrapper {
+  position: relative;
 }
 
-.resources-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-}
-
-.resource-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.column-title-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-primary);
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 10px;
-}
-
-.column-title-bar h2 {
-  font-size: 18px;
-  color: var(--text-primary);
-}
-
-.resource-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.resource-card-item {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 18px;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-}
-
-.resource-card-item:hover {
-  border-color: var(--color-primary);
-  transform: translateX(3px);
-  box-shadow: var(--shadow-md);
-}
-
-.resource-card-item h3 {
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  color: var(--text-primary);
-}
-
-.resource-card-item p {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 12px;
-}
-
-.tag-row {
-  display: flex;
-  gap: 6px;
-}
-
-.mini-tag {
-  font-size: 10px;
-  font-weight: 700;
-  background-color: var(--bg-card-alt);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: 2px 8px;
-  border-radius: 12px;
+.scrollable-select {
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 /* Family Report View styling */

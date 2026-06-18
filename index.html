@@ -72,10 +72,29 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             <span id="current-date-text">June 18, 2026</span>
           </div>
-          <button class="header-btn" title="Notifications">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            <span class="btn-badge"></span>
-          </button>
+          <div class="notifications-container">
+            <button class="header-btn" id="btn-notification-trigger" title="Notifications">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              <span class="btn-badge" id="notification-badge-dot"></span>
+            </button>
+            <div class="notifications-dropdown" id="notifications-menu">
+              <div class="notifications-dropdown-header">
+                <span>Notifications</span>
+                <button id="btn-clear-notifications" class="text-btn">Mark all read</button>
+              </div>
+              <div class="notifications-list" id="notifications-list-items">
+                <div class="notification-item unread" id="noti-shared-case">
+                  <div class="noti-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                  </div>
+                  <div class="noti-details">
+                    <p class="noti-text"><strong>Marcus Family</strong> card shared with you by <strong>Robert Mercer</strong>.</p>
+                    <span class="noti-time">Just now</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -104,17 +123,6 @@
               </div>
               <div class="stat-body">
                 <span class="stat-value" id="stat-cases-count">8</span>
-                <div class="sparkline-wrapper">
-                  <svg class="sparkline" viewBox="0 0 100 30">
-                    <path d="M0,25 Q15,5 30,20 T60,10 T90,15 T100,5" fill="none" stroke="url(#blue-grad)" stroke-width="2.5" stroke-linecap="round"></path>
-                    <defs>
-                      <linearGradient id="blue-grad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#3b82f6"></stop>
-                        <stop offset="100%" stop-color="#60a5fa"></stop>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
               </div>
             </div>
             
@@ -125,17 +133,6 @@
               </div>
               <div class="stat-body">
                 <span class="stat-value">1</span>
-                <div class="sparkline-wrapper">
-                  <svg class="sparkline" viewBox="0 0 100 30">
-                    <path d="M0,28 Q20,28 40,15 T80,12 T100,2" fill="none" stroke="url(#green-grad)" stroke-width="2.5" stroke-linecap="round"></path>
-                    <defs>
-                      <linearGradient id="green-grad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#10b981"></stop>
-                        <stop offset="100%" stop-color="#34d399"></stop>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
               </div>
             </div>
 
@@ -146,17 +143,6 @@
               </div>
               <div class="stat-body">
                 <span class="stat-value">1</span>
-                <div class="sparkline-wrapper">
-                  <svg class="sparkline" viewBox="0 0 100 30">
-                    <path d="M0,20 Q20,10 40,25 T80,8 T100,22" fill="none" stroke="url(#amber-grad)" stroke-width="2.5" stroke-linecap="round"></path>
-                    <defs>
-                      <linearGradient id="amber-grad" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#f59e0b"></stop>
-                        <stop offset="100%" stop-color="#fbbf24"></stop>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
               </div>
             </div>
           </div>
@@ -287,9 +273,30 @@
         <section id="page-resources" class="page-view">
           <div class="page-title-row">
             <h1>Curated Resources</h1>
-            <div class="filter-search-box">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" id="resource-search" placeholder="Filter resources...">
+            <div class="resources-filter-bar" style="display: flex; gap: 10px; align-items: center;">
+              <div class="filter-search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="resource-search" placeholder="Filter resources...">
+              </div>
+              <div class="tag-select-wrapper">
+                <select id="resource-tag-filter" class="custom-select scrollable-select" style="padding: 8px 12px; font-size: 13px; font-weight: 600;">
+                  <option value="all">All Tags</option>
+                  <option value="clinical">Clinical</option>
+                  <option value="behavioral">Behavioral</option>
+                  <option value="approved">Approved</option>
+                  <option value="consult">Consult</option>
+                  <option value="intake">Intake</option>
+                  <option value="support">Support</option>
+                  <option value="caregiver">Caregiver</option>
+                  <option value="home safety">Home Safety</option>
+                  <option value="devices">Devices</option>
+                  <option value="therapy">Therapy</option>
+                  <option value="engagement">Engagement</option>
+                  <option value="standard">Standard</option>
+                  <option value="coordination">Coordination</option>
+                  <option value="case study">Case Study</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -517,35 +524,35 @@
         </div>
         
         <div class="share-users-list" id="share-users-choices">
-          <div class="user-select-row" data-name="Dr. Marcus Aurelius Physician Specialist">
+          <div class="user-select-row" data-name="Marcus Aurelius CHW Specialist">
             <input type="checkbox" id="user-check-1" value="marcus">
             <label for="user-check-1" class="user-checkbox-label">
               <div class="avatar sm">MA</div>
               <div class="user-desc">
-                <span class="name">Dr. Marcus Aurelius</span>
-                <span class="role">Lead Neurologist</span>
+                <span class="name">Marcus Aurelius</span>
+                <span class="role">CHW</span>
               </div>
             </label>
           </div>
           
-          <div class="user-select-row" data-name="Sarah Connor Care Coordinator Assistant">
+          <div class="user-select-row" data-name="Sarah Connor CHW Event Manager">
             <input type="checkbox" id="user-check-2" value="sarah">
             <label for="user-check-2" class="user-checkbox-label">
               <div class="avatar sm">SC</div>
               <div class="user-desc">
                 <span class="name">Sarah Connor</span>
-                <span class="role">Care Coordinator</span>
+                <span class="role">CHW (Event Manager)</span>
               </div>
             </label>
           </div>
 
-          <div class="user-select-row" data-name="Robert Mercer Social Worker Supervisor">
+          <div class="user-select-row" data-name="Robert Mercer CHW Supervisor">
             <input type="checkbox" id="user-check-3" value="robert">
             <label for="user-check-3" class="user-checkbox-label">
               <div class="avatar sm">RM</div>
               <div class="user-desc">
                 <span class="name">Robert Mercer</span>
-                <span class="role">Social Worker</span>
+                <span class="role">CHW</span>
               </div>
             </label>
           </div>
@@ -554,6 +561,92 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" id="btn-cancel-share">Cancel</button>
         <button class="btn btn-primary" id="btn-confirm-share">Share Case Card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: MAXIMIZED CASE CARD EDITOR -->
+  <div class="modal-overlay" id="modal-card-editor">
+    <div class="modal-box editor-modal">
+      <div class="modal-header">
+        <h3 id="editor-modal-title">Edit Rivera Family Card</h3>
+        <button class="modal-close" id="btn-close-editor-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="editor-tabs">
+          <button class="editor-tab-btn active" data-edit-tab="intake">Intake Info</button>
+          <button class="editor-tab-btn" data-edit-tab="timeline">Timeline Progress</button>
+          <button class="editor-tab-btn" data-edit-tab="resources">Resource Links</button>
+          <button class="editor-tab-btn" data-edit-tab="summary">AI Summary</button>
+        </div>
+        
+        <div class="editor-tab-content">
+          <!-- Intake Edit Pane -->
+          <div class="editor-pane active" data-edit-tab="intake">
+            <div class="form-group">
+              <label for="edit-intake-notes">Intake Information &amp; Clinical Notes</label>
+              <textarea id="edit-intake-notes" rows="10" placeholder="Clinical background, caregivers, age..."></textarea>
+            </div>
+          </div>
+          
+          <!-- Timeline Edit Pane -->
+          <div class="editor-pane" data-edit-tab="timeline">
+            <p class="edit-help-text" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Modify timeline milestones for this family.</p>
+            <div class="timeline-editor-list" id="edit-timeline-steps">
+              <!-- Dynamically rendered checklist inputs -->
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-timeline-step" style="margin-top: 10px;">
+              + Add Timeline Step
+            </button>
+          </div>
+          
+          <!-- Resources Edit Pane -->
+          <div class="editor-pane" data-edit-tab="resources">
+            <p class="edit-help-text" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Manage resources associated with this case card.</p>
+            <div class="resources-editor-list" id="edit-resources-items">
+              <!-- Dynamically rendered links inputs -->
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-resource-item" style="margin-top: 10px;">
+              + Add Resource Link
+            </button>
+          </div>
+
+          <!-- Summary Edit Pane -->
+          <div class="editor-pane" data-edit-tab="summary">
+            <div class="form-group">
+              <label for="edit-ai-summary">AI Summarized Recommendation Checklist</label>
+              <textarea id="edit-ai-summary" rows="8" placeholder="AI Checklist recommendation summary..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-editor">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-editor">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: CLOSE CASE ARCHIVE OPTIONS -->
+  <div class="modal-overlay" id="modal-close-options">
+    <div class="modal-box archive-modal" style="width: 520px;">
+      <div class="modal-header">
+        <h3>Archive / Close Case</h3>
+        <button class="modal-close" id="btn-close-archive-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14px; color: var(--text-primary); line-height: 1.5; margin-bottom: 16px;">Would you like to save resource recommendations from this case to your library before closing?</p>
+        <div class="archive-recommendations" id="archive-recommendations-preview" style="background-color: var(--bg-card-alt); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 13px;">
+          <!-- Preview details -->
+        </div>
+      </div>
+      <div class="modal-footer flex-column-mobile">
+        <button class="btn btn-secondary" id="btn-archive-cancel">Cancel</button>
+        <div class="footer-right flex-column-mobile" style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary text-red" id="btn-archive-only">No, Just Close</button>
+          <button class="btn btn-secondary" id="btn-archive-practices">Add to Practices</button>
+          <button class="btn btn-primary" id="btn-archive-resources">Add to Resources</button>
+        </div>
       </div>
     </div>
   </div>

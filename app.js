@@ -11,21 +11,6 @@ const state = {
   editingCaseId: null, // Tracks case ID currently being edited in maximized editor
   activeEditTab: 'intake',
   
-  // Custom Library of Resources (starts with default, dynamically appendable)
-  customResources: {
-    adrd: [
-      { title: 'Caregiver Support Directory', desc: 'Comprehensive catalog of online and local support meetings for family members dealing with primary care fatigue.', tags: ['support', 'caregiver'] },
-      { title: 'Early ADRD Signs & Guidelines', desc: 'Clinical instructions on tracking early-stage Alzheimer\'s indicators, memory lapses, and communication guidelines.', tags: ['clinical', 'guides'] },
-      { title: 'Safety & Wandering Prevention', desc: 'Practical checklist for safety-proofing homes, installing tracking wristbands, and motion sensors.', tags: ['home safety', 'devices'] },
-      { title: 'Cognitive Stimulation Activities', desc: 'Activities, puzzle layouts, and visual stimulation guides designed for moderate-stage Alzheimer\'s patients.', tags: ['therapy', 'engagement'] }
-    ],
-    practices: [
-      { title: 'Approved Intake Protocols', desc: 'Official organization instructions on documenting initial clinical intake interviews, consent forms, and evaluations.', tags: ['standard', 'intake'] },
-      { title: 'Shared Decision Making Guide', desc: 'A step-by-step consensus guide to navigating multi-caregiver disputes and aligns clinical and family strategies.', tags: ['consult', 'coordination'] },
-      { title: 'Sundowning Mitigation Standards', desc: 'Best practices for managing late-afternoon agitation including calming routine structures and sensory light schedules.', tags: ['behavioral', 'approved'] }
-    ]
-  },
-  
   cases: [
     {
       id: 'rivera-family',
@@ -279,7 +264,6 @@ function renderAll() {
   renderCaseCards();
   renderReportsList();
   renderChatHistory();
-  renderResourcesGrid();
   renderNotificationBadge();
 }
 
@@ -643,57 +627,32 @@ function generateReportSimulated(caseId, buttonElement) {
   }, 1500);
 }
 
-// --- Render Resources Grid ---
-function renderResourcesGrid() {
-  DOM.adrdResourcesList.innerHTML = '';
-  DOM.practicesResourcesList.innerHTML = '';
-  
-  const query = DOM.resourceSearch.value.toLowerCase().trim();
-  const selectedTag = DOM.resourceTagFilter.value.toLowerCase();
-
-  // ADRD Resources
-  state.customResources.adrd.forEach(res => {
-    if (resourceMatchesFilter(res, query, selectedTag)) {
-      DOM.adrdResourcesList.appendChild(createResourceCard(res));
-    }
-  });
-
-  // Approved Practices
-  state.customResources.practices.forEach(res => {
-    if (resourceMatchesFilter(res, query, selectedTag)) {
-      DOM.practicesResourcesList.appendChild(createResourceCard(res));
-    }
-  });
-}
-
-function resourceMatchesFilter(res, query, tag) {
-  const textMatch = res.title.toLowerCase().includes(query) || res.desc.toLowerCase().includes(query);
-  const tagMatch = tag === 'all' || res.tags.includes(tag);
-  return textMatch && tagMatch;
-}
-
-function createResourceCard(res) {
-  const card = document.createElement('div');
-  card.className = 'resource-card-item';
-  card.setAttribute('data-text', res.tags.join(' '));
-  
-  let tagsHTML = '';
-  res.tags.forEach(t => {
-    tagsHTML += `<span class="mini-tag">${t}</span>`;
-  });
-
-  card.innerHTML = `
-    <h3>${res.title}</h3>
-    <p>${res.desc}</p>
-    <div class="tag-row">${tagsHTML}</div>
-  `;
-  return card;
-}
-
 // --- Setup Resources Filters ---
 function setupResourcesFilter() {
-  DOM.resourceSearch.addEventListener('input', renderResourcesGrid);
-  DOM.resourceTagFilter.addEventListener('change', renderResourcesGrid);
+  const filterHandler = () => {
+    const query = DOM.resourceSearch.value.toLowerCase().trim();
+    const selectedTag = DOM.resourceTagFilter.value.toLowerCase();
+    
+    const allCards = document.querySelectorAll('.resource-card-item');
+    allCards.forEach(card => {
+      const title = card.querySelector('h3').textContent.toLowerCase();
+      const desc = card.querySelector('p').textContent.toLowerCase();
+      const cardTagsAttr = card.getAttribute('data-tags') || '';
+      const cardTags = cardTagsAttr.toLowerCase().split(',');
+      
+      const textMatch = title.includes(query) || desc.includes(query);
+      const tagMatch = selectedTag === 'all' || cardTags.includes(selectedTag);
+      
+      if (textMatch && tagMatch) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  };
+
+  DOM.resourceSearch.addEventListener('input', filterHandler);
+  DOM.resourceTagFilter.addEventListener('change', filterHandler);
 }
 
 // --- Maximized Card Editor Modal ---
@@ -877,13 +836,23 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
   if (!c) return;
 
   if (addResource) {
-    const newResource = {
-      title: `${c.name} Case Summary`,
-      desc: c.aiSummary,
-      tags: ['case study', 'clinical']
-    };
+    const containerId = targetLibrary === 'adrd' ? 'adrd-resources-list' : 'practices-resources-list';
+    const container = document.getElementById(containerId);
     
-    state.customResources[targetLibrary].push(newResource);
+    if (container) {
+      const card = document.createElement('div');
+      card.className = 'resource-card-item';
+      card.setAttribute('data-tags', 'case study,clinical');
+      card.innerHTML = `
+        <h3>${c.name} Case Summary</h3>
+        <p>${c.aiSummary}</p>
+        <div class="tag-row">
+          <span class="mini-tag">Case Study</span>
+          <span class="mini-tag">Clinical</span>
+        </div>
+      `;
+      container.appendChild(card);
+    }
     alert(`Case successfully archived. Resource added to ${targetLibrary === 'adrd' ? 'ADRD Resources' : 'Approved Practices'}!`);
   } else {
     alert('Case successfully closed and archived.');

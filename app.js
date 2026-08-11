@@ -16,6 +16,9 @@ const state = {
       id: 'rivera-family',
       name: 'Rivera Family',
       details: 'Intake Completed &bull; Primary: Sophia Rivera',
+      phase: 'Care Plan Review',
+      blurb: 'Early-stage ADRD, daughter Sophia is primary caregiver. Focus on daily structuring and wandering safety.',
+      cardStatus: 'Continuing Services',
       patientName: 'Maria Rivera',
       patientAge: 74,
       intakeNotes: `Maria Rivera (Age 74) has early-stage ADRD diagnosed Q3 2025. Maria lives with her daughter, Sophia, who acts as primary caregiver. Sophia reports gradual increase in memory loss, word-finding difficulty, and mild anxiety in unfamiliar surroundings. Social support is limited to bi-weekly visits from a cousin. Sophia requests advice on daily structuring, safety measures at home (wandering mitigation), and caregiver burnout prevention groups.`,
@@ -33,15 +36,56 @@ const state = {
       reportStatus: 'Generated',
       reportPeriod: 'Q2 2024',
       reportContent: `
-        <h5>1. Assessment Status</h5>
-        <p>The patient, Maria Rivera, has completed a full intake cycle. Secondary observations confirm early-stage cognitive adjustments. Support structures (daughter Sophia) are functional but demonstrate elevated fatigue indicators.</p>
-        <h5>2. Key Risk Elements</h5>
-        <ul>
-          <li><strong>Caregiver Burnout Index:</strong> 8/10 (High). Critical need for weekend respite care.</li>
-          <li><strong>Spatial Orientation:</strong> Decreased orientation outside immediate home perimeter. Wandering risks remain low-moderate but require preventive attention.</li>
-        </ul>
-        <h5>3. Care Recommendations</h5>
-        <p>Establish a regular local care routine. Enroll Maria in the adult day-enrichment program 2 days a week to provide caregiver relief. Introduce sensory engagement and track sleep cycles to log anomalies.</p>
+        <h4>Rivera Family Report</h4>
+        <p class="report-meta">Date: 6/18/26<br>Assigned CHW: Jane Doe</p>
+        <p class="report-greeting">Hi Sophia,</p>
+        <p>It was good talking with you. You're doing the right thing by paying attention to these changes in your mom — noticing them and following up is exactly how families get answers. Here's a short guide to help you at Maria's next appointment so the doctor takes a closer look this time.</p>
+        <p><strong>1. Write down what you've noticed.</strong> Before the visit, jot down a few specific examples and roughly when they started — the word-finding difficulty, the anxiety in unfamiliar places. Specific, dated examples are much harder for a doctor to wave off than "she's been more forgetful." Bring the list and hand it over or read it at the start of the appointment.</p>
+        <p><strong>2. Ask directly for an evaluation.</strong> You can request this yourself. Try: "I'd like my mom screened for cognitive changes. Can we do a cognitive assessment, or get a referral to a specialist?" Naming exactly what you want makes it harder to brush past.</p>
+        <p><strong>3. Enroll Maria in structured daytime support.</strong> The adult day-enrichment program (2 days/week) gives Maria social engagement while giving you, Sophia, room to rest — burnout indicators are currently high.</p>
+        <p><strong>4. Add home safety measures.</strong> Wandering risk is low-moderate right now, but door sensors and a consistent daily routine will help keep it that way.</p>
+        <p><strong>5. Know that it may take more than one visit.</strong> Getting a proper diagnosis and care plan sometimes takes a few appointments. Keep going, and I'm here to help you through it.</p>
+        <h5>Resources</h5>
+        <div class="report-resource-group">
+          <span class="report-tag healthcare">Healthcare</span>
+          <ul class="report-resource-list">
+            <li><strong>ADRD Communication Guide (PDF):</strong> tips for talking with Maria as memory changes progress (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+            <li><strong>Local Support Group Directory:</strong> in-person and virtual caregiver support groups near you (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+          </ul>
+        </div>
+        <div class="report-resource-group">
+          <span class="report-tag logistics">Logistics</span>
+          <ul class="report-resource-list">
+            <li><strong>Home Safety Checklist for Dementia:</strong> practical steps to reduce wandering and fall risk at home (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+          </ul>
+        </div>
+        <p><strong>Next Check-up:</strong> Care Plan Review scheduled for Jun 18, 2026. We'll follow up shortly after to see how the new routine is going.</p>
+      `,
+      reportContentEs: `
+        <h4>Informe de la Familia Rivera</h4>
+        <p class="report-meta">Fecha: 18/6/26<br>Trabajadora de salud asignada: Jane Doe</p>
+        <p class="report-greeting">Hola Sophia,</p>
+        <p>Fue un gusto hablar contigo. Estás haciendo lo correcto al prestar atención a estos cambios en tu mamá — notarlos y darles seguimiento es exactamente cómo las familias obtienen respuestas. Aquí tienes una breve guía para ayudarte en la próxima cita de Maria, para que el médico le preste más atención esta vez.</p>
+        <p><strong>1. Anota lo que has notado.</strong> Antes de la visita, escribe algunos ejemplos específicos y aproximadamente cuándo comenzaron — la dificultad para encontrar palabras, la ansiedad en lugares desconocidos. Los ejemplos específicos y fechados son mucho más difíciles de ignorar para un médico que decir "ha estado más olvidadiza". Lleva la lista o léela al inicio de la cita.</p>
+        <p><strong>2. Pide directamente una evaluación.</strong> Puedes solicitarla tú misma. Intenta decir: "Me gustaría que evaluaran a mi mamá por cambios cognitivos. ¿Podemos hacer una evaluación cognitiva o conseguir una referencia a un especialista?" Nombrar exactamente lo que quieres hace más difícil que lo pasen por alto.</p>
+        <p><strong>3. Inscribe a Maria en apoyo estructurado durante el día.</strong> El programa de enriquecimiento diurno para adultos (2 días a la semana) le da a Maria interacción social mientras te da a ti, Sophia, tiempo para descansar — los indicadores de agotamiento están altos actualmente.</p>
+        <p><strong>4. Agrega medidas de seguridad en el hogar.</strong> El riesgo de deambular es bajo-moderado por ahora, pero los sensores de puerta y una rutina diaria constante ayudarán a mantenerlo así.</p>
+        <p><strong>5. Ten en cuenta que puede tomar más de una visita.</strong> Obtener un diagnóstico y un plan de cuidado adecuado a veces toma varias citas. Sigue adelante, y estoy aquí para ayudarte en el proceso.</p>
+        <h5>Recursos</h5>
+        <div class="report-resource-group">
+          <span class="report-tag healthcare">Salud</span>
+          <ul class="report-resource-list">
+            <li><strong>Guía de Comunicación sobre ADRD (PDF):</strong> consejos para hablar con Maria a medida que avanzan los cambios de memoria (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+            <li><strong>Directorio de Grupos de Apoyo Locales:</strong> grupos de apoyo presenciales y virtuales cerca de ti (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+          </ul>
+        </div>
+        <div class="report-resource-group">
+          <span class="report-tag logistics">Logística</span>
+          <ul class="report-resource-list">
+            <li><strong>Lista de Seguridad en el Hogar para Demencia:</strong> pasos prácticos para reducir el riesgo de deambular y caídas en casa (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+          </ul>
+        </div>
+        <p><strong>Próxima Revisión:</strong> Revisión del plan de cuidado programada para el 18 de junio de 2026. Nos comunicaremos contigo poco después para ver cómo va la nueva rutina.</p>
       `,
       shared: false
     },
@@ -49,6 +93,9 @@ const state = {
       id: 'oklaz-family',
       name: 'Oklaz Family',
       details: 'Awaiting AI Report &bull; Primary: Viktor Oklaz',
+      phase: 'Home Nurse Scheduling',
+      blurb: 'Moderate Alzheimer\'s with sundowning episodes. Son Alex requests respite care and behavioral strategies.',
+      cardStatus: 'Continuing Services',
       patientName: 'Viktor Oklaz',
       patientAge: 81,
       intakeNotes: `Viktor Oklaz (Age 81) moderate stage Alzheimer's. Managed jointly by his son, Alex Oklaz, and a visiting nurse service twice a week. Viktor exhibits moderate disorientation regarding time and place, as well as periodic agitation in late afternoons ("sundowning"). Alex requested professional respite care resources and behavioral strategies to calm Viktor during Sundowning episodes.`,
@@ -66,15 +113,56 @@ const state = {
       reportStatus: 'Not Generated',
       reportPeriod: 'Q2 2024',
       reportContent: `
-        <h5>1. Assessment Status</h5>
-        <p>The patient, Viktor Oklaz, is experiencing moderate stage Alzheimer's, which requires intensive daytime and afternoon care coordination. Primary caregiver Alex Oklaz exhibits moderate-high burden markers.</p>
-        <h5>2. Key Risk Elements</h5>
-        <ul>
-          <li><strong>Agitation Profile:</strong> Daily afternoon sundowning episodes from 4 PM - 7 PM.</li>
-          <li><strong>Safety Alert:</strong> High risk of wandering. Patient has attempted exit door egress unassisted.</li>
-        </ul>
-        <h5>3. Recommended Care Actions</h5>
-        <p>Deploy sensory lighting adjustments during sundowning periods. Install smart exit door sensors. Request county health respite funding support for visiting assistant nurses.</p>
+        <h4>Oklaz Family Report</h4>
+        <p class="report-meta">Date: 6/18/26<br>Assigned CHW: Jane Doe</p>
+        <p class="report-greeting">Hi Alex,</p>
+        <p>Thanks for keeping us updated on your dad's afternoons — the pattern you're seeing between 4 and 7 PM lines up with classic "sundowning," and there's a lot we can do to make that window calmer for both of you.</p>
+        <p><strong>1. Track the sundowning window.</strong> Note what time agitation starts, what seems to trigger it (light changes, noise, hunger), and how long it lasts. This helps the visiting nurse adjust his schedule around it.</p>
+        <p><strong>2. Use light and routine to your advantage.</strong> Keeping the home brightly lit in the late afternoon and sticking to a consistent dinner/wind-down routine can reduce disorientation before it starts.</p>
+        <p><strong>3. Address the wandering risk now.</strong> Viktor has attempted to exit unassisted — this is worth flagging to his care team immediately and pairing with door sensors or a GPS wristband.</p>
+        <p><strong>4. Ask about respite care.</strong> You're managing a lot solo between visits. A few hours of respite care a week can make a real difference in how sustainable this is for you.</p>
+        <p><strong>5. Loop in the visiting nurse on all of this.</strong> Sharing your notes with the twice-weekly nurse visits keeps everyone working from the same picture.</p>
+        <h5>Resources</h5>
+        <div class="report-resource-group">
+          <span class="report-tag healthcare">Healthcare</span>
+          <ul class="report-resource-list">
+            <li><strong>Sundowning Management Protocols:</strong> clinical guidance on reducing late-day agitation (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+          </ul>
+        </div>
+        <div class="report-resource-group">
+          <span class="report-tag logistics">Logistics</span>
+          <ul class="report-resource-list">
+            <li><strong>Respite Care Subsidy Options:</strong> county programs that help cover short-term relief care (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+            <li><strong>GPS Tracking Wristband Providers:</strong> wearable trackers for wandering safety (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+          </ul>
+        </div>
+        <p><strong>Next Check-up:</strong> Home Nurse Schedule review on Jun 05, 2026. We'll follow up after that visit to see how the sundowning window is trending.</p>
+      `,
+      reportContentEs: `
+        <h4>Informe de la Familia Oklaz</h4>
+        <p class="report-meta">Fecha: 18/6/26<br>Trabajador de salud asignado: Jane Doe</p>
+        <p class="report-greeting">Hola Alex,</p>
+        <p>Gracias por mantenernos al tanto de las tardes de tu papá — el patrón que estás viendo entre las 4 y las 7 PM coincide con el clásico "sundowning", y hay mucho que podemos hacer para que esa hora sea más tranquila para ambos.</p>
+        <p><strong>1. Registra la ventana de sundowning.</strong> Anota a qué hora comienza la agitación, qué parece provocarla (cambios de luz, ruido, hambre) y cuánto dura. Esto ayuda a la enfermera visitante a ajustar su horario en torno a eso.</p>
+        <p><strong>2. Usa la luz y la rutina a tu favor.</strong> Mantener la casa bien iluminada por la tarde y seguir una rutina constante de cena y relajación puede reducir la desorientación antes de que comience.</p>
+        <p><strong>3. Atiende el riesgo de deambular ahora.</strong> Viktor ha intentado salir sin ayuda — esto vale la pena reportarlo de inmediato a su equipo de cuidado y combinarlo con sensores de puerta o una pulsera GPS.</p>
+        <p><strong>4. Pregunta sobre cuidado de relevo.</strong> Estás manejando mucho tú solo entre visitas. Unas horas de cuidado de relevo a la semana pueden hacer una gran diferencia en qué tan sostenible es esto para ti.</p>
+        <p><strong>5. Comparte todo esto con la enfermera visitante.</strong> Compartir tus notas con las visitas de enfermería dos veces por semana mantiene a todos con la misma información.</p>
+        <h5>Recursos</h5>
+        <div class="report-resource-group">
+          <span class="report-tag healthcare">Salud</span>
+          <ul class="report-resource-list">
+            <li><strong>Protocolos de Manejo del Sundowning:</strong> guía clínica para reducir la agitación al final del día (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+          </ul>
+        </div>
+        <div class="report-resource-group">
+          <span class="report-tag logistics">Logística</span>
+          <ul class="report-resource-list">
+            <li><strong>Opciones de Subsidio para Cuidado de Relevo:</strong> programas del condado que ayudan a cubrir el cuidado temporal (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+            <li><strong>Proveedores de Pulseras de Rastreo GPS:</strong> dispositivos portátiles para seguridad ante deambulación (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+          </ul>
+        </div>
+        <p><strong>Próxima Revisión:</strong> Revisión del horario de enfermería en el hogar el 5 de junio de 2026. Daremos seguimiento después de esa visita para ver cómo evoluciona la ventana de sundowning.</p>
       `,
       shared: true
     },
@@ -82,6 +170,9 @@ const state = {
       id: 'pierre-family',
       name: 'Pierre Family',
       details: 'Pending Intake &bull; Primary: Henri Pierre',
+      phase: 'Pending Intake',
+      blurb: 'Vascular screening review. Niece Marcelle needs medication tracking and nutrition support tools.',
+      cardStatus: 'Waiting Followup',
       patientName: 'Henri Pierre',
       patientAge: 79,
       intakeNotes: `Henri Pierre (Age 79) vascular screening review. Niece Marcelle Pierre daily checks. Focus is on maintaining cognitive engagement, nutrition management, and tracking medical adherence. Intake pending full physical exam. Initial screenings show minor short-term recall impairment. Marcelle is requesting support tools to organize medication dosages and ensure Henri receives healthy daily meals.`,
@@ -98,10 +189,56 @@ const state = {
       reportStatus: 'Pending Intake',
       reportPeriod: 'Q2 2024',
       reportContent: `
-        <h5>1. Assessment Status</h5>
-        <p>Intake Pending physical results. Henri lives independently but requires tracking structures for general medication adherence and nutrition support.</p>
-        <h5>2. Clinical Profile</h5>
-        <p>Early stage vascular impairment. Heart rate and blood pressure check-ups scheduled monthly. Marcelle Pierre coordinating daily.</p>
+        <h4>Pierre Family Report</h4>
+        <p class="report-meta">Date: 6/18/26<br>Assigned CHW: Jane Doe</p>
+        <p class="report-greeting">Hi Marcelle,</p>
+        <p>Thanks for staying on top of your uncle's daily check-ins. Since Henri's full physical exam is still pending, here's what's helpful to focus on in the meantime.</p>
+        <p><strong>1. Keep a simple medication log.</strong> Note what Henri takes and when — this becomes very useful once his physical results come back and dosages may need adjusting.</p>
+        <p><strong>2. Bring your recall observations to the exam.</strong> The minor short-term recall impairment you've noticed is worth describing in specific terms (what he forgot, how often) at the June 25th appointment.</p>
+        <p><strong>3. Support consistent nutrition.</strong> Vascular health benefits a lot from regular, balanced meals — a meal delivery service can help if daily cooking is hard to keep up with.</p>
+        <p><strong>4. Ask about a pill dispenser.</strong> An automated dispenser can reduce missed or doubled doses between your daily check-ins.</p>
+        <p><strong>5. We'll follow up after the physical exam.</strong> Once results are in, we'll update this care plan together.</p>
+        <h5>Resources</h5>
+        <div class="report-resource-group">
+          <span class="report-tag healthcare">Healthcare</span>
+          <ul class="report-resource-list">
+            <li><strong>Vascular Dementia Lifestyle Guidelines:</strong> diet and activity guidance for vascular cognitive health (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+          </ul>
+        </div>
+        <div class="report-resource-group">
+          <span class="report-tag logistics">Logistics</span>
+          <ul class="report-resource-list">
+            <li><strong>Medication Reminder Apps & Dispensers:</strong> tools to help track daily doses (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+            <li><strong>Meal Delivery Services for Seniors:</strong> options for consistent, healthy daily meals (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+          </ul>
+        </div>
+        <p><strong>Next Check-up:</strong> Physical exam scheduled for Jun 25, 2026. We'll follow up right after to update this plan with the results.</p>
+      `,
+      reportContentEs: `
+        <h4>Informe de la Familia Pierre</h4>
+        <p class="report-meta">Fecha: 18/6/26<br>Trabajadora de salud asignada: Jane Doe</p>
+        <p class="report-greeting">Hola Marcelle,</p>
+        <p>Gracias por mantenerte al pendiente de las revisiones diarias de tu tío. Como el examen físico completo de Henri sigue pendiente, aquí está en qué enfocarte mientras tanto.</p>
+        <p><strong>1. Lleva un registro simple de medicamentos.</strong> Anota qué toma Henri y cuándo — esto será muy útil una vez que lleguen los resultados de su examen físico y sea necesario ajustar las dosis.</p>
+        <p><strong>2. Comparte tus observaciones sobre la memoria en el examen.</strong> Vale la pena describir en términos específicos (qué olvidó, con qué frecuencia) el leve deterioro de memoria a corto plazo que has notado, en la cita del 25 de junio.</p>
+        <p><strong>3. Apoya una nutrición constante.</strong> La salud vascular se beneficia mucho de comidas regulares y balanceadas — un servicio de entrega de comidas puede ayudar si cocinar a diario es difícil de mantener.</p>
+        <p><strong>4. Pregunta sobre un dispensador de pastillas.</strong> Un dispensador automático puede reducir las dosis olvidadas o duplicadas entre tus revisiones diarias.</p>
+        <p><strong>5. Daremos seguimiento después del examen físico.</strong> Una vez que tengamos los resultados, actualizaremos este plan de cuidado juntos.</p>
+        <h5>Recursos</h5>
+        <div class="report-resource-group">
+          <span class="report-tag healthcare">Salud</span>
+          <ul class="report-resource-list">
+            <li><strong>Guía de Estilo de Vida para Demencia Vascular:</strong> orientación de dieta y actividad para la salud cognitiva vascular (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+          </ul>
+        </div>
+        <div class="report-resource-group">
+          <span class="report-tag logistics">Logística</span>
+          <ul class="report-resource-list">
+            <li><strong>Apps y Dispensadores para Recordatorio de Medicamentos:</strong> herramientas para seguir las dosis diarias (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+            <li><strong>Servicios de Entrega de Comidas para Personas Mayores:</strong> opciones para comidas diarias consistentes y saludables (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+          </ul>
+        </div>
+        <p><strong>Próxima Revisión:</strong> Examen físico programado para el 25 de junio de 2026. Daremos seguimiento justo después para actualizar este plan con los resultados.</p>
       `,
       shared: false
     }
@@ -153,7 +290,9 @@ const DOM = {
   navItems: document.querySelectorAll('.nav-item'),
   pageViews: document.querySelectorAll('.page-view'),
   dashboardList: document.getElementById('families-dashboard-list'),
-  casesCountStat: document.getElementById('stat-cases-count'),
+  statWaitingReferralCount: document.getElementById('stat-waiting-referral-count'),
+  statContinuingServicesCount: document.getElementById('stat-continuing-services-count'),
+  statWaitingFollowupCount: document.getElementById('stat-waiting-followup-count'),
   familiesBadge: document.getElementById('families-badge'),
   
   // Case cards DOM
@@ -165,8 +304,12 @@ const DOM = {
   btnCancelCreate: document.getElementById('btn-cancel-create'),
   newCaseForm: document.getElementById('new-case-form'),
   caseNameInput: document.getElementById('case-name'),
-  caseDetailsInput: document.getElementById('case-details'),
-  caseIntakeInput: document.getElementById('case-intake'),
+  primaryContactInput: document.getElementById('primary-contact-name'),
+  intakeZipInput: document.getElementById('intake-zip-code'),
+  intakeMobilityInput: document.getElementById('intake-mobility'),
+  intakeEmergencyName: document.getElementById('intake-emergency-name'),
+  intakeEmergencyPhone: document.getElementById('intake-emergency-phone'),
+  intakeNotesInput: document.getElementById('intake-notes'),
   
   // Dashboard triggering buttons
   btnNewCaseDashboard: document.getElementById('btn-dashboard-new-case'),
@@ -195,11 +338,13 @@ const DOM = {
   btnCloseReportModal: document.getElementById('btn-close-report-modal'),
   btnModalCancel: document.getElementById('btn-modal-cancel'),
   btnModalDownload: document.getElementById('btn-modal-download'),
+  btnToggleReportLanguage: document.getElementById('btn-toggle-report-language'),
   btnCloseCaseFromReport: document.getElementById('btn-close-case-from-report'),
   
   modalShareCard: document.getElementById('modal-share-card'),
   shareModalTitle: document.getElementById('share-modal-title'),
   sharePreviewText: document.getElementById('share-preview-text'),
+  shareHandoffNotes: document.getElementById('share-handoff-notes'),
   shareSearchInput: document.getElementById('share-search'),
   btnCloseShareModal: document.getElementById('btn-close-share-modal'),
   btnCancelShare: document.getElementById('btn-cancel-share'),
@@ -209,6 +354,8 @@ const DOM = {
   modalCardEditor: document.getElementById('modal-card-editor'),
   editorModalTitle: document.getElementById('editor-modal-title'),
   editIntakeNotes: document.getElementById('edit-intake-notes'),
+  editHandoffNotesGroup: document.getElementById('edit-handoff-notes-group'),
+  editHandoffNotesText: document.getElementById('edit-handoff-notes-text'),
   editTimelineSteps: document.getElementById('edit-timeline-steps'),
   btnAddTimelineStep: document.getElementById('btn-add-timeline-step'),
   editResourcesItems: document.getElementById('edit-resources-items'),
@@ -251,7 +398,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupNotifications();
   setupMaximizedEditor();
   setupCloseCaseOptions();
-  
+  setupDashboardStatClicks();
+
   // Initial renders
   renderAll();
   renderSuggestions();
@@ -273,6 +421,9 @@ function setupNavigation() {
     item.addEventListener('click', () => {
       const pageId = item.getAttribute('data-page');
       switchPage(pageId);
+      if (pageId === 'case-cards') {
+        clearCaseCardFilter();
+      }
     });
   });
 
@@ -310,42 +461,197 @@ function switchPage(pageId) {
   }
 }
 
+// Helper functions to get selected values from single and multi-select pill groups
+function getSelectedPillValue(fieldId) {
+  const group = document.querySelector(`.pill-group[data-field="${fieldId}"]`);
+  if (!group) return '';
+  const activeBtn = group.querySelector('.pill-btn.active, .pill-badge.active');
+  if (activeBtn) return activeBtn.dataset.value || activeBtn.textContent.trim();
+  const input = group.querySelector('.pill-input');
+  if (input && input.value.trim()) return input.value.trim();
+  return '';
+}
+
+function getSelectedMultiPillValues(fieldId) {
+  const group = document.querySelector(`.pill-group[data-field="${fieldId}"]`);
+  if (!group) return [];
+  const activeBtns = group.querySelectorAll('.pill-badge.active, .pill-btn.active');
+  return Array.from(activeBtns).map(btn => btn.dataset.value || btn.textContent.trim());
+}
+
+function setupIntakePillInteractions() {
+  document.addEventListener('click', (e) => {
+    const pillBtn = e.target.closest('.pill-btn, .pill-badge');
+    if (!pillBtn) return;
+    
+    // Prevent default form behavior on option pill clicks
+    e.preventDefault();
+
+    const isMultiSelect = pillBtn.closest('.pill-group.multi-select');
+    const singleGroup = pillBtn.closest('.pill-group.single-select');
+
+    if (isMultiSelect) {
+      pillBtn.classList.toggle('active');
+    } else if (singleGroup) {
+      const isAlreadyActive = pillBtn.classList.contains('active');
+      singleGroup.querySelectorAll('.pill-btn, .pill-badge').forEach(b => b.classList.remove('active'));
+      if (!isAlreadyActive) {
+        pillBtn.classList.add('active');
+      }
+      // Clear custom other language input if a button is selected
+      const otherInput = singleGroup.querySelector('#intake-language-other');
+      if (otherInput) otherInput.value = '';
+    }
+  });
+
+  // Handle typing in custom language "Other (specify)..." input
+  const langOtherInput = document.getElementById('intake-language-other');
+  if (langOtherInput) {
+    langOtherInput.addEventListener('input', () => {
+      if (langOtherInput.value.trim().length > 0) {
+        const group = langOtherInput.closest('.pill-group');
+        if (group) {
+          group.querySelectorAll('.pill-btn, .pill-badge').forEach(b => b.classList.remove('active'));
+        }
+      }
+    });
+  }
+}
+
 // --- Case Card Views & Subviews ---
+function clearCaseCardFilter() {
+  const cards = DOM.caseCardsContainer.querySelectorAll('.case-card-item');
+  cards.forEach(cardItem => { cardItem.style.display = 'flex'; });
+}
+
 function setupCaseCardTabs() {
-  DOM.tabBtnList.addEventListener('click', () => showCaseCardsSubview('list'));
+  DOM.tabBtnList.addEventListener('click', () => { showCaseCardsSubview('list'); clearCaseCardFilter(); });
   DOM.tabBtnNew.addEventListener('click', () => showCaseCardsSubview('form'));
+  if (DOM.btnCancelCreate) {
+    DOM.btnCancelCreate.addEventListener('click', () => showCaseCardsSubview('list'));
+  }
+
+  setupIntakePillInteractions();
 
   DOM.newCaseForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const name = DOM.caseNameInput.value.trim();
-    const details = DOM.caseDetailsInput.value.trim();
-    const intake = DOM.caseIntakeInput.value.trim() || 'No initial intake notes entered.';
+    const familyName = DOM.caseNameInput ? DOM.caseNameInput.value.trim() : '';
+    const primaryContact = DOM.primaryContactInput ? DOM.primaryContactInput.value.trim() : '';
+    const zipCode = DOM.intakeZipInput ? DOM.intakeZipInput.value.trim() : '';
+    const emergencyName = DOM.intakeEmergencyName ? DOM.intakeEmergencyName.value.trim() : '';
+    const emergencyPhone = DOM.intakeEmergencyPhone ? DOM.intakeEmergencyPhone.value.trim() : '';
+    const notes = DOM.intakeNotesInput ? DOM.intakeNotesInput.value.trim() : '';
+
+    const patientAge = getSelectedPillValue('patient-age') || '65 - 74';
+    const patientStage = getSelectedPillValue('patient-stage') || 'Middle-Stage (Moderate)';
+    const patientLanguage = getSelectedPillValue('patient-language') || 'English';
+    const livingSituation = getSelectedPillValue('living-situation') || 'All adults';
+    const patientMobility = DOM.intakeMobilityInput && DOM.intakeMobilityInput.value.trim() ? DOM.intakeMobilityInput.value.trim() : 'No mobility issues';
     
-    if (name && details) {
-      const id = name.toLowerCase().replace(/\s+/g, '-');
+    const caregiverRel = getSelectedPillValue('caregiver-rel') || 'Adult Child';
+    const caregiverAge = getSelectedPillValue('caregiver-age') || 'Under 65';
+    const caregiverStress = getSelectedPillValue('caregiver-stress') || 'High / Burnout Risk';
+    const bestCallTime = getSelectedPillValue('best-call-time') || 'Morning (8am-12pm)';
+    
+    const focusAreas = getSelectedMultiPillValues('focus-areas');
+    const aiGoal = getSelectedPillValue('ai-assist-goal') || 'Find local resources';
+    
+    if (familyName && primaryContact) {
+      const caseTitle = familyName.toLowerCase().includes('family') ? familyName : `${familyName} Family`;
+      const id = caseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const detailsSummary = `Intake Active • Primary Contact: ${primaryContact}${zipCode ? ' (' + zipCode + ')' : ''}`;
+      
+      const fullIntakeText = `
+Primary Contact: ${primaryContact}
+Zip Code: ${zipCode || 'N/A'}
+Emergency Contact: ${emergencyName ? emergencyName + ' (' + emergencyPhone + ')' : 'None listed'}
+Best Time to Call: ${bestCallTime}
+
+Patient Profile:
+- Age Range: ${patientAge}
+- Dementia Stage: ${patientStage}
+- Language: ${patientLanguage}
+- Living Situation: ${livingSituation}
+- Mobility: ${patientMobility}
+
+Caregiver Profile:
+- Relationship: ${caregiverRel}
+- Age Range: ${caregiverAge}
+- Observed Stress Level: ${caregiverStress}
+
+Focus Areas: ${focusAreas.length > 0 ? focusAreas.join(', ') : 'None selected'}
+AI Goal: ${aiGoal}
+${notes ? '\nNotes & Dynamics: ' + notes : ''}
+      `.trim();
       
       const newCase = {
         id: id,
-        name: name,
-        details: details,
-        patientName: name.replace(' Family', ''),
-        patientAge: 70 + Math.floor(Math.random() * 20),
-        intakeNotes: intake,
+        name: caseTitle,
+        details: detailsSummary,
+        patientName: familyName.replace(/\s+Family/i, ''),
+        patientAge: patientAge,
+        phase: 'Intake Submitted',
+        blurb: `${patientStage} ADRD case for ${familyName.replace(/\s+Family/i, '')}. Primary caregiver relationship: ${caregiverRel}.`,
+        cardStatus: 'Waiting on Referral',
+        intakeNotes: fullIntakeText,
         timeline: [
-          { date: 'Jun 18, 2026', label: 'Intake Registered' }
+          { date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }), label: 'Intake Form Submitted' }
         ],
         resources: [
-          { name: 'Dementia Care Guidelines', url: '#' },
-          { name: 'Initial Safety Recommendations', url: '#' }
+          { name: `${patientStage} Care Protocols`, url: '#' },
+          { name: `Local Resources for ${zipCode || 'Region'}`, url: '#' }
         ],
-        aiSummary: `AI Summary pending. Initial notes: "${intake.substring(0, 120)}..."`,
+        aiSummary: `Intake registered for ${caseTitle}. Stage: ${patientStage}. Primary caregiver (${caregiverRel}) reports stress level: ${caregiverStress}. Focus areas identified: ${focusAreas.join(', ') || 'General ADRD care'}. AI goal: ${aiGoal}.`,
         reportStatus: 'Not Generated',
         reportPeriod: 'Q2 2024',
-        reportContent: `<h5>1. Intake Evaluation</h5><p>${intake}</p>`,
+        reportContent: `
+          <h4>${caseTitle} Report</h4>
+          <p class="report-meta">Date: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Assigned CHW: Jane Doe</p>
+          <p class="report-greeting">Hi ${primaryContact},</p>
+          <p>Thanks for completing the intake for ${familyName.replace(/\s+Family/i, '')}. Here is a starting summary based on what you shared, along with resources to help going forward.</p>
+          <h5>Intake Summary</h5>
+          <p>${fullIntakeText.replace(/\n/g, '<br>')}</p>
+          <h5>Resources</h5>
+          <div class="report-resource-group">
+            <span class="report-tag healthcare">Healthcare</span>
+            <ul class="report-resource-list">
+              <li><strong>${patientStage} Care Protocols:</strong> clinical guidance matched to the current care stage (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+            </ul>
+          </div>
+          <div class="report-resource-group">
+            <span class="report-tag logistics">Logistics</span>
+            <ul class="report-resource-list">
+              <li><strong>Local Resources for ${zipCode || 'Region'}:</strong> nearby support services and programs (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+            </ul>
+          </div>
+          <p><strong>Next Check-up:</strong> Follow-up to be scheduled based on the initial intake above.</p>
+        `,
+        reportContentEs: `
+          <h4>Informe de ${caseTitle}</h4>
+          <p class="report-meta">Fecha: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Trabajadora de salud asignada: Jane Doe</p>
+          <p class="report-greeting">Hola ${primaryContact},</p>
+          <p>Gracias por completar la admisión para ${familyName.replace(/\s+Family/i, '')}. Aquí tienes un resumen inicial basado en lo que compartiste, junto con recursos para ayudarte a seguir adelante.</p>
+          <h5>Resumen de Admisión</h5>
+          <p>${fullIntakeText.replace(/\n/g, '<br>')}</p>
+          <h5>Recursos</h5>
+          <div class="report-resource-group">
+            <span class="report-tag healthcare">Salud</span>
+            <ul class="report-resource-list">
+              <li><strong>Protocolos de Cuidado para ${patientStage}:</strong> orientación clínica según la etapa actual de cuidado (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+            </ul>
+          </div>
+          <div class="report-resource-group">
+            <span class="report-tag logistics">Logística</span>
+            <ul class="report-resource-list">
+              <li><strong>Recursos Locales para ${zipCode || 'la Región'}:</strong> servicios y programas de apoyo cercanos (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+            </ul>
+          </div>
+          <p><strong>Próxima Revisión:</strong> Se programará un seguimiento según la admisión inicial descrita arriba.</p>
+        `,
         shared: false
       };
 
-      state.cases.push(newCase);
+      state.cases.unshift(newCase);
       DOM.newCaseForm.reset();
       renderAll();
       showCaseCardsSubview('list');
@@ -372,27 +678,26 @@ function showCaseCardsSubview(subview) {
   }
 }
 
-// --- Dynamic Case Card Tab Switching (Intake/Timeline/etc.) ---
-function bindCardTabs(cardElement) {
-  const tabs = cardElement.querySelectorAll('.card-tab');
-  const panes = cardElement.querySelectorAll('.tab-pane');
-
-  tabs.forEach(tab => {
-    tab.addEventListener('click', (e) => {
-      e.stopPropagation(); // Prevent card maximizing
-      const tabType = tab.getAttribute('data-tab');
-      tabs.forEach(t => t.classList.remove('active'));
-      panes.forEach(p => p.classList.remove('active'));
-      
-      tab.classList.add('active');
-      cardElement.querySelector(`.tab-pane[data-tab="${tabType}"]`).classList.add('active');
+function setupDashboardStatClicks() {
+  document.querySelectorAll('.stat-card-clickable').forEach(card => {
+    card.addEventListener('click', () => {
+      const statusFilter = card.getAttribute('data-status-filter');
+      switchPage('case-cards');
+      showCaseCardsSubview('list');
+      DOM.globalSearch.value = '';
+      const cards = DOM.caseCardsContainer.querySelectorAll('.case-card-item');
+      cards.forEach(cardItem => {
+        cardItem.style.display = cardItem.getAttribute('data-status') === statusFilter ? 'flex' : 'none';
+      });
     });
   });
 }
 
 // --- Render Dashboard ---
 function renderStats() {
-  DOM.casesCountStat.textContent = state.cases.length;
+  DOM.statWaitingReferralCount.textContent = state.cases.filter(c => c.cardStatus === 'Waiting on Referral').length;
+  DOM.statContinuingServicesCount.textContent = state.cases.filter(c => c.cardStatus === 'Continuing Services').length;
+  DOM.statWaitingFollowupCount.textContent = state.cases.filter(c => c.cardStatus === 'Waiting Followup').length;
   DOM.familiesBadge.textContent = `${state.cases.length} ${state.cases.length === 1 ? 'Family' : 'Families'}`;
 }
 
@@ -445,6 +750,12 @@ function renderDashboard() {
 }
 
 // --- Render Case Cards List ---
+function getStatusChipClass(status) {
+  if (status === 'Continuing Services') return 'success';
+  if (status === 'Waiting Followup') return 'info';
+  return 'warning'; // Waiting on Referral
+}
+
 function renderCaseCards() {
   DOM.caseCardsContainer.innerHTML = '';
 
@@ -452,72 +763,54 @@ function renderCaseCards() {
     const card = document.createElement('div');
     card.className = 'case-card-item';
     card.id = `card-${c.id}`;
+    card.setAttribute('data-status', c.cardStatus);
 
-    let timelineHTML = `<div class="timeline-flow">`;
-    c.timeline.forEach((step, idx) => {
-      const isCurrent = idx === c.timeline.length - 1;
-      timelineHTML += `
-        <div class="timeline-step ${isCurrent ? 'current' : ''}">
-          <span class="step-date">${step.date}</span>
-          <span class="step-label">${step.label}</span>
-        </div>
-      `;
-    });
-    timelineHTML += `</div>`;
-
-    let resourcesHTML = `<ul class="card-resource-list">`;
-    c.resources.forEach(res => {
-      resourcesHTML += `<li><a href="${res.url}" class="resource-link" onclick="event.stopPropagation()">${res.name}</a></li>`;
-    });
-    resourcesHTML += `</ul>`;
+    const chipClass = getStatusChipClass(c.cardStatus);
+    const statusOptions = ['Waiting on Referral', 'Continuing Services', 'Waiting Followup'];
 
     card.innerHTML = `
       <div class="case-card-header">
         <div class="card-title-group">
           <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-          <h3>${c.name} Card</h3>
+          <h3>${c.name}</h3>
         </div>
         <button class="card-share-btn" data-family="${c.name}" title="Share Case Card">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
         </button>
       </div>
-      
-      <div class="case-card-tabs">
-        <button class="card-tab active" data-tab="intake">Intake</button>
-        <button class="card-tab" data-tab="timeline">Timeline</button>
-        <button class="card-tab" data-tab="resources">Resources</button>
-        <button class="card-tab" data-tab="summarize">AI Summarize</button>
+
+      <p class="card-phase">Phase: ${c.phase}</p>
+      <p class="card-blurb">${c.blurb}</p>
+
+      <div class="card-footer-row">
+        <select class="status-chip-select ${chipClass}" data-case-id="${c.id}">
+          ${statusOptions.map(opt => `<option value="${opt}" ${opt === c.cardStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+        </select>
       </div>
 
-      <div class="card-tab-content">
-        <div class="tab-pane active" data-tab="intake">
-          <p class="tab-scroll-text">${c.intakeNotes}</p>
-        </div>
-        <div class="tab-pane" data-tab="timeline">
-          ${timelineHTML}
-        </div>
-        <div class="tab-pane" data-tab="resources">
-          ${resourcesHTML}
-        </div>
-        <div class="tab-pane" data-tab="summarize">
-          <div class="ai-summary-box">
-            <div class="ai-header">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" class="sparkle-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-              <span>AI Companion Summary</span>
-            </div>
-            <p class="summary-text">${c.aiSummary}</p>
-            <button class="btn btn-secondary btn-xs btn-ask-ai-from-card" data-family="${c.name}">Ask AI About Case</button>
-          </div>
-        </div>
-      </div>
+      <button class="btn btn-secondary btn-maximize-card" data-case-id="${c.id}">Maximize Card Editor</button>
     `;
 
     DOM.caseCardsContainer.appendChild(card);
-    bindCardTabs(card);
-    
+
     // Maximise card on click event
     card.addEventListener('click', () => {
       openMaximizedEditor(c.id);
+    });
+  });
+
+  // Status dropdown chips: update state + styling without maximizing the card
+  document.querySelectorAll('.status-chip-select').forEach(select => {
+    select.addEventListener('click', (e) => e.stopPropagation());
+    select.addEventListener('change', (e) => {
+      const caseId = select.getAttribute('data-case-id');
+      const caseItem = state.cases.find(c => c.id === caseId);
+      if (caseItem) {
+        caseItem.cardStatus = select.value;
+        select.className = `status-chip-select ${getStatusChipClass(select.value)}`;
+        select.closest('.case-card-item').setAttribute('data-status', select.value);
+        renderStats();
+      }
     });
   });
 
@@ -732,11 +1025,15 @@ function setupMaximizedEditor() {
       const nameInputs = DOM.editResourcesItems.querySelectorAll('.edit-res-name');
       const urlInputs = DOM.editResourcesItems.querySelectorAll('.edit-res-url');
       
+      const previousResourceNames = state.cases[caseIndex].resources.map(r => r.name);
       nameInputs.forEach((input, index) => {
         const nameVal = input.value.trim();
         const urlVal = urlInputs[index].value.trim();
         if (nameVal && urlVal) {
           resourceLinks.push({ name: nameVal, url: urlVal });
+          if (!previousResourceNames.includes(nameVal)) {
+            addResourceToLibrary(nameVal, urlVal, state.cases[caseIndex].name);
+          }
         }
       });
       state.cases[caseIndex].resources = resourceLinks;
@@ -756,7 +1053,15 @@ function openMaximizedEditor(caseId) {
 
   state.editingCaseId = caseId;
   DOM.editorModalTitle.textContent = `Edit ${c.name} Card`;
-  
+
+  // Show Handoff Notes if this case has any (e.g. cases shared to you)
+  if (c.handoffNotes) {
+    DOM.editHandoffNotesGroup.style.display = '';
+    DOM.editHandoffNotesText.textContent = c.handoffNotes;
+  } else {
+    DOM.editHandoffNotesGroup.style.display = 'none';
+  }
+
   // Set Intake text
   DOM.editIntakeNotes.value = c.intakeNotes.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
   
@@ -815,7 +1120,7 @@ function setupCloseCaseOptions() {
     closeAll();
   });
 
-  // "Add to Approved Practices"
+  // "Add to Peer Process Database"
   DOM.btnArchivePractices.addEventListener('click', () => {
     executeCaseArchiving(true, 'practices');
     closeAll();
@@ -828,6 +1133,28 @@ function setupCloseCaseOptions() {
     closeAll();
     switchPage('resources');
   });
+}
+
+// Adds a resource (e.g. saved from a case card editor) into the Resources page.
+// Lands in ADRD Resources unless the name suggests a protocol/standard, in which case it lands in Peer Process Database.
+function addResourceToLibrary(name, url, familyName) {
+  const isProcessResource = /protocol|standard|guide|template|checklist/i.test(name);
+  const containerId = isProcessResource ? 'practices-resources-list' : 'adrd-resources-list';
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const card = document.createElement('div');
+  card.className = 'resource-card-item';
+  card.setAttribute('data-tags', 'case study,coordination');
+  card.innerHTML = `
+    <h3>${name}</h3>
+    <p>Added from the ${familyName} case card.</p>
+    <div class="tag-row">
+      <span class="mini-tag">Case Study</span>
+      <span class="mini-tag">Coordination</span>
+    </div>
+  `;
+  container.appendChild(card);
 }
 
 function executeCaseArchiving(addResource = false, targetLibrary = '') {
@@ -853,7 +1180,7 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
       `;
       container.appendChild(card);
     }
-    alert(`Case successfully archived. Resource added to ${targetLibrary === 'adrd' ? 'ADRD Resources' : 'Approved Practices'}!`);
+    alert(`Case successfully archived. Resource added to ${targetLibrary === 'adrd' ? 'ADRD Resources' : 'Peer Process Database'}!`);
   } else {
     alert('Case successfully closed and archived.');
   }
@@ -890,6 +1217,8 @@ function setupReportViewer() {
     closeModal();
   });
 
+  DOM.btnToggleReportLanguage.addEventListener('click', toggleReportLanguage);
+
   // Close case trigger triggers our custom options popup modal
   DOM.btnCloseCaseFromReport.addEventListener('click', () => {
     const caseId = DOM.btnCloseCaseFromReport.getAttribute('data-case-id');
@@ -899,10 +1228,25 @@ function setupReportViewer() {
 
 function openReportModal(caseItem) {
   DOM.reportModalTitle.textContent = `${caseItem.name} - ${caseItem.reportPeriod} Report`;
+  state.currentReportCaseId = caseItem.id;
+  state.reportLangSpanish = false;
   DOM.reportModalTextContent.innerHTML = caseItem.reportContent;
   DOM.btnCloseCaseFromReport.setAttribute('data-case-id', caseItem.id);
-  
+  DOM.btnToggleReportLanguage.innerHTML = DOM.btnToggleReportLanguage.innerHTML.replace(/Traducir al español|Translate to English/, 'Traducir al español');
+
   DOM.modalReportViewer.classList.add('active');
+}
+
+function toggleReportLanguage() {
+  const caseItem = state.cases.find(c => c.id === state.currentReportCaseId);
+  if (!caseItem || !caseItem.reportContentEs) return;
+
+  state.reportLangSpanish = !state.reportLangSpanish;
+  DOM.reportModalTextContent.innerHTML = state.reportLangSpanish ? caseItem.reportContentEs : caseItem.reportContent;
+  DOM.btnToggleReportLanguage.innerHTML = DOM.btnToggleReportLanguage.innerHTML.replace(
+    /Traducir al español|Translate to English/,
+    state.reportLangSpanish ? 'Translate to English' : 'Traducir al español'
+  );
 }
 
 // --- Notifications Dropdown System ---
@@ -936,6 +1280,10 @@ function setupNotifications() {
         details: 'Shared by: Robert Mercer &bull; Primary: Sarah Marcus',
         patientName: 'Sarah Marcus',
         patientAge: 76,
+        phase: 'Case Shared',
+        blurb: 'Early cognitive lapses, shared by CHW Robert Mercer to coordinate home safety and daily routines.',
+        cardStatus: 'Waiting Followup',
+        handoffNotes: 'Sarah responds well to morning visits; avoid late-afternoon check-ins as she tires easily. Family prefers phone calls over email for scheduling.',
         intakeNotes: `Sarah Marcus (Age 76) is experiencing early cognitive lapses. Case shared by CHW Robert Mercer to collaborate on home safety checklists. Family is eager to establish structured daily routine support systems.`,
         timeline: [
           { date: 'Jun 18, 2026', label: 'Case Shared by Robert Mercer' }
@@ -947,7 +1295,46 @@ function setupNotifications() {
         aiSummary: 'Marcus Family case shared by CHW Robert Mercer. Immediate recommended tasks include establishing basic check-in protocols and coordinating on safety wristbands.',
         reportStatus: 'Not Generated',
         reportPeriod: 'Q2 2024',
-        reportContent: `<h5>1. Intake Assessment</h5><p>Case shared via org neurology network. Patient experiencing mild temporal adjustments.</p>`,
+        reportContent: `
+          <h4>Marcus Family Report</h4>
+          <p class="report-meta">Date: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Assigned CHW: Robert Mercer</p>
+          <p class="report-greeting">Hi there,</p>
+          <p>This case was shared via the org neurology network. Sarah is experiencing mild temporal adjustments, and we're setting up basic check-in protocols and safety coordination to start.</p>
+          <h5>Resources</h5>
+          <div class="report-resource-group">
+            <span class="report-tag healthcare">Healthcare</span>
+            <ul class="report-resource-list">
+              <li><strong>Cognitive Exercises Guide:</strong> daily activities to support cognitive engagement (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+            </ul>
+          </div>
+          <div class="report-resource-group">
+            <span class="report-tag logistics">Logistics</span>
+            <ul class="report-resource-list">
+              <li><strong>Home Safety Audit Sheet:</strong> checklist to review home safety and access points (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
+            </ul>
+          </div>
+          <p><strong>Next Check-up:</strong> Follow-up to be scheduled after initial check-in protocols are established.</p>
+        `,
+        reportContentEs: `
+          <h4>Informe de la Familia Marcus</h4>
+          <p class="report-meta">Fecha: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Trabajador de salud asignado: Robert Mercer</p>
+          <p class="report-greeting">Hola,</p>
+          <p>Este caso fue compartido a través de la red de neurología de la organización. Sarah está experimentando ajustes temporales leves, y estamos estableciendo protocolos básicos de seguimiento y coordinación de seguridad para empezar.</p>
+          <h5>Recursos</h5>
+          <div class="report-resource-group">
+            <span class="report-tag healthcare">Salud</span>
+            <ul class="report-resource-list">
+              <li><strong>Guía de Ejercicios Cognitivos:</strong> actividades diarias para apoyar la actividad cognitiva (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+            </ul>
+          </div>
+          <div class="report-resource-group">
+            <span class="report-tag logistics">Logística</span>
+            <ul class="report-resource-list">
+              <li><strong>Hoja de Auditoría de Seguridad del Hogar:</strong> lista de verificación para revisar la seguridad y accesos del hogar (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
+            </ul>
+          </div>
+          <p><strong>Próxima Revisión:</strong> Se programará un seguimiento después de establecer los protocolos iniciales de contacto.</p>
+        `,
         shared: true
       };
 
@@ -990,13 +1377,14 @@ function setupShareModal() {
   const closeModal = () => {
     DOM.modalShareCard.classList.remove('active');
     DOM.shareSearchInput.value = '';
+    DOM.shareHandoffNotes.value = '';
     document.querySelectorAll('#share-users-choices input[type="checkbox"]').forEach(c => c.checked = false);
     filterShareUsers('');
   };
 
   DOM.btnCloseShareModal.addEventListener('click', closeModal);
   DOM.btnCancelShare.addEventListener('click', closeModal);
-  
+
   DOM.btnConfirmShare.addEventListener('click', () => {
     const checkedUsers = [];
     document.querySelectorAll('#share-users-choices input[type="checkbox"]:checked').forEach(c => {
@@ -1006,6 +1394,12 @@ function setupShareModal() {
     if (checkedUsers.length === 0) {
       alert('Please select at least one organization user to share this card.');
       return;
+    }
+
+    const handoffNote = DOM.shareHandoffNotes.value.trim();
+    if (handoffNote && state.currentShareFamilyName) {
+      const sharedCase = state.cases.find(c => c.name === state.currentShareFamilyName);
+      if (sharedCase) sharedCase.handoffNotes = handoffNote;
     }
 
     alert('Case Card shared successfully with selected team members!');
@@ -1018,9 +1412,11 @@ function setupShareModal() {
 }
 
 function openShareModal(familyName) {
+  state.currentShareFamilyName = familyName;
   DOM.shareModalTitle.textContent = `Share ${familyName} Card`;
   DOM.sharePreviewText.innerHTML = `<strong>Sharing:</strong> Current Intake assessment &amp; clinical timeline for the <strong>${familyName}</strong>. Sharing gives full editing privileges to the selected recipient's dashboards.`;
-  
+  DOM.shareHandoffNotes.value = '';
+
   DOM.modalShareCard.classList.add('active');
 }
 
@@ -1328,7 +1724,7 @@ function generateMockAIResponse(userQuery) {
         <li><strong>Simplify Clinical Jargon:</strong> Translate clinical labels into everyday behavioral items (e.g., say <em>"adjustments in speech and memory"</em> rather than <em>"aphasia"</em>).</li>
         <li><strong>Partnership Definition:</strong> Frame yourself as a collaborative resource partner working beside them, rather than a clinical evaluator grading them.</li>
       </ol>
-      <p>I have prepared a <strong>"First Visit &amp; Rapport Protocol Guide"</strong> in the <em>Approved Practices</em> resources tab for you!</p>
+      <p>I have prepared a <strong>"First Visit &amp; Rapport Protocol Guide"</strong> in the <em>Peer Process Database</em> resources tab for you!</p>
     `;
   }
   else if (queryLower.includes('roleplay') || queryLower.includes('hesitant patient') || queryLower.includes('hesitant')) {
@@ -1351,7 +1747,7 @@ function generateMockAIResponse(userQuery) {
         <li><strong>Utilize Objective Audits:</strong> Walkthrough home safety checklist forms together. Let the score sheets do the heavy lifting of showing risk.</li>
         <li><strong>Start with Tiny Compromises:</strong> Propose one micro-adjustment first (e.g., a simple pill organizer box) rather than an entire nursing schedule.</li>
       </ul>
-      <p>Check the <strong>"Denial Mitigation Standard"</strong> sheet under the <em>Approved Practices</em> column for further worksheets.</p>
+      <p>Check the <strong>"Denial Mitigation Standard"</strong> sheet under the <em>Peer Process Database</em> column for further worksheets.</p>
     `;
   }
   else if (queryLower.includes('transitioning') || queryLower.includes('old age home') || queryLower.includes('transition')) {
@@ -1382,7 +1778,7 @@ function generateMockAIResponse(userQuery) {
     additionalText = `
       <p><strong>Explanation Template to Family:</strong><br>
       <em>"As your Care Coordinator, my role is to optimize home safety systems, organize scheduling logistics, and connect you with community support grants. I do not issue medical diagnoses, change medication dosages, or prescribe therapies; those tasks are handled by your Primary Neurologist."</em></p>
-      <p>Provide them with the **"Role Boundary Handout Sheet"** available in the <em>Approved Practices</em> list to set clear expectations.</p>
+      <p>Provide them with the **"Role Boundary Handout Sheet"** available in the <em>Peer Process Database</em> list to set clear expectations.</p>
     `;
   }
 
@@ -1427,7 +1823,7 @@ function generateMockAIResponse(userQuery) {
         <li><strong>Frequent Comprehension Checks:</strong> Ask: <em>"We\\'ve mapped out a few safety items just now. How does this plan feel to you so far?"</em></li>
         <li><strong>Post-Visit Summaries:</strong> Send a follow-up checklist of only **2 to 3 action steps** maximum.</li>
       </ol>
-      <p>I have uploaded a <strong>"Pacing &amp; Visit Layout Template"</strong> in the <em>Approved Practices</em> panel.</p>
+      <p>I have uploaded a <strong>"Pacing &amp; Visit Layout Template"</strong> in the <em>Peer Process Database</em> panel.</p>
     `;
   }
 

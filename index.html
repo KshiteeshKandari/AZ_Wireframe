@@ -113,36 +113,33 @@
 
           <!-- Stats Widgets Grid -->
           <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card stat-card-clickable" id="stat-card-waiting-referral" data-status-filter="Waiting on Referral">
               <div class="stat-header">
-                <span class="stat-title">Active Cases</span>
-                <span class="stat-trend up">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                  <span>12%</span>
-                </span>
+                <span class="stat-title">Waiting on Referral</span>
+                <span class="stat-badge warning">Referral</span>
               </div>
               <div class="stat-body">
-                <span class="stat-value" id="stat-cases-count">8</span>
-              </div>
-            </div>
-            
-            <div class="stat-card">
-              <div class="stat-header">
-                <span class="stat-title">Completed Reports</span>
-                <span class="stat-badge success">Quarterly</span>
-              </div>
-              <div class="stat-body">
-                <span class="stat-value">1</span>
+                <span class="stat-value" id="stat-waiting-referral-count">0</span>
               </div>
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card stat-card-clickable" id="stat-card-continuing-services" data-status-filter="Continuing Services">
               <div class="stat-header">
-                <span class="stat-title">Pending Reports</span>
-                <span class="stat-badge warning">Urgent</span>
+                <span class="stat-title">Continuing Services</span>
+                <span class="stat-badge success">Active</span>
               </div>
               <div class="stat-body">
-                <span class="stat-value">1</span>
+                <span class="stat-value" id="stat-continuing-services-count">0</span>
+              </div>
+            </div>
+
+            <div class="stat-card stat-card-clickable" id="stat-card-waiting-followup" data-status-filter="Waiting Followup">
+              <div class="stat-header">
+                <span class="stat-title">Waiting Followup</span>
+                <span class="stat-badge info">Followup</span>
+              </div>
+              <div class="stat-body">
+                <span class="stat-value" id="stat-waiting-followup-count">0</span>
               </div>
             </div>
           </div>
@@ -185,32 +182,164 @@
 
           <!-- SUB-VIEW 2: CREATE CASE CARD FORM -->
           <div id="subview-create-form" class="sub-view">
-            <div class="form-container-card">
-              <h2>New Case Registration</h2>
-              <p class="form-subtitle">Complete this form to create a new interactive Case Card for a family.</p>
-              
-              <form id="new-case-form">
-                <div class="form-group">
-                  <label for="case-name">Family / Case Name <span class="required">*</span></label>
-                  <input type="text" id="case-name" placeholder="e.g. Smith Family" required>
-                  <span class="input-helper">Use the format '[Last Name] Family'.</span>
-                </div>
-                
-                <div class="form-group">
-                  <label for="case-details">Primary Contact / Case Summary <span class="required">*</span></label>
-                  <input type="text" id="case-details" placeholder="e.g. Intake Active &bull; Primary Caregiver: John Smith" required>
-                  <span class="input-helper">A short descriptive summary of the contact and case status.</span>
-                </div>
+            <div class="intake-form-wrapper">
+              <div class="intake-header-row">
+                <h1 class="intake-title">Create New Case</h1>
+              </div>
 
-                <div class="form-group">
-                  <label for="case-intake">Initial Intake Form / Clinical Notes</label>
-                  <textarea id="case-intake" rows="8" placeholder="Enter patient clinical background, caregiver feedback, dementia stage info, and any immediate support needs..."></textarea>
-                </div>
-                
-                <div class="form-actions">
-                  <button type="button" class="btn btn-secondary" id="btn-cancel-create">Cancel</button>
-                  <button type="submit" class="btn btn-primary">Create Case</button>
-                </div>
+              <form id="new-case-form" class="intake-main-form">
+                <div class="intake-panel">
+
+                  <!-- Top Basic Info Row -->
+                  <div class="form-row-2col">
+                    <div class="form-group">
+                      <label for="case-name" class="group-label">Client Family Name <span class="required">*</span></label>
+                      <input type="text" id="case-name" placeholder="Enter client family name..." required>
+                    </div>
+                    <div class="form-group">
+                      <label for="primary-contact-name" class="group-label">Primary Contact Name <span class="required">*</span></label>
+                      <input type="text" id="primary-contact-name" placeholder="Enter primary contact name..." required>
+                    </div>
+                  </div>
+
+                  <!-- SECTION 1: Patient Profile -->
+                  <div class="intake-section">
+                    <h3 class="section-title"><span class="section-num">1.</span> Patient Profile</h3>
+
+                    <!-- Patient Age Range (2x2 Grid) -->
+                    <div class="form-group">
+                      <label class="group-label">Patient Age Range:</label>
+                      <div class="pill-group pill-grid-2x2 single-select" data-field="patient-age">
+                        <button type="button" class="pill-btn" data-value="Under 65 (Early Onset)">Under 65 (Early Onset)</button>
+                        <button type="button" class="pill-btn active" data-value="65 - 74">65 - 74</button>
+                        <button type="button" class="pill-btn" data-value="75 - 84">75 - 84</button>
+                        <button type="button" class="pill-btn" data-value="85+">85+</button>
+                      </div>
+                    </div>
+
+                    <!-- Current Alzheimer's/Dementia Stage -->
+                    <div class="form-group">
+                      <label class="group-label">Current Alzheimer's/Dementia Stage:</label>
+                      <div class="pill-group single-select" data-field="patient-stage">
+                        <button type="button" class="pill-btn" data-value="Suspected / Undiagnosed">Suspected / Undiagnosed</button>
+                        <button type="button" class="pill-btn" data-value="Early-Stage (Mild)">Early-Stage (Mild)</button>
+                        <button type="button" class="pill-btn" data-value="Middle-Stage (Moderate)">Middle-Stage (Moderate)</button>
+                        <button type="button" class="pill-btn active" data-value="Late-Stage (Severe)">Late-Stage (Severe)</button>
+                      </div>
+                    </div>
+
+                    <!-- Language Used -->
+                    <div class="form-group">
+                      <label class="group-label">Language Used by Patient &amp; Caregiver:</label>
+                      <div class="pill-group single-select" data-field="patient-language">
+                        <button type="button" class="pill-btn active" data-value="English">English</button>
+                        <button type="button" class="pill-btn" data-value="Spanish">Spanish</button>
+                        <input type="text" id="intake-language-other" class="pill-input" placeholder="Other (specify)...">
+                      </div>
+                    </div>
+
+                    <!-- Family Dynamics / Living Situation -->
+                    <div class="form-group">
+                      <label class="group-label">Family Dynamics / Living Situation:</label>
+                      <div class="pill-group single-select" data-field="living-situation">
+                        <button type="button" class="pill-btn" data-value="Patient lives alone">Patient lives alone</button>
+                        <button type="button" class="pill-btn" data-value="There are kids">There are kids</button>
+                        <button type="button" class="pill-btn active" data-value="All adults">All adults</button>
+                      </div>
+                    </div>
+
+                    <!-- Zip Code -->
+                    <div class="form-group">
+                      <label for="intake-zip-code" class="group-label">Zip Code:</label>
+                      <input type="text" id="intake-zip-code" placeholder="Enter zip code (e.g. 90210)...">
+                    </div>
+
+                    <!-- Mobility Constraints -->
+                    <div class="form-group mb-0">
+                      <label for="intake-mobility" class="group-label">Mobility Constraints:</label>
+                      <input type="text" id="intake-mobility" placeholder="e.g. Uses walker, limited stairs access...">
+                    </div>
+                  </div>
+
+                  <!-- SECTION 2: Caregiver Profile -->
+                  <div class="intake-section">
+                    <h3 class="section-title"><span class="section-num">2.</span> Caregiver Profile</h3>
+
+                    <!-- Relationship to Patient -->
+                    <div class="form-group">
+                      <label class="group-label">Relationship to Patient:</label>
+                      <div class="pill-group single-select" data-field="caregiver-rel">
+                        <button type="button" class="pill-btn" data-value="Spouse/Partner">Spouse/Partner</button>
+                        <button type="button" class="pill-btn active" data-value="Adult Child">Adult Child</button>
+                        <button type="button" class="pill-btn" data-value="Other Relative">Other Relative</button>
+                        <button type="button" class="pill-btn" data-value="Friend/Neighbor">Friend/Neighbor</button>
+                      </div>
+                    </div>
+
+                    <!-- Caregiver Age Range (2x2 Grid) -->
+                    <div class="form-group">
+                      <label class="group-label">Caregiver Age Range:</label>
+                      <div class="pill-group pill-grid-2x2 single-select" data-field="caregiver-age">
+                        <button type="button" class="pill-btn active" data-value="Under 65">Under 65</button>
+                        <button type="button" class="pill-btn" data-value="65 - 74">65 - 74</button>
+                        <button type="button" class="pill-btn" data-value="75 - 84">75 - 84</button>
+                        <button type="button" class="pill-btn" data-value="85+">85+</button>
+                      </div>
+                    </div>
+
+                    <!-- Caregiver Stress Level -->
+                    <div class="form-group mb-0">
+                      <label class="group-label">Observed Caregiver Stress Level:</label>
+                      <div class="pill-group single-select" data-field="caregiver-stress">
+                        <button type="button" class="pill-btn" data-value="Low / Managing Well">Low / Managing Well</button>
+                        <button type="button" class="pill-btn" data-value="Moderate / Needs Support">Moderate / Needs Support</button>
+                        <button type="button" class="pill-btn active" data-value="High / Burnout Risk">High / Burnout Risk</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- SECTION 3: Primary Focus Areas / Challenges -->
+                  <div class="intake-section">
+                    <h3 class="section-title"><span class="section-num">3.</span> Primary Focus Areas / Challenges <span class="sub-label">(Select all identified)</span></h3>
+
+                    <div class="pill-group multi-select flex-wrap-badges" data-field="focus-areas">
+                      <button type="button" class="pill-badge active" data-value="Patient Denial">Patient Denial</button>
+                      <button type="button" class="pill-badge" data-value="Caregiver Guilt / Self-Care">Caregiver Guilt / Self-Care</button>
+                      <button type="button" class="pill-badge" data-value="Transitioning to Care Facility">Transitioning to Care Facility</button>
+                      <button type="button" class="pill-badge" data-value="Medical Advocacy / Doctor Communication">Medical Advocacy / Doctor Communication</button>
+                      <button type="button" class="pill-badge active" data-value="Safety Concerns (Wandering, Falls)">Safety Concerns (Wandering, Falls)</button>
+                      <button type="button" class="pill-badge" data-value="Setting Role Boundaries">Setting Role Boundaries</button>
+                      <button type="button" class="pill-badge" data-value="Unrealistic Expectations">Unrealistic Expectations</button>
+                    </div>
+                  </div>
+
+                  <!-- SECTION 4: How can the AI assist you today? -->
+                  <div class="intake-section">
+                    <h3 class="section-title"><span class="section-num">4.</span> How can the AI assist you with this case today?</h3>
+
+                    <div class="pill-group single-select" data-field="ai-assist-goal">
+                      <button type="button" class="pill-btn" data-value="Draft a conversation starter">Draft a conversation starter</button>
+                      <button type="button" class="pill-btn active" data-value="Find local resources">Find local resources</button>
+                      <button type="button" class="pill-btn" data-value="Think through scenario">Think through scenario</button>
+                      <button type="button" class="pill-btn" data-value="No immediate help">No immediate help</button>
+                    </div>
+                  </div>
+
+                  <!-- Notes -->
+                  <div class="intake-section">
+                    <div class="form-group mb-0">
+                      <label for="intake-notes" class="group-label">Any specific cultural, language, or unique family dynamics to note? (Optional)</label>
+                      <textarea id="intake-notes" rows="4" placeholder="Enter any unique family values, language needs, or notes..."></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="intake-form-actions">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-create">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save &amp; Add Case</button>
+                  </div>
+
+                </div> <!-- /intake-panel -->
               </form>
             </div>
           </div>
@@ -346,11 +475,11 @@
               </div>
             </div>
 
-            <!-- Approved Practices Column -->
+            <!-- Peer Process Database Column -->
             <div class="resource-column">
               <div class="column-title-bar">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <h2>Approved Practices</h2>
+                <h2>ASI General Recommnded Practice</h2>
               </div>
               <div class="resource-list-container" id="practices-resources-list">
                 
@@ -420,9 +549,6 @@
       <div class="modal-body report-split">
         <!-- Left Pane: Written Report Content -->
         <div class="report-text-pane">
-          <h4>Clinical Summary Report</h4>
-          <p class="report-meta">Generated on: June 18, 2026 &bull; Evaluator: Jane Doe, Case Manager</p>
-          
           <div id="report-modal-text-content">
             <!-- Dynamically injected report text -->
           </div>
@@ -491,6 +617,10 @@
           Close Case
         </button>
         <div class="footer-right">
+          <button class="btn btn-secondary" id="btn-toggle-report-language">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            Traducir al español
+          </button>
           <button class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
           <button class="btn btn-primary" id="btn-modal-download">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -556,6 +686,11 @@
             </label>
           </div>
         </div>
+
+        <div class="form-group margin-top-lg">
+          <label for="share-handoff-notes">Handoff Notes</label>
+          <textarea id="share-handoff-notes" rows="3" placeholder="Anything the recipient should know before taking over this case..."></textarea>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="btn-cancel-share">Cancel</button>
@@ -575,13 +710,17 @@
         <div class="editor-tabs">
           <button class="editor-tab-btn active" data-edit-tab="intake">Intake Info</button>
           <button class="editor-tab-btn" data-edit-tab="timeline">Timeline Progress</button>
-          <button class="editor-tab-btn" data-edit-tab="resources">Resource Links</button>
+          <button class="editor-tab-btn" data-edit-tab="resources">Family Resources</button>
           <button class="editor-tab-btn" data-edit-tab="summary">AI Summary</button>
         </div>
         
         <div class="editor-tab-content">
           <!-- Intake Edit Pane -->
           <div class="editor-pane active" data-edit-tab="intake">
+            <div class="form-group" id="edit-handoff-notes-group" style="display: none;">
+              <label>Handoff Notes</label>
+              <p id="edit-handoff-notes-text" style="font-size: 13.5px; color: var(--text-secondary); background-color: var(--bg-card-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; line-height: 1.6;"></p>
+            </div>
             <div class="form-group">
               <label for="edit-intake-notes">Intake Information &amp; Clinical Notes</label>
               <textarea id="edit-intake-notes" rows="10" placeholder="Clinical background, caregivers, age..."></textarea>
@@ -621,7 +760,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" id="btn-cancel-editor">Cancel</button>
-        <button class="btn btn-primary" id="btn-save-editor">Save Changes</button>
+        <button class="btn btn-primary" id="btn-save-editor">Update</button>
       </div>
     </div>
   </div>
@@ -643,7 +782,7 @@
         <button class="btn btn-secondary" id="btn-archive-cancel">Cancel</button>
         <div class="footer-right flex-column-mobile" style="display: flex; gap: 8px;">
           <button class="btn btn-secondary text-red" id="btn-archive-only">No, Just Close</button>
-          <button class="btn btn-secondary" id="btn-archive-practices">Add to Practices</button>
+          <button class="btn btn-secondary" id="btn-archive-practices">Add to Peer Process Database</button>
           <button class="btn btn-primary" id="btn-archive-resources">Add to Resources</button>
         </div>
       </div>

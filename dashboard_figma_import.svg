@@ -1,0 +1,304 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1024" width="1440" height="1024" style="background:#f5f6f3; font-family:'Inter', sans-serif;">
+  <!-- DEFINITIONS -->
+  <defs>
+    <!-- Shadow Filter -->
+    <filter id="shadow-sm" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#2A2B2A" flood-opacity="0.08"/>
+    </filter>
+    <filter id="shadow-md" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#2A2B2A" flood-opacity="0.05"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#2A2B2A" flood-opacity="0.03"/>
+    </filter>
+  </defs>
+
+  <!-- VIEWPORT BACKGROUND -->
+  <rect width="1440" height="1024" fill="#f5f6f3" />
+
+  <!-- MAIN VIEWPORT BACKGROUND PATTERN / OVERLAY TEXTURE -->
+  <!-- Note: When importing to Figma, this will represent the content area backdrop -->
+  <g id="Viewport-Backdrop" opacity="0.88">
+    <rect x="270" y="70" width="1170" height="954" fill="#f5f6f3" />
+  </g>
+
+  <!-- ========================================== -->
+  <!-- SIDEBAR NAVIGATION (Width: 270px) -->
+  <!-- ========================================== -->
+  <g id="Sidebar-Navigation" transform="translate(0, 0)">
+    <!-- Sidebar Base Frame -->
+    <rect width="270" height="1024" fill="#D2D4C8" stroke="#c9cbc1" stroke-width="1" />
+    
+    <!-- Sidebar Header (Logo) -->
+    <g id="Logo-Container" transform="translate(24, 24)">
+      <!-- Logo Icon -->
+      <path d="M12 2L2 7l10 5 10-5-10-5z" fill="none" stroke="#9C89B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2 17l10 5 10-5" fill="none" stroke="#9C89B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2 12l10 5 10-5" fill="none" stroke="#9C89B8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Logo Text -->
+      <text x="36" y="20" font-family="Outfit" font-size="21" font-weight="800" fill="#2A2B2A" letter-spacing="-0.03em">AZ Companion</text>
+    </g>
+
+    <!-- Nav Items -->
+    <g id="Nav-Items" transform="translate(12, 96)">
+      <!-- Item: My Cases (Active State) -->
+      <g id="Nav-My-Cases" transform="translate(0, 0)">
+        <rect width="246" height="46" rx="12" fill="#ffffff" fill-opacity="0.75" />
+        <!-- Accent line -->
+        <rect x="0" y="8" width="4" height="30" rx="2" fill="#9C89B8" />
+        <!-- Icon -->
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="#9C89B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(16, 11) scale(0.9)"/>
+        <polyline points="9 22 9 12 15 12 15 22" fill="none" stroke="#9C89B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(16, 11) scale(0.9)"/>
+        <!-- Text -->
+        <text x="48" y="27" font-size="14" font-weight="600" fill="#483961">My Cases</text>
+      </g>
+
+      <!-- Item: Case Card -->
+      <g id="Nav-Case-Card" transform="translate(0, 54)">
+        <rect width="246" height="46" rx="12" fill="transparent" />
+        <!-- Icon -->
+        <rect x="16" y="13" width="18" height="18" rx="2" ry="2" fill="none" stroke="#4a4b4a" stroke-width="2" />
+        <line x1="21" y1="18" x2="29" y2="18" stroke="#4a4b4a" stroke-width="2" />
+        <line x1="21" y1="22" x2="29" y2="22" stroke="#4a4b4a" stroke-width="2" />
+        <!-- Text -->
+        <text x="48" y="27" font-size="14" font-weight="600" fill="#4a4b4a">Case Card</text>
+      </g>
+
+      <!-- Item: AI Chat -->
+      <g id="Nav-AI-Chat" transform="translate(0, 108)">
+        <rect width="246" height="46" rx="12" fill="transparent" />
+        <!-- Icon -->
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="none" stroke="#4a4b4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(15, 12) scale(0.9)" />
+        <!-- Text -->
+        <text x="48" y="27" font-size="14" font-weight="600" fill="#4a4b4a">AI Chat</text>
+      </g>
+
+      <!-- Item: Resources -->
+      <g id="Nav-Resources" transform="translate(0, 162)">
+        <rect width="246" height="46" rx="12" fill="transparent" />
+        <!-- Icon -->
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" fill="none" stroke="#4a4b4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(15, 12) scale(0.9)"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="none" stroke="#4a4b4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(15, 12) scale(0.9)"/>
+        <!-- Text -->
+        <text x="48" y="27" font-size="14" font-weight="600" fill="#4a4b4a">Resources</text>
+      </g>
+
+      <!-- Item: Family Report -->
+      <g id="Nav-Family-Report" transform="translate(0, 216)">
+        <rect width="246" height="46" rx="12" fill="transparent" />
+        <!-- Icon -->
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="#4a4b4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(16, 12) scale(0.9)"/>
+        <!-- Text -->
+        <text x="48" y="27" font-size="14" font-weight="600" fill="#4a4b4a">Family Report</text>
+      </g>
+    </g>
+
+    <!-- Sidebar Footer (User Profile) -->
+    <g id="Sidebar-Footer" transform="translate(16, 940)">
+      <line x1="0" y1="-16" x2="238" y2="-16" stroke="#c9cbc1" stroke-width="1" />
+      <!-- User Profile Row -->
+      <g transform="translate(8, 0)">
+        <!-- Avatar Circle -->
+        <circle cx="19" cy="19" r="19" fill="#9C89B8" />
+        <text x="19" y="24" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">JD</text>
+        <!-- User Details -->
+        <text x="48" y="16" font-size="14" font-weight="700" fill="#2A2B2A">Jane Doe</text>
+        <text x="48" y="32" font-size="12" fill="#4a4b4a">Case Manager</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- TOP HEADER (Width: 1170px) -->
+  <!-- ========================================== -->
+  <g id="Top-Header" transform="translate(270, 0)">
+    <!-- Header Base Frame -->
+    <rect width="1170" height="70" fill="#E0E2DB" stroke="#c9cbc1" stroke-width="1" />
+    
+    <!-- Search Bar Component -->
+    <g id="Search-Bar" transform="translate(30, 15)">
+      <rect width="340" height="40" rx="12" fill="#ffffff" fill-opacity="0.7" stroke="#c9cbc1" stroke-width="1" />
+      <!-- Search Icon -->
+      <circle cx="21" cy="20" r="5" fill="none" stroke="#787a78" stroke-width="2" />
+      <line x1="25" y1="24" x2="29" y2="28" stroke="#787a78" stroke-width="2" stroke-linecap="round" />
+      <!-- Placeholder Text -->
+      <text x="42" y="25" font-size="14" fill="#787a78">Search families, cases, templates...</text>
+    </g>
+
+    <!-- Header Actions (Right Align) -->
+    <g id="Header-Actions" transform="translate(920, 15)">
+      <!-- Date Badge -->
+      <g id="Date-Badge" transform="translate(0, 0)">
+        <rect width="140" height="40" rx="12" fill="#ffffff" fill-opacity="0.7" stroke="#c9cbc1" stroke-width="1" />
+        <!-- Date Icon -->
+        <rect x="12" y="11" width="16" height="16" rx="2" ry="2" fill="none" stroke="#2A2B2A" stroke-width="2" />
+        <line x1="12" y1="17" x2="28" y2="17" stroke="#2A2B2A" stroke-width="2" />
+        <!-- Date Text -->
+        <text x="36" y="24" font-size="13" font-weight="600" fill="#2A2B2A">June 18, 2026</text>
+      </g>
+
+      <!-- Notification Bell -->
+      <g id="Notification-Trigger" transform="translate(164, 0)">
+        <circle cx="20" cy="20" r="20" fill="#ffffff" fill-opacity="0.7" stroke="#c9cbc1" stroke-width="1" />
+        <!-- Bell Icon -->
+        <path d="M20 8a4 4 0 0 0-4 4v5H12v2h16v-2h-4v-5a4 4 0 0 0-4-4z" fill="none" stroke="#2A2B2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18 21a2 2 0 0 0 4 0" fill="none" stroke="#2A2B2A" stroke-width="2" />
+        <!-- Unread Badge Dot -->
+        <circle cx="28" cy="11" r="5" fill="#9C89B8" />
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================== -->
+  <!-- DASHBOARD CONTENT PAGE -->
+  <!-- ========================================== -->
+  <g id="Dashboard-Content" transform="translate(270, 70)">
+    
+    <!-- PAGE TITLE ROW -->
+    <g id="Page-Title-Row" transform="translate(30, 32)">
+      <!-- Title -->
+      <text x="0" y="26" font-family="Outfit" font-size="28" font-weight="700" fill="#2A2B2A" letter-spacing="-0.02em">Dashboard</text>
+      
+      <!-- Button: New Case -->
+      <g id="Btn-New-Case" transform="translate(980, 0)">
+        <rect width="130" height="38" rx="6" fill="#9C89B8" />
+        <!-- Plus Icon -->
+        <line x1="20" y1="19" x2="32" y2="19" stroke="#ffffff" stroke-width="2.5" />
+        <line x1="26" y1="13" x2="26" y2="25" stroke="#ffffff" stroke-width="2.5" />
+        <!-- Button Text -->
+        <text x="40" y="24" font-size="13" font-weight="700" fill="#ffffff">New Case</text>
+      </g>
+    </g>
+
+    <!-- STATS CARDS GRID -->
+    <g id="Stats-Grid" transform="translate(30, 94)">
+      
+      <!-- Card 1: Active Cases -->
+      <g id="Stat-Card-Active" transform="translate(0, 0)" filter="url(#shadow-sm)">
+        <rect width="354" height="110" rx="12" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+        <text x="20" y="32" font-size="13" font-weight="600" fill="#4a4b4a">Active Cases</text>
+        <!-- Trend Indicator -->
+        <g transform="translate(288, 20)">
+          <!-- Arrow Up Icon -->
+          <path d="M3 13h10M8 8l5 5-5 5" fill="none" stroke="#1B5E20" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-90 8 13) translate(-3 -4) scale(0.8)"/>
+          <text x="16" y="12" font-size="11" font-weight="700" fill="#1B5E20">12%</text>
+        </g>
+        <!-- Value -->
+        <text x="20" y="84" font-family="Outfit" font-size="32" font-weight="700" fill="#2A2B2A">8</text>
+      </g>
+
+      <!-- Card 2: Completed Reports -->
+      <g id="Stat-Card-Completed" transform="translate(378, 0)" filter="url(#shadow-sm)">
+        <rect width="354" height="110" rx="12" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+        <text x="20" y="32" font-size="13" font-weight="600" fill="#4a4b4a">Completed Reports</text>
+        <!-- Badge -->
+        <g transform="translate(262, 20)">
+          <rect width="72" height="20" rx="6" fill="rgba(27, 94, 32, 0.1)" />
+          <text x="36" y="14" font-size="10" font-weight="700" fill="#1B5E20" text-anchor="middle">Quarterly</text>
+        </g>
+        <!-- Value -->
+        <text x="20" y="84" font-family="Outfit" font-size="32" font-weight="700" fill="#2A2B2A">1</text>
+      </g>
+
+      <!-- Card 3: Pending Reports -->
+      <g id="Stat-Card-Pending" transform="translate(756, 0)" filter="url(#shadow-sm)">
+        <rect width="354" height="110" rx="12" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+        <text x="20" y="32" font-size="13" font-weight="600" fill="#4a4b4a">Pending Reports</text>
+        <!-- Badge -->
+        <g transform="translate(282, 20)">
+          <rect width="52" height="20" rx="6" fill="rgba(183, 122, 1, 0.1)" />
+          <text x="26" y="14" font-size="10" font-weight="700" fill="#B77A01" text-anchor="middle">Urgent</text>
+        </g>
+        <!-- Value -->
+        <text x="20" y="84" font-family="Outfit" font-size="32" font-weight="700" fill="#2A2B2A">1</text>
+      </g>
+    </g>
+
+    <!-- SECTION CARD: FAMILIES UNDER CARE -->
+    <g id="Section-Families-Card" transform="translate(30, 228)" filter="url(#shadow-md)">
+      <!-- Main Elevation Card -->
+      <rect width="1110" height="630" rx="20" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+      
+      <!-- Card Header -->
+      <g id="Section-Header" transform="translate(24, 24)">
+        <!-- Group Icon -->
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" fill="none" stroke="#9C89B8" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="9" cy="7" r="4" fill="none" stroke="#9C89B8" stroke-width="2"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="#9C89B8" stroke-width="2" stroke-linecap="round"/>
+        <!-- Header Text -->
+        <text x="32" y="18" font-family="Outfit" font-size="18" font-weight="700" fill="#2A2B2A">Families Under Care</text>
+        
+        <!-- Families Counter Badge -->
+        <g transform="translate(1002, 0)">
+          <rect width="84" height="24" rx="12" fill="#f3f4f1" stroke="#c9cbc1" stroke-width="1" />
+          <text x="42" y="16" font-size="11" font-weight="700" fill="#4a4b4a" text-anchor="middle">3 Families</text>
+        </g>
+      </g>
+
+      <!-- FAMILIES ROW LIST -->
+      <g id="Families-List" transform="translate(24, 76)">
+        
+        <!-- Row 1: Rivera Family -->
+        <g id="Row-Rivera-Family" transform="translate(0, 0)">
+          <!-- Row frame border-box -->
+          <rect width="1062" height="72" rx="12" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+          
+          <!-- Info block -->
+          <g transform="translate(20, 16)">
+            <!-- Family Name -->
+            <text x="0" y="16" font-family="Outfit" font-size="15" font-weight="700" fill="#2A2B2A">Rivera Family</text>
+            <!-- Meta description details -->
+            <text x="0" y="32" font-size="12" fill="#787a78">Intake Completed • Caregivers: 2 • Case Manager Assigned</text>
+          </g>
+          
+          <!-- View button (aligned right) -->
+          <g transform="translate(926, 17)">
+            <rect width="116" height="38" rx="6" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+            <text x="58" y="23" font-size="12" font-weight="600" fill="#4a4b4a" text-anchor="middle">View Case Card</text>
+          </g>
+        </g>
+
+        <!-- Row 2: Marcus Family (Shared state row) -->
+        <g id="Row-Marcus-Family" transform="translate(0, 88)">
+          <!-- Row frame border-box -->
+          <rect width="1062" height="72" rx="12" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+          <!-- Thick Left color border indicating special state -->
+          <rect width="4" height="72" rx="0" fill="#A997DF" />
+          
+          <!-- Info block -->
+          <g transform="translate(20, 16)">
+            <g id="Name-Badge-Row">
+              <text x="0" y="16" font-family="Outfit" font-size="15" font-weight="700" fill="#2A2B2A">Marcus Family</text>
+              <!-- Shared Badge Tag -->
+              <g transform="translate(108, 2)">
+                <rect width="58" height="18" rx="4" fill="rgba(169, 151, 223, 0.15)" stroke="rgba(169, 151, 223, 0.3)" stroke-width="1" />
+                <text x="29" y="12" font-size="9.5" font-weight="700" fill="#483961" text-anchor="middle">Shared</text>
+              </g>
+            </g>
+            <text x="0" y="32" font-size="12" fill="#787a78">Shared by: Robert Mercer • Assessment Phase</text>
+          </g>
+          
+          <!-- View button (aligned right) -->
+          <g transform="translate(926, 17)">
+            <rect width="116" height="38" rx="6" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+            <text x="58" y="23" font-size="12" font-weight="600" fill="#4a4b4a" text-anchor="middle">View Case Card</text>
+          </g>
+        </g>
+
+        <!-- Row 3: Smith Family -->
+        <g id="Row-Smith-Family" transform="translate(0, 176)">
+          <rect width="1062" height="72" rx="12" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+          
+          <g transform="translate(20, 16)">
+            <text x="0" y="16" font-family="Outfit" font-size="15" font-weight="700" fill="#2A2B2A">Smith Family</text>
+            <text x="0" y="32" font-size="12" fill="#787a78">Follow-up Call Scheduled • Caregiver Support Group Referral</text>
+          </g>
+          
+          <g transform="translate(926, 17)">
+            <rect width="116" height="38" rx="6" fill="#ffffff" stroke="#c9cbc1" stroke-width="1" />
+            <text x="58" y="23" font-size="12" font-weight="600" fill="#4a4b4a" text-anchor="middle">View Case Card</text>
+          </g>
+        </g>
+
+      </g>
+    </g>
+  </g>
+</svg>

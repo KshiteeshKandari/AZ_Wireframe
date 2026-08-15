@@ -345,18 +345,170 @@
           </div>
         </section>
 
+        <!-- PAGE: EDIT INTAKE (flow page, not in main nav) -->
+        <section id="page-edit-intake" class="page-view">
+          <div class="intake-form-wrapper">
+            <div class="intake-header-row">
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-edit-intake-back" style="margin-bottom: 12px;">&#8592; Back</button>
+              <h1 class="intake-title" id="edit-intake-page-title">Update Intake Information</h1>
+            </div>
+
+            <form id="edit-intake-form" class="intake-main-form">
+              <div class="intake-panel">
+
+                <div class="form-row-2col">
+                  <div class="form-group">
+                    <label class="group-label">Family Name</label>
+                    <p id="edit-intake-family-name-display" style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 6px 0 0;"></p>
+                  </div>
+                  <div class="form-group">
+                    <label for="edit-intake-primary-contact" class="group-label">Primary Contact Name <span class="required">*</span></label>
+                    <input type="text" id="edit-intake-primary-contact" placeholder="Enter primary contact name..." required>
+                  </div>
+                </div>
+
+                <div class="intake-section">
+                  <h3 class="section-title"><span class="section-num">1.</span> Patient Profile</h3>
+
+                  <div class="form-group">
+                    <label class="group-label">Patient Age Range:</label>
+                    <div class="pill-group pill-grid-2x2 single-select" data-field="ei-patient-age">
+                      <button type="button" class="pill-btn" data-value="Under 65 (Early Onset)">Under 65 (Early Onset)</button>
+                      <button type="button" class="pill-btn" data-value="65 - 74">65 - 74</button>
+                      <button type="button" class="pill-btn" data-value="75 - 84">75 - 84</button>
+                      <button type="button" class="pill-btn" data-value="85+">85+</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="group-label">Current Alzheimer's/Dementia Stage:</label>
+                    <div class="pill-group single-select" data-field="ei-patient-stage">
+                      <button type="button" class="pill-btn" data-value="Suspected / Undiagnosed">Suspected / Undiagnosed</button>
+                      <button type="button" class="pill-btn" data-value="Early-Stage (Mild)">Early-Stage (Mild)</button>
+                      <button type="button" class="pill-btn" data-value="Middle-Stage (Moderate)">Middle-Stage (Moderate)</button>
+                      <button type="button" class="pill-btn" data-value="Late-Stage (Severe)">Late-Stage (Severe)</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="group-label">Language Used by Patient &amp; Caregiver:</label>
+                    <div class="pill-group single-select" data-field="ei-patient-language">
+                      <button type="button" class="pill-btn" data-value="English">English</button>
+                      <button type="button" class="pill-btn" data-value="Spanish">Spanish</button>
+                      <input type="text" id="ei-language-other" class="pill-input" placeholder="Other (specify)...">
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="group-label">Family Dynamics / Living Situation:</label>
+                    <div class="pill-group single-select" data-field="ei-living-situation">
+                      <button type="button" class="pill-btn" data-value="Patient lives alone">Patient lives alone</button>
+                      <button type="button" class="pill-btn" data-value="There are kids">There are kids</button>
+                      <button type="button" class="pill-btn" data-value="All adults">All adults</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ei-zip-code" class="group-label">Zip Code:</label>
+                    <input type="text" id="ei-zip-code" placeholder="Enter zip code (e.g. 90210)...">
+                  </div>
+
+                  <div class="form-group mb-0">
+                    <label for="ei-mobility" class="group-label">Mobility Constraints:</label>
+                    <input type="text" id="ei-mobility" placeholder="e.g. Uses walker, limited stairs access...">
+                  </div>
+                </div>
+
+                <div class="intake-section">
+                  <h3 class="section-title"><span class="section-num">2.</span> Caregiver Profile</h3>
+
+                  <div class="form-group">
+                    <label class="group-label">Relationship to Patient:</label>
+                    <div class="pill-group single-select" data-field="ei-caregiver-rel">
+                      <button type="button" class="pill-btn" data-value="Spouse/Partner">Spouse/Partner</button>
+                      <button type="button" class="pill-btn" data-value="Adult Child">Adult Child</button>
+                      <button type="button" class="pill-btn" data-value="Other Relative">Other Relative</button>
+                      <button type="button" class="pill-btn" data-value="Friend/Neighbor">Friend/Neighbor</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="group-label">Caregiver Age Range:</label>
+                    <div class="pill-group pill-grid-2x2 single-select" data-field="ei-caregiver-age">
+                      <button type="button" class="pill-btn" data-value="Under 65">Under 65</button>
+                      <button type="button" class="pill-btn" data-value="65 - 74">65 - 74</button>
+                      <button type="button" class="pill-btn" data-value="75 - 84">75 - 84</button>
+                      <button type="button" class="pill-btn" data-value="85+">85+</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group mb-0">
+                    <label class="group-label">Observed Caregiver Stress Level:</label>
+                    <div class="pill-group single-select" data-field="ei-caregiver-stress">
+                      <button type="button" class="pill-btn" data-value="Low / Managing Well">Low / Managing Well</button>
+                      <button type="button" class="pill-btn" data-value="Moderate / Needs Support">Moderate / Needs Support</button>
+                      <button type="button" class="pill-btn" data-value="High / Burnout Risk">High / Burnout Risk</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="intake-section">
+                  <h3 class="section-title"><span class="section-num">3.</span> Primary Focus Areas / Challenges <span class="sub-label">(Select all identified)</span></h3>
+                  <div class="pill-group multi-select flex-wrap-badges" data-field="ei-focus-areas">
+                    <button type="button" class="pill-badge" data-value="Patient Denial">Patient Denial</button>
+                    <button type="button" class="pill-badge" data-value="Caregiver Guilt / Self-Care">Caregiver Guilt / Self-Care</button>
+                    <button type="button" class="pill-badge" data-value="Transitioning to Care Facility">Transitioning to Care Facility</button>
+                    <button type="button" class="pill-badge" data-value="Medical Advocacy / Doctor Communication">Medical Advocacy / Doctor Communication</button>
+                    <button type="button" class="pill-badge" data-value="Safety Concerns (Wandering, Falls)">Safety Concerns (Wandering, Falls)</button>
+                    <button type="button" class="pill-badge" data-value="Setting Role Boundaries">Setting Role Boundaries</button>
+                    <button type="button" class="pill-badge" data-value="Unrealistic Expectations">Unrealistic Expectations</button>
+                  </div>
+                </div>
+
+                <div class="intake-section">
+                  <h3 class="section-title"><span class="section-num">4.</span> How can the AI assist you with this case today?</h3>
+                  <div class="pill-group single-select" data-field="ei-ai-assist-goal">
+                    <button type="button" class="pill-btn" data-value="Draft a conversation starter">Draft a conversation starter</button>
+                    <button type="button" class="pill-btn" data-value="Find local resources">Find local resources</button>
+                    <button type="button" class="pill-btn" data-value="Think through scenario">Think through scenario</button>
+                    <button type="button" class="pill-btn" data-value="No immediate help">No immediate help</button>
+                  </div>
+                </div>
+
+                <div class="intake-section">
+                  <div class="form-group mb-0">
+                    <label for="ei-notes" class="group-label">Any specific cultural, language, or unique family dynamics to note? (Optional)</label>
+                    <textarea id="ei-notes" rows="4" placeholder="Enter any unique family values, language needs, or notes..."></textarea>
+                  </div>
+                </div>
+
+                <div class="intake-form-actions">
+                  <button type="button" class="btn btn-secondary" id="btn-cancel-edit-intake">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </section>
+
         <!-- PAGE 3: AI CHAT -->
         <section id="page-ai-chat" class="page-view">
           <div class="page-title-row">
             <h1>AI Chat Assistant</h1>
             <div class="chat-header-actions">
+              <span class="chat-context-chip" id="chat-context-chip" style="display: none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                <span id="chat-context-chip-label"></span>
+                <button type="button" id="chat-context-chip-clear" title="Clear family context">&times;</button>
+              </span>
               <button class="btn btn-secondary btn-sm" id="btn-new-chat">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 New Chat
               </button>
-              <span class="status-indicator">
-                <span class="pulse-dot"></span>
-                AI Companion Connected
+              <span class="status-indicator" id="chat-status-indicator">
+                <span class="pulse-dot" id="chat-status-dot"></span>
+                <span id="chat-status-text">Checking status&hellip;</span>
               </span>
             </div>
           </div>
@@ -379,18 +531,9 @@
                 <textarea id="chat-input" placeholder="Ask AI Companion about cases or select a suggestion above..." rows="1"></textarea>
                 
                 <div class="chat-controls">
-                  <!-- Model Selector Dropdown -->
-                  <div class="model-select-wrapper">
-                    <select id="chat-model-select" class="custom-select">
-                      <option value="hybrid">Hybrid Engine</option>
-                      <option value="standard">Standard GPT</option>
-                      <option value="deep">Deep Analysis</option>
-                    </select>
-                  </div>
-                  
                   <button class="btn btn-primary" id="btn-chat-generate">
                     <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    <span>Generate</span>
+                    <span>Ask</span>
                   </button>
                 </div>
               </div>
@@ -433,7 +576,7 @@
             <!-- ADRD Resources Column -->
             <div class="resource-column">
               <div class="column-title-bar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                 <h2>ADRD Resources</h2>
               </div>
               <div class="resource-list-container" id="adrd-resources-list">
@@ -478,8 +621,8 @@
             <!-- Peer Process Database Column -->
             <div class="resource-column">
               <div class="column-title-bar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <h2>ASI General Recommnded Practice</h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <h2>ASI General Recommended Practice</h2>
               </div>
               <div class="resource-list-container" id="practices-resources-list">
                 
@@ -721,10 +864,8 @@
               <label>Handoff Notes</label>
               <p id="edit-handoff-notes-text" style="font-size: 13.5px; color: var(--text-secondary); background-color: var(--bg-card-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; line-height: 1.6;"></p>
             </div>
-            <div class="form-group">
-              <label for="edit-intake-notes">Intake Information &amp; Clinical Notes</label>
-              <textarea id="edit-intake-notes" rows="10" placeholder="Clinical background, caregivers, age..."></textarea>
-            </div>
+            <div id="intake-summary-display"></div>
+            <button type="button" class="btn btn-primary btn-sm" id="btn-update-intake-info" style="margin-top: 16px;">Update Information</button>
           </div>
           
           <!-- Timeline Edit Pane -->
@@ -767,24 +908,48 @@
 
   <!-- MODAL 4: CLOSE CASE ARCHIVE OPTIONS -->
   <div class="modal-overlay" id="modal-close-options">
-    <div class="modal-box archive-modal" style="width: 520px;">
+    <div class="modal-box archive-modal" style="width: 540px;">
       <div class="modal-header">
-        <h3>Archive / Close Case</h3>
+        <h3>Close Case</h3>
         <button class="modal-close" id="btn-close-archive-modal">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 14px; color: var(--text-primary); line-height: 1.5; margin-bottom: 16px;">Would you like to save resource recommendations from this case to your library before closing?</p>
-        <div class="archive-recommendations" id="archive-recommendations-preview" style="background-color: var(--bg-card-alt); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 13px;">
-          <!-- Preview details -->
+        <p class="archive-intro-text">Review the auto-generated summary below — edit it if needed, then choose what to do with this case.</p>
+        <div id="archive-recommendations-preview" class="archive-preview-box">
+          <!-- Dynamically populated: description, Title input, Content textarea -->
+        </div>
+        <div class="archive-actions">
+          <button class="archive-action-btn archive-action-btn--neutral" id="btn-archive-only">
+            <span class="archive-action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            </span>
+            <span class="archive-action-content">
+              <span class="archive-action-label">Close Case Without Saving</span>
+              <span class="archive-action-desc">Remove from active cases — no summary saved to any library</span>
+            </span>
+          </button>
+          <button class="archive-action-btn" id="btn-archive-resources">
+            <span class="archive-action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            </span>
+            <span class="archive-action-content">
+              <span class="archive-action-label">Close &amp; Save to ADRD Resources</span>
+              <span class="archive-action-desc">Add this summary to the shared ADRD resource library for the team</span>
+            </span>
+          </button>
+          <button class="archive-action-btn" id="btn-archive-practices">
+            <span class="archive-action-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </span>
+            <span class="archive-action-content">
+              <span class="archive-action-label">Close &amp; Save to ASI Practices</span>
+              <span class="archive-action-desc">Archive as an ASI recommended practice for your organization</span>
+            </span>
+          </button>
         </div>
       </div>
-      <div class="modal-footer flex-column-mobile">
+      <div class="modal-footer">
         <button class="btn btn-secondary" id="btn-archive-cancel">Cancel</button>
-        <div class="footer-right flex-column-mobile" style="display: flex; gap: 8px;">
-          <button class="btn btn-secondary text-red" id="btn-archive-only">No, Just Close</button>
-          <button class="btn btn-secondary" id="btn-archive-practices">Add to Peer Process Database</button>
-          <button class="btn btn-primary" id="btn-archive-resources">Add to Resources</button>
-        </div>
       </div>
     </div>
   </div>

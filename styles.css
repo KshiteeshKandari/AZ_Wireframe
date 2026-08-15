@@ -934,7 +934,14 @@ a:hover {
   font-size: 18px;
 }
 
-.card-share-btn {
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.card-share-btn,
+.btn-ask-ai-from-card {
   background: transparent;
   border: none;
   color: var(--text-secondary);
@@ -943,10 +950,11 @@ a:hover {
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
   position: relative;
-  z-index: 5; /* click on share shouldn't trigger card maximization */
+  z-index: 5; /* click on share/ask-ai shouldn't trigger card maximization */
 }
 
-.card-share-btn:hover {
+.card-share-btn:hover,
+.btn-ask-ai-from-card:hover {
   color: var(--color-primary);
   background-color: var(--bg-hover);
 }
@@ -1329,7 +1337,9 @@ button.pill-badge.active {
 
 .intake-panel input[type="text"],
 .intake-panel input[type="tel"],
-.intake-panel textarea {
+.intake-panel textarea,
+.editor-pane input[type="text"],
+.editor-pane input[type="tel"] {
   width: 100%;
   background-color: var(--bg-card-alt);
   border: 1px solid var(--border-color);
@@ -1343,11 +1353,176 @@ button.pill-badge.active {
 
 .intake-panel input[type="text"]:focus,
 .intake-panel input[type="tel"]:focus,
-.intake-panel textarea:focus {
+.intake-panel textarea:focus,
+.editor-pane input[type="text"]:focus,
+.editor-pane input[type="tel"]:focus {
   background-color: #ffffff;
   border-color: var(--color-primary);
   outline: none;
   box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+/* Compact intake summary inside the maximized editor modal */
+.intake-summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.intake-summary-row {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.intake-summary-row:last-child {
+  border-bottom: none;
+}
+
+.intake-summary-row--wide {
+  grid-template-columns: 130px 1fr;
+  align-items: flex-start;
+}
+
+.intake-summary-row dt {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-top: 2px;
+}
+
+.intake-summary-row dd {
+  font-size: 13.5px;
+  color: var(--text-primary);
+  font-weight: 500;
+  margin: 0;
+}
+
+.intake-summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.intake-summary-chip {
+  background: var(--color-primary-tint, #edeaf4);
+  border: 1px solid var(--color-primary, #9C89B8);
+  color: var(--color-primary, #9C89B8);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* --- Archive / Close Case Modal --- */
+.archive-intro-text {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.archive-preview-box {
+  background-color: var(--bg-card-alt);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* Fix browser-default monospace font on dynamically-injected form elements */
+.archive-preview-box input[type="text"],
+.archive-preview-box textarea {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--text-primary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.archive-preview-box input[type="text"]:focus,
+.archive-preview-box textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.archive-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.archive-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.archive-action-btn:hover {
+  background-color: var(--color-primary-tint);
+  border-color: var(--color-primary);
+}
+
+.archive-action-btn--neutral:hover {
+  background-color: #fff5f5;
+  border-color: #fc8181;
+}
+
+.archive-action-icon {
+  flex-shrink: 0;
+  color: var(--color-primary);
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+}
+
+.archive-action-btn--neutral .archive-action-icon {
+  color: #e53e3e;
+}
+
+.archive-action-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.archive-action-label {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.archive-action-btn--neutral .archive-action-label {
+  color: #c53030;
+}
+
+.archive-action-desc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
 /* Bottom Actions */
@@ -1621,6 +1796,163 @@ button.pill-badge.active {
   text-align: right;
 }
 
+/* Chat answer formatting: manual page citations + bullet lists */
+.citation-page {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.message-bubble .chat-answer-list {
+  margin-left: 20px;
+  margin-bottom: 10px;
+  list-style: disc;
+}
+
+.message-bubble .chat-answer-list li {
+  margin-bottom: 4px;
+}
+
+/* Matched-resource card shown under a chat answer */
+.chat-resource-card {
+  background-color: var(--bg-card-alt);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin: 12px 0;
+  max-width: 400px;
+  box-shadow: var(--shadow-sm);
+}
+
+.chat-resource-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.chat-resource-header h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.verified-badge {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.chat-resource-card p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.chat-resource-card .tag-row {
+  margin-bottom: 12px;
+}
+
+.add-to-report-btn {
+  background-color: #ffffff;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.add-to-report-btn:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.add-to-report-btn:disabled {
+  cursor: default;
+  border-color: var(--color-success);
+  color: var(--color-success);
+  background-color: var(--color-success-bg);
+}
+
+.tooltip-icon {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 6px;
+  color: var(--color-warning);
+  cursor: help;
+}
+
+/* Chat Active Family Context Chip */
+.chat-context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light, rgba(90, 62, 143, 0.1));
+  border: 1px solid var(--color-primary);
+  border-radius: 999px;
+  padding: 4px 8px 4px 10px;
+}
+
+.chat-context-chip svg {
+  flex-shrink: 0;
+}
+
+.chat-context-chip #chat-context-chip-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  color: inherit;
+  padding: 0 0 0 2px;
+}
+
+/* Agent Live/Offline Status */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.pulse-dot.is-live {
+  background-color: var(--color-success);
+  box-shadow: 0 0 0 rgba(27, 94, 32, 0.5);
+  animation: pulse-live 2s infinite;
+}
+
+.pulse-dot.is-offline {
+  background-color: var(--color-danger);
+}
+
+@keyframes pulse-live {
+  0% { box-shadow: 0 0 0 0 rgba(27, 94, 32, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(27, 94, 32, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(27, 94, 32, 0); }
+}
+
 /* Typing Indicator Animation */
 .typing-indicator {
   display: inline-flex;
@@ -1703,10 +2035,6 @@ button.pill-badge.active {
   gap: 8px;
 }
 
-.model-select-wrapper {
-  position: relative;
-}
-
 .custom-select {
   background-color: #ffffff;
   border: 1px solid var(--border-color);
@@ -1726,17 +2054,6 @@ button.pill-badge.active {
 .custom-select:hover {
   border-color: var(--text-muted);
   color: var(--text-primary);
-}
-
-.model-select-wrapper::after {
-  content: '▼';
-  font-size: 8px;
-  color: var(--text-muted);
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
 }
 
 /* Interactive Chat Suggestions Grid Styling */

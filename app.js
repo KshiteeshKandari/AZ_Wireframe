@@ -5,11 +5,60 @@
   Close-Case Archiving redirects, and Resource Tag Filters.
 */
 
+// --- Chat backend config ---
+// Set this once the Cloudflare Worker is deployed (task 6). Left blank = chat falls back to mock responses.
+const CHAT_WORKER_URL = 'https://az-chat-worker.uicvare.workers.dev';
+
+// Canonical tag set for resources attached to a family's case card (Family Resources tab).
+// Capped at 10 so the dropdown stays scannable; doubles later as the practice-vs-resource
+// categorization key once the ASI-verified document is added.
+const FAMILY_RESOURCE_TAGS = ['Support', 'Caregiver', 'Clinical', 'Safety', 'Behavioral', 'Engagement', 'Intake', 'Coordination', 'Guides', 'Devices'];
+
+// Fallback intake field values for cases that predate structured intakeFields (e.g. hand-authored
+// seed cases that only ever had a freeform intakeNotes narrative).
+const DEFAULT_INTAKE_FIELDS = {
+  primaryContact: '', zipCode: '', mobility: '',
+  patientAge: '65 - 74', patientStage: 'Middle-Stage (Moderate)',
+  patientLanguage: 'English', livingSituation: 'All adults',
+  caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
+  focusAreas: [], aiGoal: 'Find local resources', notes: ''
+};
+
+function buildResourceTagOptionsHTML(selectedTag) {
+  const options = ['<option value="">No tag</option>'].concat(
+    FAMILY_RESOURCE_TAGS.map(t => `<option value="${t}" ${t === selectedTag ? 'selected' : ''}>${t}</option>`)
+  );
+  return options.join('');
+}
+
+// Curated resources (RESOURCES_DATA below) predate the 10-tag taxonomy and use their own
+// looser tags - map onto the canonical list where there's a real match, otherwise leave
+// untagged rather than forcing a wrong bucket.
+function mapToCanonicalResourceTag(tags) {
+  if (!tags) return '';
+  const match = tags.find(t => FAMILY_RESOURCE_TAGS.some(ft => ft.toLowerCase() === t.toLowerCase()));
+  return match ? FAMILY_RESOURCE_TAGS.find(ft => ft.toLowerCase() === match.toLowerCase()) : '';
+}
+
+// Mirrors the resource cards on the Resources page (index.html) so chat answers can
+// surface a matching one. "verified" = listed under the ASI General Recommended Practice
+// column, i.e. ASI-vetted rather than general ADRD reading.
+const RESOURCES_DATA = [
+  { title: 'Caregiver Support Directory', tags: ['support', 'caregiver'], desc: 'Comprehensive catalog of online and local support meetings for family members dealing with primary care fatigue.', verified: false },
+  { title: 'Early ADRD Signs & Guidelines', tags: ['clinical', 'guides'], desc: "Clinical instructions on tracking early-stage Alzheimer's indicators, memory lapses, and communication guidelines.", verified: false },
+  { title: 'Safety & Wandering Prevention', tags: ['home safety', 'devices'], desc: 'Practical checklist for safety-proofing homes, installing tracking wristbands, and motion sensors.', verified: false },
+  { title: 'Cognitive Stimulation Activities', tags: ['therapy', 'engagement'], desc: "Activities, puzzle layouts, and visual stimulation guides designed for moderate-stage Alzheimer's patients.", verified: false },
+  { title: 'Approved Intake Protocols', tags: ['standard', 'intake'], desc: 'Official organization instructions on documenting initial clinical intake interviews, consent forms, and evaluations.', verified: true },
+  { title: 'Shared Decision Making Guide', tags: ['consult', 'coordination'], desc: 'A step-by-step consensus guide to navigating multi-caregiver disputes and aligns clinical and family strategies.', verified: true },
+  { title: 'Sundowning Mitigation Standards', tags: ['behavioral', 'approved'], desc: 'Best practices for managing late-afternoon agitation including calming routine structures and sensory light schedules.', verified: true }
+];
+
 // --- Application State ---
 const state = {
   activePage: 'my-cases',
   editingCaseId: null, // Tracks case ID currently being edited in maximized editor
   activeEditTab: 'intake',
+  activeChatCaseId: null, // Tracks which family case (if any) the AI Chat is currently scoped to
   
   cases: [
     {
@@ -22,15 +71,24 @@ const state = {
       patientName: 'Maria Rivera',
       patientAge: 74,
       intakeNotes: `Maria Rivera (Age 74) has early-stage ADRD diagnosed Q3 2025. Maria lives with her daughter, Sophia, who acts as primary caregiver. Sophia reports gradual increase in memory loss, word-finding difficulty, and mild anxiety in unfamiliar surroundings. Social support is limited to bi-weekly visits from a cousin. Sophia requests advice on daily structuring, safety measures at home (wandering mitigation), and caregiver burnout prevention groups.`,
+      intakeFields: {
+        primaryContact: 'Sophia Rivera', zipCode: '', mobility: 'No mobility issues',
+        patientAge: '65 - 74', patientStage: 'Early-Stage (Mild)',
+        patientLanguage: 'English', livingSituation: 'All adults',
+        caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
+        focusAreas: ['Caregiver Guilt / Self-Care', 'Safety Concerns (Wandering, Falls)'],
+        aiGoal: 'Find local resources',
+        notes: 'Social support is limited to bi-weekly visits from a cousin.'
+      },
       timeline: [
         { date: 'Oct 12, 2025', label: 'Initial Diagnosis (ADRD)' },
         { date: 'Jan 08, 2026', label: 'Intake Assessment Registered' },
         { date: 'Jun 18, 2026', label: 'Care Plan Review (Active)' }
       ],
       resources: [
-        { name: 'ADRD Communication Guide (PDF)', url: '#' },
-        { name: 'Home Safety Checklist for Dementia', url: '#' },
-        { name: 'Local Support Group Directory', url: '#' }
+        { name: 'ADRD Communication Guide (PDF)', url: '#', tag: 'Guides' },
+        { name: 'Home Safety Checklist for Dementia', url: '#', tag: 'Safety' },
+        { name: 'Local Support Group Directory', url: '#', tag: 'Support' }
       ],
       aiSummary: 'Maria Rivera presents with progressive cognitive decline consistent with early ADRD, supported by primary caregiver Sophia. Recommended actions include establishing a daily structured routine, installing smart safety monitors, and referring Sophia to the local ADRD Caregiver Support Network.',
       reportStatus: 'Generated',
@@ -45,20 +103,6 @@ const state = {
         <p><strong>3. Enroll Maria in structured daytime support.</strong> The adult day-enrichment program (2 days/week) gives Maria social engagement while giving you, Sophia, room to rest — burnout indicators are currently high.</p>
         <p><strong>4. Add home safety measures.</strong> Wandering risk is low-moderate right now, but door sensors and a consistent daily routine will help keep it that way.</p>
         <p><strong>5. Know that it may take more than one visit.</strong> Getting a proper diagnosis and care plan sometimes takes a few appointments. Keep going, and I'm here to help you through it.</p>
-        <h5>Resources</h5>
-        <div class="report-resource-group">
-          <span class="report-tag healthcare">Healthcare</span>
-          <ul class="report-resource-list">
-            <li><strong>ADRD Communication Guide (PDF):</strong> tips for talking with Maria as memory changes progress (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-            <li><strong>Local Support Group Directory:</strong> in-person and virtual caregiver support groups near you (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-          </ul>
-        </div>
-        <div class="report-resource-group">
-          <span class="report-tag logistics">Logistics</span>
-          <ul class="report-resource-list">
-            <li><strong>Home Safety Checklist for Dementia:</strong> practical steps to reduce wandering and fall risk at home (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-          </ul>
-        </div>
         <p><strong>Next Check-up:</strong> Care Plan Review scheduled for Jun 18, 2026. We'll follow up shortly after to see how the new routine is going.</p>
       `,
       reportContentEs: `
@@ -71,20 +115,6 @@ const state = {
         <p><strong>3. Inscribe a Maria en apoyo estructurado durante el día.</strong> El programa de enriquecimiento diurno para adultos (2 días a la semana) le da a Maria interacción social mientras te da a ti, Sophia, tiempo para descansar — los indicadores de agotamiento están altos actualmente.</p>
         <p><strong>4. Agrega medidas de seguridad en el hogar.</strong> El riesgo de deambular es bajo-moderado por ahora, pero los sensores de puerta y una rutina diaria constante ayudarán a mantenerlo así.</p>
         <p><strong>5. Ten en cuenta que puede tomar más de una visita.</strong> Obtener un diagnóstico y un plan de cuidado adecuado a veces toma varias citas. Sigue adelante, y estoy aquí para ayudarte en el proceso.</p>
-        <h5>Recursos</h5>
-        <div class="report-resource-group">
-          <span class="report-tag healthcare">Salud</span>
-          <ul class="report-resource-list">
-            <li><strong>Guía de Comunicación sobre ADRD (PDF):</strong> consejos para hablar con Maria a medida que avanzan los cambios de memoria (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-            <li><strong>Directorio de Grupos de Apoyo Locales:</strong> grupos de apoyo presenciales y virtuales cerca de ti (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-          </ul>
-        </div>
-        <div class="report-resource-group">
-          <span class="report-tag logistics">Logística</span>
-          <ul class="report-resource-list">
-            <li><strong>Lista de Seguridad en el Hogar para Demencia:</strong> pasos prácticos para reducir el riesgo de deambular y caídas en casa (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-          </ul>
-        </div>
         <p><strong>Próxima Revisión:</strong> Revisión del plan de cuidado programada para el 18 de junio de 2026. Nos comunicaremos contigo poco después para ver cómo va la nueva rutina.</p>
       `,
       shared: false
@@ -99,15 +129,24 @@ const state = {
       patientName: 'Viktor Oklaz',
       patientAge: 81,
       intakeNotes: `Viktor Oklaz (Age 81) moderate stage Alzheimer's. Managed jointly by his son, Alex Oklaz, and a visiting nurse service twice a week. Viktor exhibits moderate disorientation regarding time and place, as well as periodic agitation in late afternoons ("sundowning"). Alex requested professional respite care resources and behavioral strategies to calm Viktor during Sundowning episodes.`,
+      intakeFields: {
+        primaryContact: 'Alex Oklaz', zipCode: '', mobility: 'No mobility issues',
+        patientAge: '75 - 84', patientStage: 'Middle-Stage (Moderate)',
+        patientLanguage: 'English', livingSituation: 'All adults',
+        caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'High / Burnout Risk',
+        focusAreas: ['Safety Concerns (Wandering, Falls)'],
+        aiGoal: 'Find local resources',
+        notes: 'Managed jointly with a visiting nurse service twice a week.'
+      },
       timeline: [
         { date: 'Feb 14, 2024', label: 'Initial Consultation' },
         { date: 'Dec 19, 2025', label: 'Shared Case Registered in Org' },
         { date: 'Jun 05, 2026', label: 'Home Nurse Schedule Updated' }
       ],
       resources: [
-        { name: 'Sundowning Management Protocols', url: '#' },
-        { name: 'Respite Care Subsidy Options', url: '#' },
-        { name: 'GPS Tracking Wristband Providers', url: '#' }
+        { name: 'Sundowning Management Protocols', url: '#', tag: 'Behavioral' },
+        { name: 'Respite Care Subsidy Options', url: '#', tag: 'Support' },
+        { name: 'GPS Tracking Wristband Providers', url: '#', tag: 'Devices' }
       ],
       aiSummary: 'Viktor Oklaz is an 81-year-old patient experiencing moderate sundowning-related agitation and wandering behavior. Recommendation includes immediate exploration of wearable GPS trackers, implementation of sensory light therapies in late afternoons, and facilitating temporary respite care relief for Alex Oklaz.',
       reportStatus: 'Not Generated',
@@ -122,20 +161,6 @@ const state = {
         <p><strong>3. Address the wandering risk now.</strong> Viktor has attempted to exit unassisted — this is worth flagging to his care team immediately and pairing with door sensors or a GPS wristband.</p>
         <p><strong>4. Ask about respite care.</strong> You're managing a lot solo between visits. A few hours of respite care a week can make a real difference in how sustainable this is for you.</p>
         <p><strong>5. Loop in the visiting nurse on all of this.</strong> Sharing your notes with the twice-weekly nurse visits keeps everyone working from the same picture.</p>
-        <h5>Resources</h5>
-        <div class="report-resource-group">
-          <span class="report-tag healthcare">Healthcare</span>
-          <ul class="report-resource-list">
-            <li><strong>Sundowning Management Protocols:</strong> clinical guidance on reducing late-day agitation (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-          </ul>
-        </div>
-        <div class="report-resource-group">
-          <span class="report-tag logistics">Logistics</span>
-          <ul class="report-resource-list">
-            <li><strong>Respite Care Subsidy Options:</strong> county programs that help cover short-term relief care (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-            <li><strong>GPS Tracking Wristband Providers:</strong> wearable trackers for wandering safety (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-          </ul>
-        </div>
         <p><strong>Next Check-up:</strong> Home Nurse Schedule review on Jun 05, 2026. We'll follow up after that visit to see how the sundowning window is trending.</p>
       `,
       reportContentEs: `
@@ -148,20 +173,6 @@ const state = {
         <p><strong>3. Atiende el riesgo de deambular ahora.</strong> Viktor ha intentado salir sin ayuda — esto vale la pena reportarlo de inmediato a su equipo de cuidado y combinarlo con sensores de puerta o una pulsera GPS.</p>
         <p><strong>4. Pregunta sobre cuidado de relevo.</strong> Estás manejando mucho tú solo entre visitas. Unas horas de cuidado de relevo a la semana pueden hacer una gran diferencia en qué tan sostenible es esto para ti.</p>
         <p><strong>5. Comparte todo esto con la enfermera visitante.</strong> Compartir tus notas con las visitas de enfermería dos veces por semana mantiene a todos con la misma información.</p>
-        <h5>Recursos</h5>
-        <div class="report-resource-group">
-          <span class="report-tag healthcare">Salud</span>
-          <ul class="report-resource-list">
-            <li><strong>Protocolos de Manejo del Sundowning:</strong> guía clínica para reducir la agitación al final del día (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-          </ul>
-        </div>
-        <div class="report-resource-group">
-          <span class="report-tag logistics">Logística</span>
-          <ul class="report-resource-list">
-            <li><strong>Opciones de Subsidio para Cuidado de Relevo:</strong> programas del condado que ayudan a cubrir el cuidado temporal (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-            <li><strong>Proveedores de Pulseras de Rastreo GPS:</strong> dispositivos portátiles para seguridad ante deambulación (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-          </ul>
-        </div>
         <p><strong>Próxima Revisión:</strong> Revisión del horario de enfermería en el hogar el 5 de junio de 2026. Daremos seguimiento después de esa visita para ver cómo evoluciona la ventana de sundowning.</p>
       `,
       shared: true
@@ -169,24 +180,33 @@ const state = {
     {
       id: 'pierre-family',
       name: 'Pierre Family',
-      details: 'Pending Intake &bull; Primary: Henri Pierre',
-      phase: 'Pending Intake',
+      details: 'Awaiting Physical Exam &bull; Primary: Henri Pierre',
+      phase: 'Awaiting Physical Exam',
       blurb: 'Vascular screening review. Niece Marcelle needs medication tracking and nutrition support tools.',
       cardStatus: 'Waiting Followup',
       patientName: 'Henri Pierre',
       patientAge: 79,
       intakeNotes: `Henri Pierre (Age 79) vascular screening review. Niece Marcelle Pierre daily checks. Focus is on maintaining cognitive engagement, nutrition management, and tracking medical adherence. Intake pending full physical exam. Initial screenings show minor short-term recall impairment. Marcelle is requesting support tools to organize medication dosages and ensure Henri receives healthy daily meals.`,
+      intakeFields: {
+        primaryContact: 'Marcelle Pierre', zipCode: '', mobility: 'No mobility issues',
+        patientAge: '75 - 84', patientStage: 'Suspected / Undiagnosed',
+        patientLanguage: 'English', livingSituation: 'Patient lives alone',
+        caregiverRel: 'Other Relative', caregiverAge: 'Under 65', caregiverStress: 'Low / Managing Well',
+        focusAreas: ['Medical Advocacy / Doctor Communication'],
+        aiGoal: 'Find local resources',
+        notes: 'Intake pending full physical exam; initial screenings show minor short-term recall impairment.'
+      },
       timeline: [
         { date: 'May 20, 2026', label: 'Vascular Screening Review' },
         { date: 'Jun 25, 2026', label: 'Scheduled Physical Exam (Pending)' }
       ],
       resources: [
-        { name: 'Vascular Dementia Lifestyle Guidelines', url: '#' },
-        { name: 'Medication Reminder Apps & Dispensers', url: '#' },
-        { name: 'Meal Delivery Services for Seniors', url: '#' }
+        { name: 'Vascular Dementia Lifestyle Guidelines', url: '#', tag: 'Clinical' },
+        { name: 'Medication Reminder Apps & Dispensers', url: '#', tag: 'Devices' },
+        { name: 'Meal Delivery Services for Seniors', url: '#', tag: 'Coordination' }
       ],
       aiSummary: 'Henri Pierre is in the initial phases of vascular dementia care. Main support requirements center on dietary adherence and medication scheduling. Recommended strategy includes deploying an automated pill dispenser, enrolling in senior meal programs, and introducing routine memory exercises.',
-      reportStatus: 'Pending Intake',
+      reportStatus: 'Not Generated',
       reportPeriod: 'Q2 2024',
       reportContent: `
         <h4>Pierre Family Report</h4>
@@ -198,20 +218,6 @@ const state = {
         <p><strong>3. Support consistent nutrition.</strong> Vascular health benefits a lot from regular, balanced meals — a meal delivery service can help if daily cooking is hard to keep up with.</p>
         <p><strong>4. Ask about a pill dispenser.</strong> An automated dispenser can reduce missed or doubled doses between your daily check-ins.</p>
         <p><strong>5. We'll follow up after the physical exam.</strong> Once results are in, we'll update this care plan together.</p>
-        <h5>Resources</h5>
-        <div class="report-resource-group">
-          <span class="report-tag healthcare">Healthcare</span>
-          <ul class="report-resource-list">
-            <li><strong>Vascular Dementia Lifestyle Guidelines:</strong> diet and activity guidance for vascular cognitive health (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-          </ul>
-        </div>
-        <div class="report-resource-group">
-          <span class="report-tag logistics">Logistics</span>
-          <ul class="report-resource-list">
-            <li><strong>Medication Reminder Apps & Dispensers:</strong> tools to help track daily doses (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-            <li><strong>Meal Delivery Services for Seniors:</strong> options for consistent, healthy daily meals (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-          </ul>
-        </div>
         <p><strong>Next Check-up:</strong> Physical exam scheduled for Jun 25, 2026. We'll follow up right after to update this plan with the results.</p>
       `,
       reportContentEs: `
@@ -224,20 +230,6 @@ const state = {
         <p><strong>3. Apoya una nutrición constante.</strong> La salud vascular se beneficia mucho de comidas regulares y balanceadas — un servicio de entrega de comidas puede ayudar si cocinar a diario es difícil de mantener.</p>
         <p><strong>4. Pregunta sobre un dispensador de pastillas.</strong> Un dispensador automático puede reducir las dosis olvidadas o duplicadas entre tus revisiones diarias.</p>
         <p><strong>5. Daremos seguimiento después del examen físico.</strong> Una vez que tengamos los resultados, actualizaremos este plan de cuidado juntos.</p>
-        <h5>Recursos</h5>
-        <div class="report-resource-group">
-          <span class="report-tag healthcare">Salud</span>
-          <ul class="report-resource-list">
-            <li><strong>Guía de Estilo de Vida para Demencia Vascular:</strong> orientación de dieta y actividad para la salud cognitiva vascular (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-          </ul>
-        </div>
-        <div class="report-resource-group">
-          <span class="report-tag logistics">Logística</span>
-          <ul class="report-resource-list">
-            <li><strong>Apps y Dispensadores para Recordatorio de Medicamentos:</strong> herramientas para seguir las dosis diarias (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-            <li><strong>Servicios de Entrega de Comidas para Personas Mayores:</strong> opciones para comidas diarias consistentes y saludables (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-          </ul>
-        </div>
         <p><strong>Próxima Revisión:</strong> Examen físico programado para el 25 de junio de 2026. Daremos seguimiento justo después para actualizar este plan con los resultados.</p>
       `,
       shared: false
@@ -254,6 +246,30 @@ const state = {
     { id: 'noti-shared-case', unread: true }
   ]
 };
+
+// --- Per-Tab Session Persistence ---
+// Demo attendees click through simultaneously with no login, so state can't live on a shared
+// server - but an accidental refresh shouldn't wipe someone's in-progress edits either.
+// sessionStorage is the fit: scoped to this one tab, gone the moment the tab closes, never
+// synced or shared with anyone else's tab.
+const SESSION_STORAGE_KEY = 'azCompanionState_v1';
+
+function persistState() {
+  try {
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(state));
+  } catch (err) {
+    // Storage full or unavailable (e.g. private browsing) - session just won't persist.
+  }
+}
+
+function restoreState() {
+  try {
+    const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (saved) Object.assign(state, JSON.parse(saved));
+  } catch (err) {
+    // Corrupt snapshot - ignore and fall back to the seeded defaults.
+  }
+}
 
 // --- Chat suggestions child questions configurations ---
 const suggestionsData = {
@@ -318,9 +334,13 @@ const DOM = {
   chatMessagesBox: document.getElementById('chat-messages-box'),
   chatInput: document.getElementById('chat-input'),
   btnChatGenerate: document.getElementById('btn-chat-generate'),
-  modelSelect: document.getElementById('chat-model-select'),
+  chatStatusDot: document.getElementById('chat-status-dot'),
+  chatStatusText: document.getElementById('chat-status-text'),
   btnNewChat: document.getElementById('btn-new-chat'),
   chatSuggestionsBox: document.getElementById('chat-suggestions-box'),
+  chatContextChip: document.getElementById('chat-context-chip'),
+  chatContextChipLabel: document.getElementById('chat-context-chip-label'),
+  chatContextChipClear: document.getElementById('chat-context-chip-clear'),
   
   // Resources DOM
   resourceSearch: document.getElementById('resource-search'),
@@ -353,9 +373,19 @@ const DOM = {
   // Custom Modals (Maximized Editor & Close Archive Options)
   modalCardEditor: document.getElementById('modal-card-editor'),
   editorModalTitle: document.getElementById('editor-modal-title'),
-  editIntakeNotes: document.getElementById('edit-intake-notes'),
+  intakeSummaryDisplay: document.getElementById('intake-summary-display'),
+  btnUpdateIntakeInfo: document.getElementById('btn-update-intake-info'),
   editHandoffNotesGroup: document.getElementById('edit-handoff-notes-group'),
   editHandoffNotesText: document.getElementById('edit-handoff-notes-text'),
+  // Edit Intake page
+  editIntakeForm: document.getElementById('edit-intake-form'),
+  editIntakeFamilyNameDisplay: document.getElementById('edit-intake-family-name-display'),
+  editIntakePrimaryContact: document.getElementById('edit-intake-primary-contact'),
+  eiZipCode: document.getElementById('ei-zip-code'),
+  eiMobility: document.getElementById('ei-mobility'),
+  eiNotes: document.getElementById('ei-notes'),
+  btnEditIntakeBack: document.getElementById('btn-edit-intake-back'),
+  btnCancelEditIntake: document.getElementById('btn-cancel-edit-intake'),
   editTimelineSteps: document.getElementById('edit-timeline-steps'),
   btnAddTimelineStep: document.getElementById('btn-add-timeline-step'),
   editResourcesItems: document.getElementById('edit-resources-items'),
@@ -388,6 +418,7 @@ const DOM = {
 
 // --- App Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
+  restoreState();
   setupNavigation();
   setupCaseCardTabs();
   setupReportViewer();
@@ -397,12 +428,15 @@ document.addEventListener('DOMContentLoaded', () => {
   setupGlobalSearch();
   setupNotifications();
   setupMaximizedEditor();
+  setupEditIntakePage();
   setupCloseCaseOptions();
   setupDashboardStatClicks();
 
   // Initial renders
   renderAll();
   renderSuggestions();
+  switchPage(state.activePage); // reflects a restored session's page, not just the HTML default
+  checkAgentStatus();
 });
 
 // --- Renders Master Routine ---
@@ -413,6 +447,7 @@ function renderAll() {
   renderReportsList();
   renderChatHistory();
   renderNotificationBadge();
+  persistState();
 }
 
 // --- Navigation & Routing ---
@@ -461,9 +496,12 @@ function switchPage(pageId) {
   }
 }
 
-// Helper functions to get selected values from single and multi-select pill groups
-function getSelectedPillValue(fieldId) {
-  const group = document.querySelector(`.pill-group[data-field="${fieldId}"]`);
+// Helper functions to get selected values from single and multi-select pill groups.
+// `root` scopes the lookup - the create-form and the maximized editor's intake pane
+// both use the same data-field names, so an unscoped document-wide query would always
+// hit whichever copy comes first in the DOM regardless of which form is being read.
+function getSelectedPillValue(fieldId, root = document) {
+  const group = root.querySelector(`.pill-group[data-field="${fieldId}"]`);
   if (!group) return '';
   const activeBtn = group.querySelector('.pill-btn.active, .pill-badge.active');
   if (activeBtn) return activeBtn.dataset.value || activeBtn.textContent.trim();
@@ -472,11 +510,62 @@ function getSelectedPillValue(fieldId) {
   return '';
 }
 
-function getSelectedMultiPillValues(fieldId) {
-  const group = document.querySelector(`.pill-group[data-field="${fieldId}"]`);
+function getSelectedMultiPillValues(fieldId, root = document) {
+  const group = root.querySelector(`.pill-group[data-field="${fieldId}"]`);
   if (!group) return [];
   const activeBtns = group.querySelectorAll('.pill-badge.active, .pill-btn.active');
   return Array.from(activeBtns).map(btn => btn.dataset.value || btn.textContent.trim());
+}
+
+// Counterpart setters, used to pre-populate a pill-group from stored data (e.g. when
+// opening the maximized editor's Intake tab for an existing case).
+function setActivePillValue(fieldId, value, root = document) {
+  const group = root.querySelector(`.pill-group[data-field="${fieldId}"]`);
+  if (!group) return;
+  const buttons = group.querySelectorAll('.pill-btn, .pill-badge');
+  buttons.forEach(b => b.classList.remove('active'));
+  const target = Array.from(buttons).find(b => (b.dataset.value || b.textContent.trim()) === value);
+  if (target) {
+    target.classList.add('active');
+  } else {
+    const input = group.querySelector('.pill-input');
+    if (input) input.value = value || '';
+  }
+}
+
+function setActiveMultiPillValues(fieldId, values, root = document) {
+  const group = root.querySelector(`.pill-group[data-field="${fieldId}"]`);
+  if (!group) return;
+  const list = values || [];
+  group.querySelectorAll('.pill-btn, .pill-badge').forEach(b => {
+    const val = b.dataset.value || b.textContent.trim();
+    b.classList.toggle('active', list.includes(val));
+  });
+}
+
+// Renders a structured intakeFields object into the same narrative text format used
+// by isIntakeIncomplete() and the case card's Intake Info display.
+function buildIntakeNotesText(f) {
+  return `
+Primary Contact: ${f.primaryContact || 'N/A'}
+Zip Code: ${f.zipCode || 'N/A'}
+
+Patient Profile:
+- Age Range: ${f.patientAge}
+- Dementia Stage: ${f.patientStage}
+- Language: ${f.patientLanguage}
+- Living Situation: ${f.livingSituation}
+- Mobility: ${f.mobility || 'No mobility issues'}
+
+Caregiver Profile:
+- Relationship: ${f.caregiverRel}
+- Age Range: ${f.caregiverAge}
+- Observed Stress Level: ${f.caregiverStress}
+
+Focus Areas: ${f.focusAreas && f.focusAreas.length > 0 ? f.focusAreas.join(', ') : 'None selected'}
+AI Goal: ${f.aiGoal}
+${f.notes ? '\nNotes & Dynamics: ' + f.notes : ''}
+  `.trim();
 }
 
 function setupIntakePillInteractions() {
@@ -504,9 +593,9 @@ function setupIntakePillInteractions() {
     }
   });
 
-  // Handle typing in custom language "Other (specify)..." input
-  const langOtherInput = document.getElementById('intake-language-other');
-  if (langOtherInput) {
+  // Handle typing in custom language "Other (specify)..." input - both the create
+  // form and the maximized editor's intake pane have their own copy of this input.
+  document.querySelectorAll('.pill-input').forEach(langOtherInput => {
     langOtherInput.addEventListener('input', () => {
       if (langOtherInput.value.trim().length > 0) {
         const group = langOtherInput.closest('.pill-group');
@@ -515,7 +604,7 @@ function setupIntakePillInteractions() {
         }
       }
     });
-  }
+  });
 }
 
 // --- Case Card Views & Subviews ---
@@ -542,19 +631,19 @@ function setupCaseCardTabs() {
     const emergencyPhone = DOM.intakeEmergencyPhone ? DOM.intakeEmergencyPhone.value.trim() : '';
     const notes = DOM.intakeNotesInput ? DOM.intakeNotesInput.value.trim() : '';
 
-    const patientAge = getSelectedPillValue('patient-age') || '65 - 74';
-    const patientStage = getSelectedPillValue('patient-stage') || 'Middle-Stage (Moderate)';
-    const patientLanguage = getSelectedPillValue('patient-language') || 'English';
-    const livingSituation = getSelectedPillValue('living-situation') || 'All adults';
+    const patientAge = getSelectedPillValue('patient-age', DOM.newCaseForm) || '65 - 74';
+    const patientStage = getSelectedPillValue('patient-stage', DOM.newCaseForm) || 'Middle-Stage (Moderate)';
+    const patientLanguage = getSelectedPillValue('patient-language', DOM.newCaseForm) || 'English';
+    const livingSituation = getSelectedPillValue('living-situation', DOM.newCaseForm) || 'All adults';
     const patientMobility = DOM.intakeMobilityInput && DOM.intakeMobilityInput.value.trim() ? DOM.intakeMobilityInput.value.trim() : 'No mobility issues';
-    
-    const caregiverRel = getSelectedPillValue('caregiver-rel') || 'Adult Child';
-    const caregiverAge = getSelectedPillValue('caregiver-age') || 'Under 65';
-    const caregiverStress = getSelectedPillValue('caregiver-stress') || 'High / Burnout Risk';
-    const bestCallTime = getSelectedPillValue('best-call-time') || 'Morning (8am-12pm)';
-    
-    const focusAreas = getSelectedMultiPillValues('focus-areas');
-    const aiGoal = getSelectedPillValue('ai-assist-goal') || 'Find local resources';
+
+    const caregiverRel = getSelectedPillValue('caregiver-rel', DOM.newCaseForm) || 'Adult Child';
+    const caregiverAge = getSelectedPillValue('caregiver-age', DOM.newCaseForm) || 'Under 65';
+    const caregiverStress = getSelectedPillValue('caregiver-stress', DOM.newCaseForm) || 'High / Burnout Risk';
+    const bestCallTime = getSelectedPillValue('best-call-time', DOM.newCaseForm) || 'Morning (8am-12pm)';
+
+    const focusAreas = getSelectedMultiPillValues('focus-areas', DOM.newCaseForm);
+    const aiGoal = getSelectedPillValue('ai-assist-goal', DOM.newCaseForm) || 'Find local resources';
     
     if (familyName && primaryContact) {
       const caseTitle = familyName.toLowerCase().includes('family') ? familyName : `${familyName} Family`;
@@ -594,12 +683,18 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
         blurb: `${patientStage} ADRD case for ${familyName.replace(/\s+Family/i, '')}. Primary caregiver relationship: ${caregiverRel}.`,
         cardStatus: 'Waiting on Referral',
         intakeNotes: fullIntakeText,
+        intakeFields: {
+          primaryContact, zipCode, mobility: patientMobility,
+          patientAge, patientStage, patientLanguage, livingSituation,
+          caregiverRel, caregiverAge, caregiverStress,
+          focusAreas, aiGoal, notes
+        },
         timeline: [
           { date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }), label: 'Intake Form Submitted' }
         ],
         resources: [
-          { name: `${patientStage} Care Protocols`, url: '#' },
-          { name: `Local Resources for ${zipCode || 'Region'}`, url: '#' }
+          { name: `${patientStage} Care Protocols`, url: '#', tag: 'Clinical' },
+          { name: `Local Resources for ${zipCode || 'Region'}`, url: '#', tag: 'Coordination' }
         ],
         aiSummary: `Intake registered for ${caseTitle}. Stage: ${patientStage}. Primary caregiver (${caregiverRel}) reports stress level: ${caregiverStress}. Focus areas identified: ${focusAreas.join(', ') || 'General ADRD care'}. AI goal: ${aiGoal}.`,
         reportStatus: 'Not Generated',
@@ -611,19 +706,6 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
           <p>Thanks for completing the intake for ${familyName.replace(/\s+Family/i, '')}. Here is a starting summary based on what you shared, along with resources to help going forward.</p>
           <h5>Intake Summary</h5>
           <p>${fullIntakeText.replace(/\n/g, '<br>')}</p>
-          <h5>Resources</h5>
-          <div class="report-resource-group">
-            <span class="report-tag healthcare">Healthcare</span>
-            <ul class="report-resource-list">
-              <li><strong>${patientStage} Care Protocols:</strong> clinical guidance matched to the current care stage (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-            </ul>
-          </div>
-          <div class="report-resource-group">
-            <span class="report-tag logistics">Logistics</span>
-            <ul class="report-resource-list">
-              <li><strong>Local Resources for ${zipCode || 'Region'}:</strong> nearby support services and programs (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-            </ul>
-          </div>
           <p><strong>Next Check-up:</strong> Follow-up to be scheduled based on the initial intake above.</p>
         `,
         reportContentEs: `
@@ -633,19 +715,6 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
           <p>Gracias por completar la admisión para ${familyName.replace(/\s+Family/i, '')}. Aquí tienes un resumen inicial basado en lo que compartiste, junto con recursos para ayudarte a seguir adelante.</p>
           <h5>Resumen de Admisión</h5>
           <p>${fullIntakeText.replace(/\n/g, '<br>')}</p>
-          <h5>Recursos</h5>
-          <div class="report-resource-group">
-            <span class="report-tag healthcare">Salud</span>
-            <ul class="report-resource-list">
-              <li><strong>Protocolos de Cuidado para ${patientStage}:</strong> orientación clínica según la etapa actual de cuidado (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-            </ul>
-          </div>
-          <div class="report-resource-group">
-            <span class="report-tag logistics">Logística</span>
-            <ul class="report-resource-list">
-              <li><strong>Recursos Locales para ${zipCode || 'la Región'}:</strong> servicios y programas de apoyo cercanos (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-            </ul>
-          </div>
           <p><strong>Próxima Revisión:</strong> Se programará un seguimiento según la admisión inicial descrita arriba.</p>
         `,
         shared: false
@@ -699,6 +768,7 @@ function renderStats() {
   DOM.statContinuingServicesCount.textContent = state.cases.filter(c => c.cardStatus === 'Continuing Services').length;
   DOM.statWaitingFollowupCount.textContent = state.cases.filter(c => c.cardStatus === 'Waiting Followup').length;
   DOM.familiesBadge.textContent = `${state.cases.length} ${state.cases.length === 1 ? 'Family' : 'Families'}`;
+  persistState();
 }
 
 function renderDashboard() {
@@ -736,15 +806,8 @@ function renderDashboard() {
       const id = btn.getAttribute('data-id');
       switchPage('case-cards');
       showCaseCardsSubview('list');
-      
-      setTimeout(() => {
-        const element = document.getElementById(`card-${id}`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-          element.classList.add('glowing-highlight');
-          setTimeout(() => element.classList.remove('glowing-highlight'), 1500);
-        }
-      }, 200);
+      clearCaseCardFilter();
+      openMaximizedEditor(id);
     });
   });
 }
@@ -774,9 +837,14 @@ function renderCaseCards() {
           <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
           <h3>${c.name}</h3>
         </div>
-        <button class="card-share-btn" data-family="${c.name}" title="Share Case Card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-        </button>
+        <div class="card-header-actions">
+          <button class="btn-ask-ai-from-card" data-case-id="${c.id}" title="Ask AI Companion about ${c.name}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </button>
+          <button class="card-share-btn" data-family="${c.name}" title="Share Case Card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          </button>
+        </div>
       </div>
 
       <p class="card-phase">Phase: ${c.phase}</p>
@@ -823,19 +891,33 @@ function renderCaseCards() {
     });
   });
 
-  // Stop propagation for Ask AI buttons
+  // Ask AI buttons: scope the chat to this family so "Add to Family Report" knows
+  // which case.resources to write into, then jump to the chat page
   document.querySelectorAll('.btn-ask-ai-from-card').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const familyName = btn.getAttribute('data-family');
+      const caseId = btn.getAttribute('data-case-id');
+      const caseItem = state.cases.find(c => c.id === caseId);
+      state.activeChatCaseId = caseId;
+      renderChatContextChip();
+      persistState();
       switchPage('ai-chat');
-      DOM.chatInput.value = `Can you provide a detailed care recommendation checklist for the ${familyName}?`;
-      DOM.chatInput.focus();
+      if (caseItem) {
+        DOM.chatInput.value = `Can you provide a detailed care recommendation checklist for the ${caseItem.name}?`;
+        DOM.chatInput.focus();
+      }
     });
   });
 }
 
 // --- Render Reports List ---
+// Pending Intake should only ever describe missing/empty intake data - not "waiting on
+// something external" (a physical exam, a referral, etc). Those are real reasons a report
+// isn't ready yet, but they're "Not Generated", not "Pending Intake".
+function isIntakeIncomplete(c) {
+  return !c.intakeNotes || c.intakeNotes.trim().length < 40;
+}
+
 function renderReportsList() {
   DOM.reportsRowsList.innerHTML = '';
 
@@ -844,29 +926,40 @@ function renderReportsList() {
     row.className = 'report-row';
     row.setAttribute('data-family', c.name);
 
+    const intakeIncomplete = isIntakeIncomplete(c);
+    const displayStatus = intakeIncomplete ? 'Pending Intake' : c.reportStatus;
+
     let badgeClass = 'info';
-    if (c.reportStatus === 'Generated') badgeClass = 'success';
-    else if (c.reportStatus === 'Not Generated') badgeClass = 'warning';
+    if (displayStatus === 'Generated') badgeClass = 'success';
+    else if (displayStatus === 'Not Generated') badgeClass = 'warning';
+    else if (displayStatus === 'Pending Intake') badgeClass = 'warning';
+
+    const statusHTML = intakeIncomplete
+      ? `<span class="status-badge ${badgeClass}">${displayStatus}</span>
+         <span class="tooltip-icon" title="Intake information is missing for this family. Complete the intake form before a report can be generated.">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+         </span>`
+      : `<span class="status-badge ${badgeClass}">${displayStatus}</span>`;
 
     let actionHTML = '';
-    if (c.reportStatus === 'Generated') {
+    if (intakeIncomplete) {
+      actionHTML = `
+        <button class="btn btn-primary btn-sm btn-complete-intake" data-id="${c.id}">
+          Complete Intake
+        </button>
+      `;
+    } else if (c.reportStatus === 'Generated') {
       actionHTML = `
         <button class="btn btn-secondary btn-sm btn-open-report" data-id="${c.id}" data-family="${c.name}" data-period="${c.reportPeriod}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           View Report
         </button>
       `;
-    } else if (c.reportStatus === 'Not Generated') {
+    } else {
       actionHTML = `
         <button class="btn btn-primary btn-sm btn-generate-report-action" data-id="${c.id}">
           <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="margin-right: 4px; color: white;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
           Generate Report
-        </button>
-      `;
-    } else {
-      actionHTML = `
-        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
-          Pending Setup
         </button>
       `;
     }
@@ -875,7 +968,7 @@ function renderReportsList() {
       <div class="col-family font-semibold">${c.name}</div>
       <div class="col-period">${c.reportPeriod}</div>
       <div class="col-status">
-        <span class="status-badge ${badgeClass}">${c.reportStatus}</span>
+        ${statusHTML}
       </div>
       <div class="col-action">
         ${actionHTML}
@@ -883,6 +976,13 @@ function renderReportsList() {
     `;
 
     DOM.reportsRowsList.appendChild(row);
+  });
+
+  document.querySelectorAll('.btn-complete-intake').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      openMaximizedEditor(id);
+    });
   });
 
   document.querySelectorAll('.btn-open-report').forEach(btn => {
@@ -993,6 +1093,7 @@ function setupMaximizedEditor() {
     row.innerHTML = `
       <input type="text" placeholder="Resource Name" class="edit-res-name" style="flex: 1;">
       <input type="text" placeholder="Link URL" class="edit-res-url" style="flex: 1;" value="#">
+      <select class="edit-res-tag custom-select" style="flex: 0 0 130px;">${buildResourceTagOptionsHTML('')}</select>
       <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">&times;</button>
     `;
     container.appendChild(row);
@@ -1003,10 +1104,9 @@ function setupMaximizedEditor() {
   DOM.btnSaveEditor.addEventListener('click', () => {
     const caseIndex = state.cases.findIndex(c => c.id === state.editingCaseId);
     if (caseIndex !== -1) {
-      // 1. Save Intake
-      state.cases[caseIndex].intakeNotes = DOM.editIntakeNotes.value;
-      
-      // 2. Save Timeline Steps
+      // Intake is edited via the dedicated Edit Intake page (btn-update-intake-info) — skip here.
+
+      // 1. Save Timeline Steps
       const timelineSteps = [];
       const dateInputs = DOM.editTimelineSteps.querySelectorAll('.edit-timeline-date');
       const labelInputs = DOM.editTimelineSteps.querySelectorAll('.edit-timeline-label');
@@ -1024,13 +1124,15 @@ function setupMaximizedEditor() {
       const resourceLinks = [];
       const nameInputs = DOM.editResourcesItems.querySelectorAll('.edit-res-name');
       const urlInputs = DOM.editResourcesItems.querySelectorAll('.edit-res-url');
-      
+      const tagInputs = DOM.editResourcesItems.querySelectorAll('.edit-res-tag');
+
       const previousResourceNames = state.cases[caseIndex].resources.map(r => r.name);
       nameInputs.forEach((input, index) => {
         const nameVal = input.value.trim();
         const urlVal = urlInputs[index].value.trim();
+        const tagVal = tagInputs[index] ? tagInputs[index].value : '';
         if (nameVal && urlVal) {
-          resourceLinks.push({ name: nameVal, url: urlVal });
+          resourceLinks.push({ name: nameVal, url: urlVal, tag: tagVal });
           if (!previousResourceNames.includes(nameVal)) {
             addResourceToLibrary(nameVal, urlVal, state.cases[caseIndex].name);
           }
@@ -1062,9 +1164,22 @@ function openMaximizedEditor(caseId) {
     DOM.editHandoffNotesGroup.style.display = 'none';
   }
 
-  // Set Intake text
-  DOM.editIntakeNotes.value = c.intakeNotes.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
-  
+  // Populate compact intake summary display
+  const fields = Object.assign({}, DEFAULT_INTAKE_FIELDS, c.intakeFields || {});
+  const challenges = fields.focusAreas && fields.focusAreas.length > 0
+    ? fields.focusAreas.map(f => `<span class="intake-summary-chip">${escapeHTML(f)}</span>`).join(' ')
+    : '<span style="color:var(--text-secondary)">None selected</span>';
+  DOM.intakeSummaryDisplay.innerHTML = `
+    <dl class="intake-summary-grid">
+      <div class="intake-summary-row"><dt>Primary Contact</dt><dd>${escapeHTML(fields.primaryContact || '—')}</dd></div>
+      <div class="intake-summary-row"><dt>Patient Age</dt><dd>${escapeHTML(fields.patientAge)}</dd></div>
+      <div class="intake-summary-row"><dt>Stage</dt><dd>${escapeHTML(fields.patientStage)}</dd></div>
+      <div class="intake-summary-row"><dt>Language</dt><dd>${escapeHTML(fields.patientLanguage)}</dd></div>
+      <div class="intake-summary-row"><dt>Caregiver</dt><dd>${escapeHTML(fields.caregiverRel)}</dd></div>
+      <div class="intake-summary-row intake-summary-row--wide"><dt>Challenges</dt><dd class="intake-summary-chips">${challenges}</dd></div>
+    </dl>
+  `;
+
   // Load Timeline list
   DOM.editTimelineSteps.innerHTML = '';
   c.timeline.forEach(step => {
@@ -1086,6 +1201,7 @@ function openMaximizedEditor(caseId) {
     row.innerHTML = `
       <input type="text" class="edit-res-name" value="${res.name}" style="flex: 1;">
       <input type="text" class="edit-res-url" value="${res.url}" style="flex: 1;">
+      <select class="edit-res-tag custom-select" style="flex: 0 0 130px;">${buildResourceTagOptionsHTML(res.tag || '')}</select>
       <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">&times;</button>
     `;
     DOM.editResourcesItems.appendChild(row);
@@ -1102,6 +1218,82 @@ function openMaximizedEditor(caseId) {
   state.activeEditTab = 'intake';
 
   DOM.modalCardEditor.classList.add('active');
+}
+
+// --- Edit Intake Page ---
+function openEditIntakePage(caseId) {
+  const c = state.cases.find(item => item.id === caseId);
+  if (!c) return;
+
+  // Close the maximized editor modal directly (closeModal is a local closure inside setupMaximizedEditor)
+  DOM.modalCardEditor.classList.remove('active');
+
+  const f = Object.assign({}, DEFAULT_INTAKE_FIELDS, c.intakeFields || {});
+  const form = DOM.editIntakeForm;
+
+  DOM.editIntakeFamilyNameDisplay.textContent = c.name;
+  DOM.editIntakePrimaryContact.value = f.primaryContact;
+  DOM.eiZipCode.value = f.zipCode;
+  DOM.eiMobility.value = f.mobility;
+  DOM.eiNotes.value = f.notes;
+
+  setActivePillValue('ei-patient-age', f.patientAge, form);
+  setActivePillValue('ei-patient-stage', f.patientStage, form);
+  setActivePillValue('ei-patient-language', f.patientLanguage, form);
+  setActivePillValue('ei-living-situation', f.livingSituation, form);
+  setActivePillValue('ei-caregiver-rel', f.caregiverRel, form);
+  setActivePillValue('ei-caregiver-age', f.caregiverAge, form);
+  setActivePillValue('ei-caregiver-stress', f.caregiverStress, form);
+  setActiveMultiPillValues('ei-focus-areas', f.focusAreas, form);
+  setActivePillValue('ei-ai-assist-goal', f.aiGoal, form);
+
+  state.editingCaseId = caseId;
+  switchPage('edit-intake');
+}
+
+function setupEditIntakePage() {
+  DOM.btnUpdateIntakeInfo.addEventListener('click', () => {
+    openEditIntakePage(state.editingCaseId);
+  });
+
+  const goBack = () => {
+    switchPage('case-cards');
+    showCaseCardsSubview('list');
+  };
+
+  DOM.btnEditIntakeBack.addEventListener('click', goBack);
+  DOM.btnCancelEditIntake.addEventListener('click', goBack);
+
+  DOM.editIntakeForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const caseIndex = state.cases.findIndex(c => c.id === state.editingCaseId);
+    if (caseIndex === -1) return;
+
+    const form = DOM.editIntakeForm;
+    const updatedFields = {
+      primaryContact: DOM.editIntakePrimaryContact.value.trim(),
+      zipCode: DOM.eiZipCode.value.trim(),
+      mobility: DOM.eiMobility.value.trim(),
+      patientAge: getSelectedPillValue('ei-patient-age', form) || '65 - 74',
+      patientStage: getSelectedPillValue('ei-patient-stage', form) || 'Middle-Stage (Moderate)',
+      patientLanguage: getSelectedPillValue('ei-patient-language', form) || 'English',
+      livingSituation: getSelectedPillValue('ei-living-situation', form) || 'All adults',
+      caregiverRel: getSelectedPillValue('ei-caregiver-rel', form) || 'Adult Child',
+      caregiverAge: getSelectedPillValue('ei-caregiver-age', form) || 'Under 65',
+      caregiverStress: getSelectedPillValue('ei-caregiver-stress', form) || 'High / Burnout Risk',
+      focusAreas: getSelectedMultiPillValues('ei-focus-areas', form),
+      aiGoal: getSelectedPillValue('ei-ai-assist-goal', form) || 'Find local resources',
+      notes: DOM.eiNotes.value.trim()
+    };
+
+    state.cases[caseIndex].intakeFields = updatedFields;
+    state.cases[caseIndex].intakeNotes = buildIntakeNotesText(updatedFields);
+
+    persistState();
+    renderAll();
+    switchPage('case-cards');
+    showCaseCardsSubview('list');
+  });
 }
 
 // --- Close Case Archive Options Dialog ---
@@ -1157,6 +1349,23 @@ function addResourceToLibrary(name, url, familyName) {
   container.appendChild(card);
 }
 
+// Auto-generates a non-identifying starting point for the archived card: a title built
+// from the case phase (not the family name), and the AI summary with the patient's name
+// scrubbed out. This is a starting draft, not a guarantee - the CHW reviews and edits it
+// in the modal before anything is actually archived.
+function buildAnonymizedCaseSummary(c) {
+  const title = `${c.phase} Case Summary`;
+  let content = c.aiSummary || '';
+  const firstName = (c.patientName || '').split(' ')[0];
+  if (c.patientName) {
+    content = content.split(c.patientName).join('the patient');
+  }
+  if (firstName && firstName !== c.patientName) {
+    content = content.replace(new RegExp(`\\b${firstName}\\b`, 'g'), 'the patient');
+  }
+  return { title, content };
+}
+
 function executeCaseArchiving(addResource = false, targetLibrary = '') {
   const caseId = DOM.btnCloseCaseFromReport.getAttribute('data-case-id');
   const c = state.cases.find(item => item.id === caseId);
@@ -1165,14 +1374,21 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
   if (addResource) {
     const containerId = targetLibrary === 'adrd' ? 'adrd-resources-list' : 'practices-resources-list';
     const container = document.getElementById(containerId);
-    
+
+    // Use the CHW-reviewed/edited title & content, not the raw case data - this is the
+    // whole point of the review step: nothing identifying gets archived without a look first.
+    const titleInput = document.getElementById('archive-edit-title');
+    const contentInput = document.getElementById('archive-edit-content');
+    const title = titleInput ? titleInput.value.trim() : `${c.phase} Case Summary`;
+    const content = contentInput ? contentInput.value.trim() : '';
+
     if (container) {
       const card = document.createElement('div');
       card.className = 'resource-card-item';
       card.setAttribute('data-tags', 'case study,clinical');
       card.innerHTML = `
-        <h3>${c.name} Case Summary</h3>
-        <p>${c.aiSummary}</p>
+        <h3>${escapeHTML(title)}</h3>
+        <p>${escapeHTML(content)}</p>
         <div class="tag-row">
           <span class="mini-tag">Case Study</span>
           <span class="mini-tag">Clinical</span>
@@ -1195,10 +1411,14 @@ function openCloseCaseOptionsModal(caseId) {
   if (!c) return;
 
   DOM.btnCloseCaseFromReport.setAttribute('data-case-id', caseId);
+
+  const { title, content } = buildAnonymizedCaseSummary(c);
   DOM.archiveRecommendationsPreview.innerHTML = `
-    <strong>Resource Preview:</strong><br>
-    <strong>Title:</strong> ${c.name} Case Summary<br>
-    <strong>Content:</strong> ${c.aiSummary}
+    <p style="margin: 0 0 10px; color: var(--text-secondary);">This is what would be added to your Curated Resources library. It's auto-generated to avoid naming the family - review and edit before confirming.</p>
+    <label class="group-label" for="archive-edit-title">Title</label>
+    <input type="text" id="archive-edit-title" value="${escapeHTML(title)}" style="width: 100%; margin-bottom: 10px;">
+    <label class="group-label" for="archive-edit-content">Content</label>
+    <textarea id="archive-edit-content" rows="4" style="width: 100%;">${escapeHTML(content)}</textarea>
   `;
   DOM.modalCloseOptions.classList.add('active');
 }
@@ -1226,11 +1446,30 @@ function setupReportViewer() {
   });
 }
 
+// Resources are rendered live from case.resources rather than baked into reportContent,
+// so a chat "Add to Family Report" click actually shows up here without regenerating the report.
+function buildReportResourcesSectionHTML(caseItem, lang) {
+  const resources = caseItem.resources || [];
+  if (resources.length === 0) return '';
+  const heading = lang === 'es' ? 'Recursos' : 'Resources';
+  const linkLabel = lang === 'es' ? 'enlace' : 'link';
+  const itemsHTML = resources.map(r => {
+    const tagBadge = r.tag ? `<span class="mini-tag">${escapeHTML(r.tag)}</span> ` : '';
+    return `<li>${tagBadge}<strong>${escapeHTML(r.name)}:</strong> <a href="${r.url || '#'}" onclick="event.stopPropagation()">${linkLabel}</a></li>`;
+  }).join('');
+  return `
+    <h5>${heading}</h5>
+    <div class="report-resource-group">
+      <ul class="report-resource-list">${itemsHTML}</ul>
+    </div>
+  `;
+}
+
 function openReportModal(caseItem) {
   DOM.reportModalTitle.textContent = `${caseItem.name} - ${caseItem.reportPeriod} Report`;
   state.currentReportCaseId = caseItem.id;
   state.reportLangSpanish = false;
-  DOM.reportModalTextContent.innerHTML = caseItem.reportContent;
+  DOM.reportModalTextContent.innerHTML = caseItem.reportContent + buildReportResourcesSectionHTML(caseItem, 'en');
   DOM.btnCloseCaseFromReport.setAttribute('data-case-id', caseItem.id);
   DOM.btnToggleReportLanguage.innerHTML = DOM.btnToggleReportLanguage.innerHTML.replace(/Traducir al español|Translate to English/, 'Traducir al español');
 
@@ -1242,7 +1481,9 @@ function toggleReportLanguage() {
   if (!caseItem || !caseItem.reportContentEs) return;
 
   state.reportLangSpanish = !state.reportLangSpanish;
-  DOM.reportModalTextContent.innerHTML = state.reportLangSpanish ? caseItem.reportContentEs : caseItem.reportContent;
+  const lang = state.reportLangSpanish ? 'es' : 'en';
+  const body = state.reportLangSpanish ? caseItem.reportContentEs : caseItem.reportContent;
+  DOM.reportModalTextContent.innerHTML = body + buildReportResourcesSectionHTML(caseItem, lang);
   DOM.btnToggleReportLanguage.innerHTML = DOM.btnToggleReportLanguage.innerHTML.replace(
     /Traducir al español|Translate to English/,
     state.reportLangSpanish ? 'Translate to English' : 'Traducir al español'
@@ -1285,12 +1526,21 @@ function setupNotifications() {
         cardStatus: 'Waiting Followup',
         handoffNotes: 'Sarah responds well to morning visits; avoid late-afternoon check-ins as she tires easily. Family prefers phone calls over email for scheduling.',
         intakeNotes: `Sarah Marcus (Age 76) is experiencing early cognitive lapses. Case shared by CHW Robert Mercer to collaborate on home safety checklists. Family is eager to establish structured daily routine support systems.`,
+        intakeFields: {
+          primaryContact: '', zipCode: '', mobility: 'No mobility issues',
+          patientAge: '75 - 84', patientStage: 'Suspected / Undiagnosed',
+          patientLanguage: 'English', livingSituation: 'All adults',
+          caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
+          focusAreas: ['Safety Concerns (Wandering, Falls)'],
+          aiGoal: 'Find local resources',
+          notes: 'Family is eager to establish structured daily routine support systems.'
+        },
         timeline: [
           { date: 'Jun 18, 2026', label: 'Case Shared by Robert Mercer' }
         ],
         resources: [
-          { name: 'Home Safety Audit Sheet', url: '#' },
-          { name: 'Cognitive Exercises Guide', url: '#' }
+          { name: 'Home Safety Audit Sheet', url: '#', tag: 'Safety' },
+          { name: 'Cognitive Exercises Guide', url: '#', tag: 'Engagement' }
         ],
         aiSummary: 'Marcus Family case shared by CHW Robert Mercer. Immediate recommended tasks include establishing basic check-in protocols and coordinating on safety wristbands.',
         reportStatus: 'Not Generated',
@@ -1300,19 +1550,6 @@ function setupNotifications() {
           <p class="report-meta">Date: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Assigned CHW: Robert Mercer</p>
           <p class="report-greeting">Hi there,</p>
           <p>This case was shared via the org neurology network. Sarah is experiencing mild temporal adjustments, and we're setting up basic check-in protocols and safety coordination to start.</p>
-          <h5>Resources</h5>
-          <div class="report-resource-group">
-            <span class="report-tag healthcare">Healthcare</span>
-            <ul class="report-resource-list">
-              <li><strong>Cognitive Exercises Guide:</strong> daily activities to support cognitive engagement (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-            </ul>
-          </div>
-          <div class="report-resource-group">
-            <span class="report-tag logistics">Logistics</span>
-            <ul class="report-resource-list">
-              <li><strong>Home Safety Audit Sheet:</strong> checklist to review home safety and access points (<a href="#" onclick="event.stopPropagation()">link</a>)</li>
-            </ul>
-          </div>
           <p><strong>Next Check-up:</strong> Follow-up to be scheduled after initial check-in protocols are established.</p>
         `,
         reportContentEs: `
@@ -1320,19 +1557,6 @@ function setupNotifications() {
           <p class="report-meta">Fecha: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Trabajador de salud asignado: Robert Mercer</p>
           <p class="report-greeting">Hola,</p>
           <p>Este caso fue compartido a través de la red de neurología de la organización. Sarah está experimentando ajustes temporales leves, y estamos estableciendo protocolos básicos de seguimiento y coordinación de seguridad para empezar.</p>
-          <h5>Recursos</h5>
-          <div class="report-resource-group">
-            <span class="report-tag healthcare">Salud</span>
-            <ul class="report-resource-list">
-              <li><strong>Guía de Ejercicios Cognitivos:</strong> actividades diarias para apoyar la actividad cognitiva (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-            </ul>
-          </div>
-          <div class="report-resource-group">
-            <span class="report-tag logistics">Logística</span>
-            <ul class="report-resource-list">
-              <li><strong>Hoja de Auditoría de Seguridad del Hogar:</strong> lista de verificación para revisar la seguridad y accesos del hogar (<a href="#" onclick="event.stopPropagation()">enlace</a>)</li>
-            </ul>
-          </div>
           <p><strong>Próxima Revisión:</strong> Se programará un seguimiento después de establecer los protocolos iniciales de contacto.</p>
         `,
         shared: true
@@ -1370,6 +1594,7 @@ function setupNotifications() {
 function renderNotificationBadge() {
   const hasUnread = state.notifications.some(n => n.unread);
   DOM.notificationBadgeDot.style.display = hasUnread ? 'block' : 'none';
+  persistState();
 }
 
 // --- Share Case Modal ---
@@ -1476,10 +1701,19 @@ function setupChat() {
     state.chatHistory = [];
     DOM.chatInput.value = '';
     DOM.chatInput.style.height = 'auto';
-    
+
     renderChatHistory();
     renderSuggestions();
   });
+
+  if (DOM.chatContextChipClear) {
+    DOM.chatContextChipClear.addEventListener('click', () => {
+      state.activeChatCaseId = null;
+      renderChatContextChip();
+      renderChatHistory();
+      persistState();
+    });
+  }
 }
 
 // Render dynamic static parent suggestion chips
@@ -1536,7 +1770,22 @@ function scrollChatBottom() {
   }, 50);
 }
 
+// Reflects state.activeChatCaseId in the chat header as a small dismissible chip
+function renderChatContextChip() {
+  if (!DOM.chatContextChip) return;
+  const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
+  if (activeCase) {
+    DOM.chatContextChip.style.display = '';
+    DOM.chatContextChipLabel.textContent = activeCase.name;
+  } else {
+    DOM.chatContextChip.style.display = 'none';
+    DOM.chatContextChipLabel.textContent = '';
+  }
+}
+
 function renderChatHistory() {
+  persistState();
+  renderChatContextChip();
   DOM.chatMessagesBox.innerHTML = '';
 
   if (state.chatHistory.length === 0) {
@@ -1602,6 +1851,30 @@ function renderChatHistory() {
       `;
     }
 
+    // Matched-resource card + Add to Family Report action
+    let resourceHTML = '';
+    if (msg.resource) {
+      const tagsHTML = msg.resource.tags.map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('');
+      // Add to Family Report only makes sense when the chat is scoped to a specific
+      // family - with no active case there's no case.resources list to add it to.
+      const addToReportBtnHTML = state.activeChatCaseId
+        ? `<button class="add-to-report-btn" ${msg.resource.addedToReport ? 'disabled' : ''}>
+            ${msg.resource.addedToReport ? '✓ Added to Family Report' : '+ Add to Family Report'}
+          </button>`
+        : '';
+      resourceHTML = `
+        <div class="chat-resource-card">
+          <div class="chat-resource-header">
+            <h4>${escapeHTML(msg.resource.title)}</h4>
+            ${msg.resource.verified ? '<span class="verified-badge">Verified by ASI</span>' : ''}
+          </div>
+          <p>${escapeHTML(msg.resource.desc)}</p>
+          <div class="tag-row">${tagsHTML}</div>
+          ${addToReportBtnHTML}
+        </div>
+      `;
+    }
+
     // In-Chat Options buttons block logic
     let optionsHTML = '';
     if (msg.optionsList && msg.optionsList.length > 0) {
@@ -1617,15 +1890,42 @@ function renderChatHistory() {
       <div class="message-content-wrapper">
         <div class="message-sender">${msg.sender === 'assistant' ? 'AZ Companion' : 'You'}</div>
         <div class="message-bubble">
-          <p>${msg.text}</p>
+          ${msg.raw ? formatAssistantAnswer(msg.text) : `<p>${msg.text}</p>`}
           ${embedHTML}
           ${msg.additionalText ? `<p>${msg.additionalText}</p>` : ''}
+          ${resourceHTML}
           ${optionsHTML}
         </div>
       </div>
     `;
-    
+
     DOM.chatMessagesBox.appendChild(msgDiv);
+
+    // Bind Add to Family Report click: writes the resource into the active case's
+    // resources list (so it shows on the case card AND feeds the generated report),
+    // then flips the button in place without a full chat re-render.
+    if (msg.resource) {
+      const addBtn = msgDiv.querySelector('.add-to-report-btn');
+      if (addBtn) {
+        addBtn.addEventListener('click', () => {
+          const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
+          if (activeCase) {
+            const alreadyExists = activeCase.resources.some(r => r.name === msg.resource.title);
+            if (!alreadyExists) {
+              activeCase.resources.push({
+                name: msg.resource.title,
+                url: '#',
+                tag: mapToCanonicalResourceTag(msg.resource.tags)
+              });
+            }
+          }
+          msg.resource.addedToReport = true;
+          addBtn.disabled = true;
+          addBtn.textContent = '✓ Added to Family Report';
+          persistState();
+        });
+      }
+    }
 
     // Bind event listeners for in-chat dynamic buttons
     if (msg.optionsList && msg.optionsList.length > 0) {
@@ -1667,11 +1967,172 @@ function handleChatSend() {
 
   renderChatHistory();
   showChatTypingIndicator();
-  
-  setTimeout(() => {
+
+  if (!CHAT_WORKER_URL) {
+    setTimeout(() => {
+      removeChatTypingIndicator();
+      generateMockAIResponse(query);
+    }, 1500);
+    return;
+  }
+
+  fetchWorkerChatResponse(query);
+}
+
+// Pings the worker's CORS preflight (cheap - no OpenAI call) to show a real Live/Offline
+// status instead of a hardcoded "Connected" label.
+async function checkAgentStatus() {
+  if (!DOM.chatStatusDot || !DOM.chatStatusText) return;
+  if (!CHAT_WORKER_URL) {
+    DOM.chatStatusDot.className = 'pulse-dot is-offline';
+    DOM.chatStatusText.textContent = 'Agent Offline';
+    return;
+  }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(CHAT_WORKER_URL, { method: 'OPTIONS', signal: controller.signal });
+    clearTimeout(timeout);
+    const isLive = res.ok;
+    DOM.chatStatusDot.className = `pulse-dot ${isLive ? 'is-live' : 'is-offline'}`;
+    DOM.chatStatusText.textContent = isLive ? 'Agent Live' : 'Agent Offline';
+  } catch (err) {
+    DOM.chatStatusDot.className = 'pulse-dot is-offline';
+    DOM.chatStatusText.textContent = 'Agent Offline';
+  }
+}
+
+async function fetchWorkerChatResponse(query) {
+  try {
+    const res = await fetch(CHAT_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: query })
+    });
+    const data = await res.json();
     removeChatTypingIndicator();
-    generateMockAIResponse(query);
-  }, 1500);
+
+    if (!res.ok) {
+      appendAssistantChatMessage(data.error || "Something went wrong reaching the assistant.", { raw: true });
+      return;
+    }
+    const matched = findMatchingResource(query, data.answer);
+    appendAssistantChatMessage(data.answer, { raw: true, resource: matched ? { ...matched, addedToReport: false } : null });
+  } catch (err) {
+    removeChatTypingIndicator();
+    appendAssistantChatMessage("Couldn't reach the assistant right now. Please try again in a moment.", { raw: true });
+  }
+}
+
+function appendAssistantChatMessage(text, { raw = false, resource = null } = {}) {
+  const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  state.chatHistory.push({ sender: 'assistant', text, time: timeNow, raw, resource });
+  renderChatHistory();
+  scrollChatBottom();
+}
+
+// Escapes text into safe HTML, then re-applies a small set of formatting affordances
+// (paragraphs, bullet lists, **bold**, and manual page citations) that the worker's
+// plain-text answers use. Only ever called on raw/untrusted text - never on the
+// hand-authored HTML strings used elsewhere in the mock responses.
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatAssistantAnswer(rawText) {
+  const escaped = escapeHTML(rawText)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\([^)]*\bp\.?\s*\d+[^)]*\)/gi, (match) => `<span class="citation-page">${match}</span>`);
+
+  const lines = escaped.split('\n').map(l => l.trim());
+  const htmlBlocks = [];
+  let listBuffer = [];
+  let paraBuffer = [];
+
+  const flushList = () => {
+    if (listBuffer.length) {
+      htmlBlocks.push(`<ul class="chat-answer-list">${listBuffer.map(l => `<li>${l}</li>`).join('')}</ul>`);
+      listBuffer = [];
+    }
+  };
+  const flushPara = () => {
+    if (paraBuffer.length) {
+      htmlBlocks.push(`<p>${paraBuffer.join('<br>')}</p>`);
+      paraBuffer = [];
+    }
+  };
+
+  // Consecutive bullet lines merge into one list (even across blank lines);
+  // a blank line otherwise breaks the current paragraph into its own block.
+  lines.forEach(line => {
+    if (!line) {
+      flushPara();
+      return;
+    }
+    const bulletMatch = line.match(/^[-•]\s+(.*)$/);
+    if (bulletMatch) {
+      flushPara();
+      listBuffer.push(bulletMatch[1]);
+    } else {
+      flushList();
+      paraBuffer.push(line);
+    }
+  });
+  flushList();
+  flushPara();
+
+  return htmlBlocks.join('') || '<p></p>';
+}
+
+// Lightweight keyword/tag match against the curated Resources list - not a real
+// search index, just enough to surface a plausibly-related resource card under
+// an answer. See RESOURCES_DATA.
+// "caregiver"/"support" show up in nearly every caregiving answer, so they're
+// down-weighted - otherwise Caregiver Support Directory wins every match.
+const GENERIC_RESOURCE_TERMS = new Set(['support', 'caregiver']);
+
+function scoreTextForResource(text, resource) {
+  let score = 0;
+  resource.tags.forEach(tag => {
+    const tagLower = tag.toLowerCase();
+    const tagWords = tagLower.split(/\s+/).filter(w => w.length > 2 && !GENERIC_RESOURCE_TERMS.has(w));
+    if (tagWords.length === 0) return;
+    const hits = tagWords.filter(w => text.includes(w)).length;
+    if (hits === 0) return;
+    const weight = GENERIC_RESOURCE_TERMS.has(tagLower) ? 1 : 4;
+    score += weight * (hits / tagWords.length);
+  });
+  resource.title.toLowerCase().split(/\s+/).forEach(word => {
+    const clean = word.replace(/[^a-z]/g, '');
+    if (clean.length > 5 && !GENERIC_RESOURCE_TERMS.has(clean) && text.includes(clean)) {
+      score += 3;
+    }
+  });
+  return score;
+}
+
+// The AI's answer is discursive by nature and will touch related topics beyond what was
+// actually asked (e.g. a question about caregiver guilt might mention wandering behavior
+// in passing) - scoring the answer as heavily as the question caused resource cards to
+// surface for tangentially-related content. The question carries the user's real intent,
+// so it's weighted full strength; the answer only counts as a weak supporting signal.
+function findMatchingResource(question, answer) {
+  const questionText = question.toLowerCase();
+  const answerText = answer.toLowerCase();
+  let best = null;
+  let bestScore = 0;
+
+  RESOURCES_DATA.forEach(resource => {
+    const score = scoreTextForResource(questionText, resource) + scoreTextForResource(answerText, resource) * 0.25;
+    if (score > bestScore) {
+      bestScore = score;
+      best = resource;
+    }
+  });
+
+  return bestScore >= 4 ? best : null;
 }
 
 function showChatTypingIndicator() {
@@ -1711,9 +2172,7 @@ function generateMockAIResponse(userQuery) {
   let text = '';
   let embedCard = null;
   let additionalText = '';
-  
-  const modelType = DOM.modelSelect.value;
-  const modelHeadline = modelType === 'deep' ? '<strong>[Deep Analysis Engine Active]</strong> ' : '';
+  const modelHeadline = '';
 
   // --- 1. First Visit / Rapport responses ---
   if (queryLower.includes('build rapport') || queryLower.includes('rapport')) {

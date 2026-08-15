@@ -1,0 +1,15 @@
+name = "az-chat-worker"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Per-IP rate limit counters. Create with: wrangler kv namespace create RATE_LIMIT_KV
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "9922e9128df64f16823d965fce17658b"
+
+[vars]
+ALLOWED_ORIGIN = "https://kshiteeshkandari.github.io,http://localhost:5500"
+
+# Secrets (never put real values here - set with `wrangler secret put OPENAI_API_KEY`):
+#   OPENAI_API_KEY   - required, used for both embeddings and chat completions

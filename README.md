@@ -55,20 +55,6 @@ Open `http://localhost:5500` in your browser.
 
 > The AI Chat will run in **offline / mock mode** by default if the Worker URL is unreachable. To disable live AI and always use mock responses, set `CHAT_WORKER_URL = ''` on line 10 of `app.js`.
 
----
-
-## Disabling the AI (Offline Mode)
-
-**From the app** — set line 10 of `app.js` to:
-```js
-const CHAT_WORKER_URL = '';
-```
-The chat will fall back to mock responses and the status indicator will show **Offline**.
-
-**From Cloudflare** — go to Workers & Pages → `az-chat-worker` → Settings → Pause or Delete the Worker.
-
----
-
 ## Project Structure
 
 ```

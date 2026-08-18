@@ -11,6 +11,23 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Login Gate: simple demo-wide password screen, shown until unlocked for this tab session -->
+  <div id="login-gate-overlay" class="login-gate-overlay">
+    <div class="login-gate-box">
+      <div class="login-gate-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span>AZ Companion</span>
+      </div>
+      <h2>Enter Password</h2>
+      <p class="login-gate-subtitle">This is a private demo environment. Please enter the access password to continue.</p>
+      <form id="login-gate-form" autocomplete="off">
+        <input type="password" id="login-gate-input" class="login-gate-input" placeholder="Password" autocomplete="new-password" required>
+        <p id="login-gate-error" class="login-gate-error" style="display: none;">Incorrect password. Please try again.</p>
+        <button type="submit" class="btn btn-primary login-gate-submit">Unlock</button>
+      </form>
+    </div>
+  </div>
+
   <div class="app-container">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
@@ -133,9 +150,9 @@
               </div>
             </div>
 
-            <div class="stat-card stat-card-clickable" id="stat-card-waiting-followup" data-status-filter="Waiting Followup">
+            <div class="stat-card stat-card-clickable" id="stat-card-waiting-followup" data-status-filter="Awaiting Follow Up">
               <div class="stat-header">
-                <span class="stat-title">Waiting Followup</span>
+                <span class="stat-title">Awaiting Follow Up</span>
                 <span class="stat-badge info">Followup</span>
               </div>
               <div class="stat-body">
@@ -325,6 +342,14 @@
                     </div>
                   </div>
 
+                  <!-- Other Information -->
+                  <div class="intake-section">
+                    <div class="form-group mb-0">
+                      <label for="intake-other-info" class="group-label">Other information</label>
+                      <textarea id="intake-other-info" rows="3" placeholder="Anything else worth noting about this family or case..."></textarea>
+                    </div>
+                  </div>
+
                   <!-- Notes -->
                   <div class="intake-section">
                     <div class="form-group mb-0">
@@ -477,6 +502,13 @@
 
                 <div class="intake-section">
                   <div class="form-group mb-0">
+                    <label for="ei-other-info" class="group-label">Other information</label>
+                    <textarea id="ei-other-info" rows="3" placeholder="Anything else worth noting about this family or case..."></textarea>
+                  </div>
+                </div>
+
+                <div class="intake-section">
+                  <div class="form-group mb-0">
                     <label for="ei-notes" class="group-label">Any specific cultural, language, or unique family dynamics to note? (Optional)</label>
                     <textarea id="ei-notes" rows="4" placeholder="Enter any unique family values, language needs, or notes..."></textarea>
                   </div>
@@ -502,6 +534,9 @@
                 <span id="chat-context-chip-label"></span>
                 <button type="button" id="chat-context-chip-clear" title="Clear family context">&times;</button>
               </span>
+              <button type="button" class="btn btn-secondary btn-sm" id="btn-add-to-notes" title="You can add text to the notes, do this by highlighting the text and hitting this button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" style="vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </button>
               <button class="btn btn-secondary btn-sm" id="btn-new-chat">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="vertical-align: middle; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 New Chat
@@ -532,7 +567,7 @@
                 
                 <div class="chat-controls">
                   <button class="btn btn-primary" id="btn-chat-generate">
-                    <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
                     <span>Ask</span>
                   </button>
                 </div>
@@ -581,38 +616,71 @@
               </div>
               <div class="resource-list-container" id="adrd-resources-list">
                 <div class="resource-card-item" data-tags="support,caregiver">
-                  <h3>Caregiver Support Directory</h3>
-                  <p>Comprehensive catalog of online and local support meetings for family members dealing with primary care fatigue.</p>
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>ASI Caregiver Support Program</h3>
+                  <p>Stressbuster Course (9 weeks), education and training, gap-filling funds for items like grab bars and technology, respite care, and monthly caregiver support groups. Eligibility: age 18+, resident of the city of Chicago, caring for someone with Alzheimer's, dementia, or another chronic condition. Contact: DFSS Senior Services Information &amp; Assistance, aging@cityofchicago.org, 312-744-4016</p>
                   <div class="tag-row">
                     <span class="mini-tag">Support</span>
                     <span class="mini-tag">Caregiver</span>
                   </div>
                 </div>
 
-                <div class="resource-card-item" data-tags="clinical,guides">
-                  <h3>Early ADRD Signs &amp; Guidelines</h3>
-                  <p>Clinical instructions on tracking early-stage Alzheimer's indicators, memory lapses, and communication guidelines.</p>
+                <div class="resource-card-item" data-tags="support,caregiver">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Alzheimer's Association 24/7 Helpline</h3>
+                  <p>225 N. Michigan Ave, Floor 17, Chicago, IL 60601 &middot; 24/7 Helpline (800) 272-3900</p>
                   <div class="tag-row">
-                    <span class="mini-tag">Clinical</span>
+                    <span class="mini-tag">Support</span>
+                    <span class="mini-tag">Caregiver</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="support">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Suicide Prevention Lifeline</h3>
+                  <p>1-800-273-8255 &middot; 24/7 free and confidential support. Help available in Spanish.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Support</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="support,caregiver">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Latino Alzheimer's &amp; Memory Disorders Alliance (LAMDA)</h3>
+                  <p>1609 36th Ave, Melrose Park, IL 60160 &middot; (224) 715-4673. Spanish-language caregiver education, support groups, and case management for Latino families affected by Alzheimer's and memory disorders.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Support</span>
+                    <span class="mini-tag">Caregiver</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="home safety,guides">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Dementia &amp; Driving Guidance</h3>
+                  <p>wvpersonalinjury.com &middot; 304-345-6789. Guidance on when a person with dementia should stop driving and how to manage the transition.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Home Safety</span>
                     <span class="mini-tag">Guides</span>
                   </div>
                 </div>
 
-                <div class="resource-card-item" data-tags="home safety,devices">
-                  <h3>Safety &amp; Wandering Prevention</h3>
-                  <p>Practical checklist for safety-proofing homes, installing tracking wristbands, and motion sensors.</p>
+                <div class="resource-card-item" data-tags="consult,support">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>ASI Senior Health Insurance Program (SHIP)</h3>
+                  <p>Free Medicare and Medicaid benefits counseling for beneficiaries. Main: (773) 278-5130</p>
                   <div class="tag-row">
-                    <span class="mini-tag">Home Safety</span>
-                    <span class="mini-tag">Devices</span>
+                    <span class="mini-tag">Consult</span>
+                    <span class="mini-tag">Support</span>
                   </div>
                 </div>
 
-                <div class="resource-card-item" data-tags="therapy,engagement">
-                  <h3>Cognitive Stimulation Activities</h3>
-                  <p>Activities, puzzle layouts, and visual stimulation guides designed for moderate-stage Alzheimer's patients.</p>
+                <div class="resource-card-item" data-tags="consult,standard">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Legal Aid Chicago</h3>
+                  <p>120 S. LaSalle St. #900, Chicago, IL 60603 &middot; (312) 341-1070. Free civil legal services for people living in poverty in Cook County.</p>
                   <div class="tag-row">
-                    <span class="mini-tag">Therapy</span>
-                    <span class="mini-tag">Engagement</span>
+                    <span class="mini-tag">Consult</span>
+                    <span class="mini-tag">Standard</span>
                   </div>
                 </div>
               </div>
@@ -625,31 +693,64 @@
                 <h2>ASI General Recommended Practice</h2>
               </div>
               <div class="resource-list-container" id="practices-resources-list">
-                
-                <div class="resource-card-item" data-tags="standard,intake">
-                  <h3>Approved Intake Protocols</h3>
-                  <p>Official organization instructions on documenting initial clinical intake interviews, consent forms, and evaluations.</p>
-                  <div class="tag-row">
-                    <span class="mini-tag">Standard</span>
-                    <span class="mini-tag">Intake</span>
-                  </div>
-                </div>
-
-                <div class="resource-card-item" data-tags="consult,coordination">
-                  <h3>Shared Decision Making Guide</h3>
-                  <p>A step-by-step consensus guide to navigating multi-caregiver disputes and aligns clinical and family strategies.</p>
-                  <div class="tag-row">
-                    <span class="mini-tag">Consult</span>
-                    <span class="mini-tag">Coordination</span>
-                  </div>
-                </div>
 
                 <div class="resource-card-item" data-tags="behavioral,approved">
-                  <h3>Sundowning Mitigation Standards</h3>
-                  <p>Best practices for managing late-afternoon agitation including calming routine structures and sensory light schedules.</p>
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Naming the Accusation as a Symptom</h3>
+                  <p>Caregivers who hear first that an accusation is a known part of the disease, and not about them, are better able to use what comes next. Accusations often cluster at a particular time of day. Keeping a small amount of cash somewhere the person can find it themselves lets the search end without a confrontation.</p>
                   <div class="tag-row">
                     <span class="mini-tag">Behavioral</span>
                     <span class="mini-tag">Approved</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="consult,case study">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Reframing a Refused Service</h3>
+                  <p>Arguing the merits of a service tends not to work with caregivers who have refused help more than once. Asking what the care recipient would say if they could see how tired the caregiver was can move the conversation from the service to an earlier promise, opening the door to a short trial visit.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Consult</span>
+                    <span class="mini-tag">Case Study</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="support,approved">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Respite Before Support Group</h3>
+                  <p>Caregivers who say they can't leave the person alone are usually right, and offering a group before solving that tends not to land. Raising the respite question first (an adult day program, a neighbor, a grandchild for two hours) makes the group offer usable. Where no respite option exists, a phone or online group has worked better than an in-person one.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Support</span>
+                    <span class="mini-tag">Approved</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="consult,case study">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Answering the Placement Question</h3>
+                  <p>Declining to answer the placement question directly, while offering to help think it through, has worked better than either answering or deflecting. Asking what a normal day looks like now, and what would have to change to keep going, often leads caregivers to answer their own question.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Consult</span>
+                    <span class="mini-tag">Case Study</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="support,approved">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Raising a Caregiver's Own Symptom</h3>
+                  <p>Raising a caregiver's own symptom again at a later call, rather than only at the call where they mention it, is what tends to get them to see a doctor. A single suggestion has usually not been enough on its own.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Support</span>
+                    <span class="mini-tag">Approved</span>
+                  </div>
+                </div>
+
+                <div class="resource-card-item" data-tags="clinical,case study">
+                  <div class="tag-row" style="margin-bottom:6px;"><span class="verified-badge">ASI Approved</span></div>
+                  <h3>Documenting Changes for the Doctor</h3>
+                  <p>Contradicting a family who says the person is just getting old has worked less well than asking what they have noticed that seemed different, and writing the examples down as they talk. Offering the list for them to take to the doctor changes what the visit produces.</p>
+                  <div class="tag-row">
+                    <span class="mini-tag">Clinical</span>
+                    <span class="mini-tag">Case Study</span>
                   </div>
                 </div>
               </div>
@@ -760,6 +861,10 @@
           Close Case
         </button>
         <div class="footer-right">
+          <button class="btn btn-secondary" id="btn-regenerate-report-modal" title="Regenerate this report using the latest case info and chat conversation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+            Regenerate Report
+          </button>
           <button class="btn btn-secondary" id="btn-toggle-report-language">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
             Traducir al español
@@ -855,6 +960,7 @@
           <button class="editor-tab-btn" data-edit-tab="timeline">Timeline Progress</button>
           <button class="editor-tab-btn" data-edit-tab="resources">Family Resources</button>
           <button class="editor-tab-btn" data-edit-tab="summary">AI Summary</button>
+          <button class="editor-tab-btn" data-edit-tab="notes">Notes</button>
         </div>
         
         <div class="editor-tab-content">
@@ -895,6 +1001,15 @@
             <div class="form-group">
               <label for="edit-ai-summary">AI Summarized Recommendation Checklist</label>
               <textarea id="edit-ai-summary" rows="8" placeholder="AI Checklist recommendation summary..."></textarea>
+            </div>
+          </div>
+
+          <!-- Notes Edit Pane -->
+          <div class="editor-pane" data-edit-tab="notes">
+            <p class="edit-help-text" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Freeform notes for this family. Type here, or highlight text in AI Chat and use the notes button to add it here automatically.</p>
+            <div class="form-group">
+              <label for="edit-case-notes">Notes</label>
+              <textarea id="edit-case-notes" rows="12" placeholder="Notes about this family..."></textarea>
             </div>
           </div>
         </div>

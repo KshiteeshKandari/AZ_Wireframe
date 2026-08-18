@@ -128,6 +128,85 @@ a:hover {
   overflow: hidden;
 }
 
+/* --- Login Gate --- */
+.login-gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  padding: 20px;
+}
+
+.login-gate-box {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-card, #fff);
+  border-radius: 16px;
+  padding: 36px 32px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.login-gate-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-primary);
+  font-family: var(--font-heading, inherit);
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.login-gate-box h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.login-gate-subtitle {
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+}
+
+.login-gate-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #ddd);
+  font-family: var(--font-body);
+  font-size: 14px;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.login-gate-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.login-gate-error {
+  color: var(--color-danger);
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 4px 0 12px;
+  text-align: left;
+}
+
+.login-gate-submit {
+  width: 100%;
+  margin-top: 8px;
+  justify-content: center;
+}
+
 /* Sidebar with User's Uploaded Behind-Navbar Image */
 .sidebar {
   width: var(--sidebar-width);
@@ -748,6 +827,11 @@ a:hover {
   color: var(--color-info);
 }
 
+.status-chip-select.danger {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
 .stat-badge {
   font-size: 11px;
   padding: 2px 8px;
@@ -897,6 +981,33 @@ a:hover {
 .card-footer-row {
   display: flex;
   margin-bottom: 14px;
+}
+
+.followup-fields {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.followup-number-input {
+  width: 70px;
+  flex: 0 0 70px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.followup-number-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.followup-unit-select {
+  flex: 1;
+  font-size: 13px;
 }
 
 .btn-maximize-card {
@@ -1846,6 +1957,18 @@ button.pill-badge.active {
   color: var(--color-warning);
   padding: 2px 8px;
   border-radius: 12px;
+}
+
+.notes-btn-flash-success {
+  background-color: var(--color-success-bg, #E4F5E8) !important;
+  color: var(--color-success, #1F9254) !important;
+  border-color: var(--color-success, #1F9254) !important;
+}
+
+.notes-btn-flash-error {
+  background-color: var(--color-danger-bg, #FBE7E7) !important;
+  color: var(--color-danger, #C0392B) !important;
+  border-color: var(--color-danger, #C0392B) !important;
 }
 
 .chat-resource-card p {

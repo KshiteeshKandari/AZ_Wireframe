@@ -21,7 +21,7 @@ const DEFAULT_INTAKE_FIELDS = {
   patientAge: '65 - 74', patientStage: 'Middle-Stage (Moderate)',
   patientLanguage: 'English', livingSituation: 'All adults',
   caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
-  focusAreas: [], aiGoal: 'Find local resources', notes: ''
+  focusAreas: [], aiGoal: 'Find local resources', otherInfo: '', notes: ''
 };
 
 function buildResourceTagOptionsHTML(selectedTag) {
@@ -41,16 +41,24 @@ function mapToCanonicalResourceTag(tags) {
 }
 
 // Mirrors the resource cards on the Resources page (index.html) so chat answers can
-// surface a matching one. "verified" = listed under the ASI General Recommended Practice
-// column, i.e. ASI-vetted rather than general ADRD reading.
+// surface a matching one. "verified" = ASI-sourced (from the Verified Resources / Peer
+// Practices docs) rather than general reading - these render with an "ASI Approved" badge.
 const RESOURCES_DATA = [
-  { title: 'Caregiver Support Directory', tags: ['support', 'caregiver'], desc: 'Comprehensive catalog of online and local support meetings for family members dealing with primary care fatigue.', verified: false },
-  { title: 'Early ADRD Signs & Guidelines', tags: ['clinical', 'guides'], desc: "Clinical instructions on tracking early-stage Alzheimer's indicators, memory lapses, and communication guidelines.", verified: false },
-  { title: 'Safety & Wandering Prevention', tags: ['home safety', 'devices'], desc: 'Practical checklist for safety-proofing homes, installing tracking wristbands, and motion sensors.', verified: false },
-  { title: 'Cognitive Stimulation Activities', tags: ['therapy', 'engagement'], desc: "Activities, puzzle layouts, and visual stimulation guides designed for moderate-stage Alzheimer's patients.", verified: false },
-  { title: 'Approved Intake Protocols', tags: ['standard', 'intake'], desc: 'Official organization instructions on documenting initial clinical intake interviews, consent forms, and evaluations.', verified: true },
-  { title: 'Shared Decision Making Guide', tags: ['consult', 'coordination'], desc: 'A step-by-step consensus guide to navigating multi-caregiver disputes and aligns clinical and family strategies.', verified: true },
-  { title: 'Sundowning Mitigation Standards', tags: ['behavioral', 'approved'], desc: 'Best practices for managing late-afternoon agitation including calming routine structures and sensory light schedules.', verified: true }
+  // -- Verified Resources doc -> ADRD Resources column --
+  { title: 'ASI Caregiver Support Program', tags: ['support', 'caregiver'], desc: "Stressbuster Course (9 weeks), education and training, gap-filling funds for items like grab bars and technology, respite care, and monthly caregiver support groups. Eligibility: age 18+, resident of the city of Chicago, caring for someone with Alzheimer's, dementia, or another chronic condition. Contact: DFSS Senior Services Information & Assistance, aging@cityofchicago.org, 312-744-4016", verified: true },
+  { title: "Alzheimer's Association 24/7 Helpline", tags: ['support', 'caregiver'], desc: '225 N. Michigan Ave, Floor 17, Chicago, IL 60601 · 24/7 Helpline (800) 272-3900', verified: true },
+  { title: 'Suicide Prevention Lifeline', tags: ['support'], desc: '1-800-273-8255 · 24/7 free and confidential support. Help available in Spanish.', verified: true },
+  { title: 'Latino Alzheimer\'s & Memory Disorders Alliance (LAMDA)', tags: ['support', 'caregiver'], desc: "1609 36th Ave, Melrose Park, IL 60160 · (224) 715-4673. Spanish-language caregiver education, support groups, and case management for Latino families affected by Alzheimer's and memory disorders.", verified: true },
+  { title: 'Dementia & Driving Guidance', tags: ['home safety', 'guides'], desc: 'wvpersonalinjury.com · 304-345-6789. Guidance on when a person with dementia should stop driving and how to manage the transition.', verified: true },
+  { title: 'ASI Senior Health Insurance Program (SHIP)', tags: ['consult', 'support'], desc: 'Free Medicare and Medicaid benefits counseling for beneficiaries. Main: (773) 278-5130', verified: true },
+  { title: 'Legal Aid Chicago', tags: ['consult', 'standard'], desc: '120 S. LaSalle St. #900, Chicago, IL 60603 · (312) 341-1070. Free civil legal services for people living in poverty in Cook County.', verified: true },
+  // -- Peer Practices doc -> ASI General Recommended Practice column --
+  { title: 'Naming the Accusation as a Symptom', tags: ['behavioral', 'approved'], desc: 'Caregivers who hear first that an accusation is a known part of the disease, and not about them, are better able to use what comes next. Accusations often cluster at a particular time of day. Keeping a small amount of cash somewhere the person can find it themselves lets the search end without a confrontation.', verified: true },
+  { title: 'Reframing a Refused Service', tags: ['consult', 'case study'], desc: "Arguing the merits of a service tends not to work with caregivers who have refused help more than once. Asking what the care recipient would say if they could see how tired the caregiver was can move the conversation from the service to an earlier promise, opening the door to a short trial visit.", verified: true },
+  { title: 'Respite Before Support Group', tags: ['support', 'approved'], desc: "Caregivers who say they can't leave the person alone are usually right, and offering a group before solving that tends not to land. Raising the respite question first (an adult day program, a neighbor, a grandchild for two hours) makes the group offer usable. Where no respite option exists, a phone or online group has worked better than an in-person one.", verified: true },
+  { title: 'Answering the Placement Question', tags: ['consult', 'case study'], desc: 'Declining to answer the placement question directly, while offering to help think it through, has worked better than either answering or deflecting. Asking what a normal day looks like now, and what would have to change to keep going, often leads caregivers to answer their own question.', verified: true },
+  { title: "Raising a Caregiver's Own Symptom", tags: ['support', 'approved'], desc: "Raising a caregiver's own symptom again at a later call, rather than only at the call where they mention it, is what tends to get them to see a doctor. A single suggestion has usually not been enough on its own.", verified: true },
+  { title: 'Documenting Changes for the Doctor', tags: ['clinical', 'case study'], desc: 'Contradicting a family who says the person is just getting old has worked less well than asking what they have noticed that seemed different, and writing the examples down as they talk. Offering the list for them to take to the doctor changes what the visit produces.', verified: true }
 ];
 
 // --- Application State ---
@@ -183,7 +191,9 @@ const state = {
       details: 'Awaiting Physical Exam &bull; Primary: Henri Pierre',
       phase: 'Awaiting Physical Exam',
       blurb: 'Vascular screening review. Niece Marcelle needs medication tracking and nutrition support tools.',
-      cardStatus: 'Waiting Followup',
+      cardStatus: 'Awaiting Follow Up',
+      followUpValue: '2',
+      followUpUnit: 'weeks',
       patientName: 'Henri Pierre',
       patientAge: 79,
       intakeNotes: `Henri Pierre (Age 79) vascular screening review. Niece Marcelle Pierre daily checks. Focus is on maintaining cognitive engagement, nutrition management, and tracking medical adherence. Intake pending full physical exam. Initial screenings show minor short-term recall impairment. Marcelle is requesting support tools to organize medication dosages and ensure Henri receives healthy daily meals.`,
@@ -235,7 +245,10 @@ const state = {
       shared: false
     }
   ],
-  chatHistory: [
+  // General (no family pinned) chat thread. Each case additionally carries its own
+  // `chatHistory` array (see getActiveChatArray) so every family's conversation - and the
+  // context window built from it - stays separate and switches when the family tag changes.
+  generalChatHistory: [
     {
       sender: 'assistant',
       text: 'Hello! I am your AI Companion. I can help summarize case notes, generate local resources, draft family care plans, or analyze trends. Ask me anything about your active families (Rivera, Oklaz, Pierre).',
@@ -325,6 +338,7 @@ const DOM = {
   intakeMobilityInput: document.getElementById('intake-mobility'),
   intakeEmergencyName: document.getElementById('intake-emergency-name'),
   intakeEmergencyPhone: document.getElementById('intake-emergency-phone'),
+  intakeOtherInfo: document.getElementById('intake-other-info'),
   intakeNotesInput: document.getElementById('intake-notes'),
   
   // Dashboard triggering buttons
@@ -341,6 +355,7 @@ const DOM = {
   chatContextChip: document.getElementById('chat-context-chip'),
   chatContextChipLabel: document.getElementById('chat-context-chip-label'),
   chatContextChipClear: document.getElementById('chat-context-chip-clear'),
+  btnAddToNotes: document.getElementById('btn-add-to-notes'),
   
   // Resources DOM
   resourceSearch: document.getElementById('resource-search'),
@@ -359,6 +374,7 @@ const DOM = {
   btnModalCancel: document.getElementById('btn-modal-cancel'),
   btnModalDownload: document.getElementById('btn-modal-download'),
   btnToggleReportLanguage: document.getElementById('btn-toggle-report-language'),
+  btnRegenerateReportModal: document.getElementById('btn-regenerate-report-modal'),
   btnCloseCaseFromReport: document.getElementById('btn-close-case-from-report'),
   
   modalShareCard: document.getElementById('modal-share-card'),
@@ -383,6 +399,7 @@ const DOM = {
   editIntakePrimaryContact: document.getElementById('edit-intake-primary-contact'),
   eiZipCode: document.getElementById('ei-zip-code'),
   eiMobility: document.getElementById('ei-mobility'),
+  eiOtherInfo: document.getElementById('ei-other-info'),
   eiNotes: document.getElementById('ei-notes'),
   btnEditIntakeBack: document.getElementById('btn-edit-intake-back'),
   btnCancelEditIntake: document.getElementById('btn-cancel-edit-intake'),
@@ -391,6 +408,7 @@ const DOM = {
   editResourcesItems: document.getElementById('edit-resources-items'),
   btnAddResourceItem: document.getElementById('btn-add-resource-item'),
   editAiSummary: document.getElementById('edit-ai-summary'),
+  editCaseNotes: document.getElementById('edit-case-notes'),
   btnCancelEditor: document.getElementById('btn-cancel-editor'),
   btnSaveEditor: document.getElementById('btn-save-editor'),
   btnCloseEditorModal: document.getElementById('btn-close-editor-modal'),
@@ -417,7 +435,7 @@ const DOM = {
 };
 
 // --- App Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   restoreState();
   setupNavigation();
   setupCaseCardTabs();
@@ -437,6 +455,64 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSuggestions();
   switchPage(state.activePage); // reflects a restored session's page, not just the HTML default
   checkAgentStatus();
+}
+
+// --- Login Gate ---
+// Lightweight demo-wide password screen. Not real auth - just keeps the public GitHub Pages
+// link from being casually browsable. Unlimited attempts, no cooldown, no username.
+const LOGIN_GATE_KEY = 'azCompanionUnlocked_v1';
+const LOGIN_GATE_PASSWORD = 'azdemo@123';
+
+function setupLoginGate() {
+  const overlay = document.getElementById('login-gate-overlay');
+  const appContainer = document.querySelector('.app-container');
+  const form = document.getElementById('login-gate-form');
+  const input = document.getElementById('login-gate-input');
+  const errorMsg = document.getElementById('login-gate-error');
+
+  const unlock = () => {
+    try {
+      sessionStorage.setItem(LOGIN_GATE_KEY, 'true');
+    } catch (err) {
+      // Storage unavailable - unlock still works for this page load.
+    }
+    overlay.style.display = 'none';
+    appContainer.style.display = '';
+    initApp();
+  };
+
+  let alreadyUnlocked = false;
+  try {
+    alreadyUnlocked = sessionStorage.getItem(LOGIN_GATE_KEY) === 'true';
+  } catch (err) {
+    alreadyUnlocked = false;
+  }
+
+  if (alreadyUnlocked) {
+    overlay.style.display = 'none';
+    appContainer.style.display = '';
+    initApp();
+    return;
+  }
+
+  appContainer.style.display = 'none';
+  input.focus();
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (input.value === LOGIN_GATE_PASSWORD) {
+      errorMsg.style.display = 'none';
+      unlock();
+    } else {
+      errorMsg.style.display = 'block';
+      input.value = '';
+      input.focus();
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupLoginGate();
 });
 
 // --- Renders Master Routine ---
@@ -564,6 +640,7 @@ Caregiver Profile:
 
 Focus Areas: ${f.focusAreas && f.focusAreas.length > 0 ? f.focusAreas.join(', ') : 'None selected'}
 AI Goal: ${f.aiGoal}
+${f.otherInfo ? '\nOther Information: ' + f.otherInfo : ''}
 ${f.notes ? '\nNotes & Dynamics: ' + f.notes : ''}
   `.trim();
 }
@@ -629,6 +706,7 @@ function setupCaseCardTabs() {
     const zipCode = DOM.intakeZipInput ? DOM.intakeZipInput.value.trim() : '';
     const emergencyName = DOM.intakeEmergencyName ? DOM.intakeEmergencyName.value.trim() : '';
     const emergencyPhone = DOM.intakeEmergencyPhone ? DOM.intakeEmergencyPhone.value.trim() : '';
+    const otherInfo = DOM.intakeOtherInfo ? DOM.intakeOtherInfo.value.trim() : '';
     const notes = DOM.intakeNotesInput ? DOM.intakeNotesInput.value.trim() : '';
 
     const patientAge = getSelectedPillValue('patient-age', DOM.newCaseForm) || '65 - 74';
@@ -670,6 +748,7 @@ Caregiver Profile:
 
 Focus Areas: ${focusAreas.length > 0 ? focusAreas.join(', ') : 'None selected'}
 AI Goal: ${aiGoal}
+${otherInfo ? '\nOther Information: ' + otherInfo : ''}
 ${notes ? '\nNotes & Dynamics: ' + notes : ''}
       `.trim();
       
@@ -681,13 +760,13 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
         patientAge: patientAge,
         phase: 'Intake Submitted',
         blurb: `${patientStage} ADRD case for ${familyName.replace(/\s+Family/i, '')}. Primary caregiver relationship: ${caregiverRel}.`,
-        cardStatus: 'Waiting on Referral',
+        cardStatus: 'Continuing Services',
         intakeNotes: fullIntakeText,
         intakeFields: {
           primaryContact, zipCode, mobility: patientMobility,
           patientAge, patientStage, patientLanguage, livingSituation,
           caregiverRel, caregiverAge, caregiverStress,
-          focusAreas, aiGoal, notes
+          focusAreas, aiGoal, otherInfo, notes
         },
         timeline: [
           { date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }), label: 'Intake Form Submitted' }
@@ -766,7 +845,7 @@ function setupDashboardStatClicks() {
 function renderStats() {
   DOM.statWaitingReferralCount.textContent = state.cases.filter(c => c.cardStatus === 'Waiting on Referral').length;
   DOM.statContinuingServicesCount.textContent = state.cases.filter(c => c.cardStatus === 'Continuing Services').length;
-  DOM.statWaitingFollowupCount.textContent = state.cases.filter(c => c.cardStatus === 'Waiting Followup').length;
+  DOM.statWaitingFollowupCount.textContent = state.cases.filter(c => c.cardStatus === 'Awaiting Follow Up').length;
   DOM.familiesBadge.textContent = `${state.cases.length} ${state.cases.length === 1 ? 'Family' : 'Families'}`;
   persistState();
 }
@@ -815,7 +894,8 @@ function renderDashboard() {
 // --- Render Case Cards List ---
 function getStatusChipClass(status) {
   if (status === 'Continuing Services') return 'success';
-  if (status === 'Waiting Followup') return 'info';
+  if (status === 'Awaiting Follow Up') return 'info';
+  if (status === 'Follow up due') return 'danger';
   return 'warning'; // Waiting on Referral
 }
 
@@ -829,7 +909,7 @@ function renderCaseCards() {
     card.setAttribute('data-status', c.cardStatus);
 
     const chipClass = getStatusChipClass(c.cardStatus);
-    const statusOptions = ['Waiting on Referral', 'Continuing Services', 'Waiting Followup'];
+    const statusOptions = ['Waiting on Referral', 'Continuing Services', 'Awaiting Follow Up', 'Follow up due'];
 
     card.innerHTML = `
       <div class="case-card-header">
@@ -839,7 +919,7 @@ function renderCaseCards() {
         </div>
         <div class="card-header-actions">
           <button class="btn-ask-ai-from-card" data-case-id="${c.id}" title="Ask AI Companion about ${c.name}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
           </button>
           <button class="card-share-btn" data-family="${c.name}" title="Share Case Card">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
@@ -855,6 +935,16 @@ function renderCaseCards() {
           ${statusOptions.map(opt => `<option value="${opt}" ${opt === c.cardStatus ? 'selected' : ''}>${opt}</option>`).join('')}
         </select>
       </div>
+
+      ${c.cardStatus === 'Awaiting Follow Up' ? `
+      <div class="followup-fields" data-case-id="${c.id}">
+        <input type="number" min="0" class="followup-number-input" placeholder="e.g. 2" value="${c.followUpValue != null ? c.followUpValue : ''}">
+        <select class="followup-unit-select custom-select">
+          <option value="days" ${(c.followUpUnit || 'days') === 'days' ? 'selected' : ''}>Days</option>
+          <option value="weeks" ${c.followUpUnit === 'weeks' ? 'selected' : ''}>Weeks</option>
+          <option value="months" ${c.followUpUnit === 'months' ? 'selected' : ''}>Months</option>
+        </select>
+      </div>` : ''}
 
       <button class="btn btn-secondary btn-maximize-card" data-case-id="${c.id}">Maximize Card Editor</button>
     `;
@@ -878,6 +968,33 @@ function renderCaseCards() {
         select.className = `status-chip-select ${getStatusChipClass(select.value)}`;
         select.closest('.case-card-item').setAttribute('data-status', select.value);
         renderStats();
+        // Awaiting Follow Up reveals/hides the number + unit fields - re-render to reflect it
+        renderCaseCards();
+      }
+    });
+  });
+
+  // Follow-up number + unit fields (only rendered when status is "Awaiting Follow Up")
+  document.querySelectorAll('.followup-number-input').forEach(input => {
+    input.addEventListener('click', (e) => e.stopPropagation());
+    input.addEventListener('input', (e) => {
+      const caseId = e.target.closest('.followup-fields').getAttribute('data-case-id');
+      const caseItem = state.cases.find(c => c.id === caseId);
+      if (caseItem) {
+        caseItem.followUpValue = e.target.value;
+        persistState();
+      }
+    });
+  });
+
+  document.querySelectorAll('.followup-unit-select').forEach(select => {
+    select.addEventListener('click', (e) => e.stopPropagation());
+    select.addEventListener('change', (e) => {
+      const caseId = e.target.closest('.followup-fields').getAttribute('data-case-id');
+      const caseItem = state.cases.find(c => c.id === caseId);
+      if (caseItem) {
+        caseItem.followUpUnit = e.target.value;
+        persistState();
       }
     });
   });
@@ -899,7 +1016,7 @@ function renderCaseCards() {
       const caseId = btn.getAttribute('data-case-id');
       const caseItem = state.cases.find(c => c.id === caseId);
       state.activeChatCaseId = caseId;
-      renderChatContextChip();
+      renderChatHistory();
       persistState();
       switchPage('ai-chat');
       if (caseItem) {
@@ -954,11 +1071,15 @@ function renderReportsList() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           View Report
         </button>
+        <button class="btn btn-secondary btn-sm btn-regenerate-report-action" data-id="${c.id}" title="Regenerate this report using the latest case info and chat conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+          Regenerate
+        </button>
       `;
     } else {
       actionHTML = `
         <button class="btn btn-primary btn-sm btn-generate-report-action" data-id="${c.id}">
-          <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="margin-right: 4px; color: white;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="margin-right: 4px; color: white;"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
           Generate Report
         </button>
       `;
@@ -998,26 +1119,78 @@ function renderReportsList() {
   document.querySelectorAll('.btn-generate-report-action').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-id');
-      generateReportSimulated(id, btn);
+      generateReportSimulated(id, btn, false);
+    });
+  });
+
+  document.querySelectorAll('.btn-regenerate-report-action').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-id');
+      generateReportSimulated(id, btn, true);
     });
   });
 }
 
-function generateReportSimulated(caseId, buttonElement) {
+// Generates (or regenerates) a family report. When the worker is reachable, this sends the
+// full case context + chat transcript to the worker's `generate_report` action and stores
+// the real result back on the case; otherwise it falls back to the pre-baked mock content so
+// the demo still works offline.
+async function generateReportSimulated(caseId, buttonElement, isRegenerate = false) {
+  const originalButtonHTML = buttonElement.innerHTML;
+  const restoreButton = () => {
+    buttonElement.disabled = false;
+    buttonElement.style.cursor = '';
+    buttonElement.innerHTML = originalButtonHTML;
+  };
+
   buttonElement.disabled = true;
   buttonElement.style.cursor = 'wait';
   buttonElement.innerHTML = `
     <svg class="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="12" height="12" style="margin-right: 4px; animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke="rgba(0,0,0,0.1)"></circle><path d="M4 12a8 8 0 0 1 8-8V0C5.37 0 0 5.37 0 12h4z" fill="currentColor"></path></svg>
-    Generating...
+    ${isRegenerate ? 'Regenerating...' : 'Generating...'}
   `;
 
-  setTimeout(() => {
-    const caseIndex = state.cases.findIndex(c => c.id === caseId);
-    if (caseIndex !== -1) {
+  const caseIndex = state.cases.findIndex(c => c.id === caseId);
+  if (caseIndex === -1) return;
+  const caseItem = state.cases[caseIndex];
+
+  if (!CHAT_WORKER_URL) {
+    setTimeout(() => {
       state.cases[caseIndex].reportStatus = 'Generated';
+      persistState();
       renderAll();
+    }, 1500);
+    return;
+  }
+
+  try {
+    const reportContext = buildReportGenerationContext(caseItem);
+    const res = await fetch(CHAT_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'generate_report', reportContext })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Report generation failed');
+
+    caseItem.reportContent = data.reportContent;
+    caseItem.reportContentEs = data.reportContentEs;
+    caseItem.reportStatus = 'Generated';
+    caseItem.reportPeriod = caseItem.reportPeriod || 'Q2 2024';
+    persistState();
+    renderAll();
+
+    // If the report modal for this case is currently open, refresh it in place. renderAll()
+    // rebuilds the reports-list buttons fresh, but this button may live in the modal footer
+    // (which isn't part of that re-render), so restore it explicitly either way.
+    if (state.currentReportCaseId === caseId && DOM.modalReportViewer.classList.contains('active')) {
+      openReportModal(caseItem);
     }
-  }, 1500);
+    restoreButton();
+  } catch (err) {
+    restoreButton();
+    alert("Couldn't generate the report right now. Please try again in a moment.");
+  }
 }
 
 // --- Setup Resources Filters ---
@@ -1143,8 +1316,12 @@ function setupMaximizedEditor() {
       // 4. Save AI Summary
       state.cases[caseIndex].aiSummary = DOM.editAiSummary.value;
 
+      // 5. Save Notes
+      state.cases[caseIndex].notes = DOM.editCaseNotes.value;
+
       closeModal();
       renderAll();
+      persistState();
     }
   });
 }
@@ -1210,6 +1387,9 @@ function openMaximizedEditor(caseId) {
   // Load AI Summary
   DOM.editAiSummary.value = c.aiSummary;
 
+  // Load Notes
+  DOM.editCaseNotes.value = c.notes || '';
+
   // Default to Intake tab
   DOM.editorTabBtns.forEach(btn => btn.classList.remove('active'));
   DOM.editorPanes.forEach(pane => pane.classList.remove('active'));
@@ -1235,6 +1415,7 @@ function openEditIntakePage(caseId) {
   DOM.editIntakePrimaryContact.value = f.primaryContact;
   DOM.eiZipCode.value = f.zipCode;
   DOM.eiMobility.value = f.mobility;
+  DOM.eiOtherInfo.value = f.otherInfo || '';
   DOM.eiNotes.value = f.notes;
 
   setActivePillValue('ei-patient-age', f.patientAge, form);
@@ -1283,6 +1464,7 @@ function setupEditIntakePage() {
       caregiverStress: getSelectedPillValue('ei-caregiver-stress', form) || 'High / Burnout Risk',
       focusAreas: getSelectedMultiPillValues('ei-focus-areas', form),
       aiGoal: getSelectedPillValue('ei-ai-assist-goal', form) || 'Find local resources',
+      otherInfo: DOM.eiOtherInfo.value.trim(),
       notes: DOM.eiNotes.value.trim()
     };
 
@@ -1439,6 +1621,14 @@ function setupReportViewer() {
 
   DOM.btnToggleReportLanguage.addEventListener('click', toggleReportLanguage);
 
+  if (DOM.btnRegenerateReportModal) {
+    DOM.btnRegenerateReportModal.addEventListener('click', () => {
+      const caseId = state.currentReportCaseId;
+      if (!caseId) return;
+      generateReportSimulated(caseId, DOM.btnRegenerateReportModal, true);
+    });
+  }
+
   // Close case trigger triggers our custom options popup modal
   DOM.btnCloseCaseFromReport.addEventListener('click', () => {
     const caseId = DOM.btnCloseCaseFromReport.getAttribute('data-case-id');
@@ -1523,7 +1713,7 @@ function setupNotifications() {
         patientAge: 76,
         phase: 'Case Shared',
         blurb: 'Early cognitive lapses, shared by CHW Robert Mercer to coordinate home safety and daily routines.',
-        cardStatus: 'Waiting Followup',
+        cardStatus: 'Follow up due',
         handoffNotes: 'Sarah responds well to morning visits; avoid late-afternoon check-ins as she tires easily. Family prefers phone calls over email for scheduling.',
         intakeNotes: `Sarah Marcus (Age 76) is experiencing early cognitive lapses. Case shared by CHW Robert Mercer to collaborate on home safety checklists. Family is eager to establish structured daily routine support systems.`,
         intakeFields: {
@@ -1622,9 +1812,15 @@ function setupShareModal() {
     }
 
     const handoffNote = DOM.shareHandoffNotes.value.trim();
-    if (handoffNote && state.currentShareFamilyName) {
+    if (state.currentShareFamilyName) {
       const sharedCase = state.cases.find(c => c.name === state.currentShareFamilyName);
-      if (sharedCase) sharedCase.handoffNotes = handoffNote;
+      if (sharedCase) {
+        if (handoffNote) sharedCase.handoffNotes = handoffNote;
+        sharedCase.cardStatus = 'Follow up due';
+        renderCaseCards();
+        renderStats();
+        persistState();
+      }
     }
 
     alert('Case Card shared successfully with selected team members!');
@@ -1698,7 +1894,7 @@ function setupChat() {
   });
 
   DOM.btnNewChat.addEventListener('click', () => {
-    state.chatHistory = [];
+    clearActiveChatArray();
     DOM.chatInput.value = '';
     DOM.chatInput.style.height = 'auto';
 
@@ -1714,6 +1910,58 @@ function setupChat() {
       persistState();
     });
   }
+
+  if (DOM.btnAddToNotes) {
+    // Clicking a button normally collapses the page's text selection on mousedown
+    // (before the click handler even runs) - preventDefault here keeps the user's
+    // highlighted text intact so handleAddHighlightToNotes can still read it.
+    DOM.btnAddToNotes.addEventListener('mousedown', (e) => e.preventDefault());
+    DOM.btnAddToNotes.addEventListener('click', handleAddHighlightToNotes);
+  }
+}
+
+// Reads the current text selection (must be inside the chat messages pane), and appends it
+// to the notes of whichever family is currently pinned via the chat's family tag
+// (state.activeChatCaseId). Surfaces the outcome as a brief inline flash on the button itself
+// rather than a blocking alert, since this is meant to be a quick highlight-and-click action.
+function flashAddToNotesFeedback(message, isError) {
+  if (!DOM.btnAddToNotes) return;
+  const original = DOM.btnAddToNotes.getAttribute('data-original-title') || DOM.btnAddToNotes.title;
+  DOM.btnAddToNotes.setAttribute('data-original-title', original);
+  DOM.btnAddToNotes.title = message;
+  DOM.btnAddToNotes.classList.add(isError ? 'notes-btn-flash-error' : 'notes-btn-flash-success');
+  clearTimeout(DOM.btnAddToNotes._flashTimeout);
+  DOM.btnAddToNotes._flashTimeout = setTimeout(() => {
+    DOM.btnAddToNotes.title = original;
+    DOM.btnAddToNotes.classList.remove('notes-btn-flash-success', 'notes-btn-flash-error');
+  }, 1800);
+}
+
+function handleAddHighlightToNotes() {
+  const selection = window.getSelection();
+  const selectedText = selection ? selection.toString().trim() : '';
+
+  if (!selectedText || !selection.anchorNode || !DOM.chatMessagesBox.contains(selection.anchorNode)) {
+    flashAddToNotesFeedback('Highlight text in the chat first', true);
+    return;
+  }
+  if (!state.activeChatCaseId) {
+    flashAddToNotesFeedback('Select a family tag first', true);
+    return;
+  }
+
+  const caseIndex = state.cases.findIndex(c => c.id === state.activeChatCaseId);
+  if (caseIndex === -1) {
+    flashAddToNotesFeedback('Select a family tag first', true);
+    return;
+  }
+
+  const existing = state.cases[caseIndex].notes || '';
+  state.cases[caseIndex].notes = existing ? `${existing}\n\n${selectedText}` : selectedText;
+  persistState();
+
+  flashAddToNotesFeedback('Added to notes ✓', false);
+  selection.removeAllRanges();
 }
 
 // Render dynamic static parent suggestion chips
@@ -1740,7 +1988,7 @@ function handleCategorySelected(cat) {
   const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   
   // 1. Post User Choice
-  state.chatHistory.push({
+  getActiveChatArray().push({
     sender: 'user',
     text: `Let's discuss: ${cat.label}`,
     time: timeNow
@@ -1753,7 +2001,7 @@ function handleCategorySelected(cat) {
     removeChatTypingIndicator();
     
     // 2. Post AI response with dynamic buttons inside the bubble
-    state.chatHistory.push({
+    getActiveChatArray().push({
       sender: 'assistant',
       text: `Here are some common questions regarding <strong>${cat.label}</strong>. Select one below to explore:`,
       time: timeNow,
@@ -1768,6 +2016,104 @@ function scrollChatBottom() {
   setTimeout(() => {
     DOM.chatMessagesBox.scrollTop = DOM.chatMessagesBox.scrollHeight;
   }, 50);
+}
+
+// Returns the message array for whichever thread is currently active: the pinned family's
+// own chatHistory if a family tag is set (state.activeChatCaseId), otherwise the shared
+// general thread. Lazily creates a case's chatHistory array the first time it's needed so
+// older/seed cases that predate this field still work.
+function getActiveChatArray() {
+  if (state.activeChatCaseId) {
+    const c = state.cases.find(item => item.id === state.activeChatCaseId);
+    if (c) {
+      if (!c.chatHistory) c.chatHistory = [];
+      return c.chatHistory;
+    }
+  }
+  return state.generalChatHistory;
+}
+
+// "New Chat" clears only the currently active thread, not every family's history.
+function clearActiveChatArray() {
+  if (state.activeChatCaseId) {
+    const c = state.cases.find(item => item.id === state.activeChatCaseId);
+    if (c) c.chatHistory = [];
+  } else {
+    state.generalChatHistory = [];
+  }
+}
+
+function stripHTMLTags(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Builds the per-family "context window" sent to the worker alongside each question:
+// basic case info pulled from the Case Card (patient/caregiver, stage, focus areas, intake
+// notes, CHW notes) plus a short tail of the recent conversation, so answers can stay
+// grounded in who this family actually is without re-explaining it every message.
+const CHAT_CONTEXT_MAX_CHARS = 4000;
+function buildChatContextText(caseItem) {
+  if (!caseItem) return '';
+  const f = Object.assign({}, DEFAULT_INTAKE_FIELDS, caseItem.intakeFields || {});
+  const lines = [];
+  lines.push(`Family: ${caseItem.name}`);
+  if (caseItem.patientName) {
+    lines.push(`Patient: ${caseItem.patientName}${caseItem.patientAge ? ' (age ' + caseItem.patientAge + ')' : ''}`);
+  }
+  if (f.primaryContact) lines.push(`Primary contact/caregiver: ${f.primaryContact} (${f.caregiverRel})`);
+  lines.push(`Stage: ${f.patientStage}`);
+  if (f.focusAreas && f.focusAreas.length) lines.push(`Focus areas: ${f.focusAreas.join(', ')}`);
+  if (caseItem.intakeNotes) lines.push(`Intake notes: ${caseItem.intakeNotes}`);
+  if (caseItem.notes) lines.push(`CHW notes: ${caseItem.notes}`);
+
+  const recentMessages = (caseItem.chatHistory || []).slice(-6);
+  if (recentMessages.length > 0) {
+    const recentText = recentMessages
+      .map(m => `${m.sender === 'user' ? 'CHW' : 'Assistant'}: ${stripHTMLTags(m.text).slice(0, 300)}`)
+      .join('\n');
+    lines.push(`Recent conversation:\n${recentText}`);
+  }
+
+  return lines.join('\n').slice(0, CHAT_CONTEXT_MAX_CHARS);
+}
+
+// Builds the full context sent to the worker to generate (or regenerate) a family report.
+// Unlike buildChatContextText (which trims to a short recent tail to keep chat replies snappy
+// and cheap), this pulls the FULL per-family chat transcript plus notes and intake fields,
+// since report quality benefits from the whole conversation and this only runs on-demand.
+const CHW_NAME = 'Jane Doe';
+function buildReportGenerationContext(caseItem) {
+  if (!caseItem) return '';
+  const f = Object.assign({}, DEFAULT_INTAKE_FIELDS, caseItem.intakeFields || {});
+  const lines = [];
+  lines.push(`Family: ${caseItem.name}`);
+  if (caseItem.patientName) {
+    lines.push(`Patient: ${caseItem.patientName}${caseItem.patientAge ? ' (age ' + caseItem.patientAge + ')' : ''}`);
+  }
+  if (f.primaryContact) lines.push(`Primary contact/caregiver: ${f.primaryContact} (${f.caregiverRel})`);
+  lines.push(`Stage: ${f.patientStage}`);
+  if (f.focusAreas && f.focusAreas.length) lines.push(`Focus areas: ${f.focusAreas.join(', ')}`);
+  if (caseItem.intakeNotes) lines.push(`Intake notes: ${caseItem.intakeNotes}`);
+  if (caseItem.notes) lines.push(`CHW notes: ${caseItem.notes}`);
+  lines.push(`CHW name: ${CHW_NAME}`);
+  lines.push(`Today's date: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}`);
+
+  if (caseItem.timeline && caseItem.timeline.length) {
+    const upcoming = caseItem.timeline[caseItem.timeline.length - 1];
+    lines.push(`Next scheduled item: ${upcoming.label} on ${upcoming.date}`);
+  }
+
+  const fullHistory = caseItem.chatHistory || [];
+  if (fullHistory.length > 0) {
+    const transcript = fullHistory
+      .map(m => `${m.sender === 'user' ? 'CHW' : 'Assistant'}: ${stripHTMLTags(m.text)}`)
+      .join('\n');
+    lines.push(`Full conversation so far:\n${transcript}`);
+  }
+
+  return lines.join('\n');
 }
 
 // Reflects state.activeChatCaseId in the chat header as a small dismissible chip
@@ -1788,12 +2134,13 @@ function renderChatHistory() {
   renderChatContextChip();
   DOM.chatMessagesBox.innerHTML = '';
 
-  if (state.chatHistory.length === 0) {
+  const activeChatArray = getActiveChatArray();
+  if (activeChatArray.length === 0) {
     const welcomeBox = document.createElement('div');
     welcomeBox.className = 'chat-message assistant';
     welcomeBox.innerHTML = `
       <div class="message-avatar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
       </div>
       <div class="message-content-wrapper">
         <div class="message-sender">AZ Companion</div>
@@ -1807,13 +2154,13 @@ function renderChatHistory() {
     return;
   }
   
-  state.chatHistory.forEach((msg, msgIndex) => {
+  activeChatArray.forEach((msg, msgIndex) => {
     const msgDiv = document.createElement('div');
     msgDiv.className = `chat-message ${msg.sender}`;
     
     let avatarContent = 'JD';
     if (msg.sender === 'assistant') {
-      avatarContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+      avatarContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>`;
     }
     
     // Embed card logic
@@ -1866,7 +2213,7 @@ function renderChatHistory() {
         <div class="chat-resource-card">
           <div class="chat-resource-header">
             <h4>${escapeHTML(msg.resource.title)}</h4>
-            ${msg.resource.verified ? '<span class="verified-badge">Verified by ASI</span>' : ''}
+            ${msg.resource.verified ? '<span class="verified-badge">ASI Approved</span>' : ''}
           </div>
           <p>${escapeHTML(msg.resource.desc)}</p>
           <div class="tag-row">${tagsHTML}</div>
@@ -1959,7 +2306,7 @@ function handleChatSend() {
   DOM.chatInput.style.height = 'auto';
 
   const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  state.chatHistory.push({
+  getActiveChatArray().push({
     sender: 'user',
     text: query,
     time: timeNow
@@ -2004,10 +2351,12 @@ async function checkAgentStatus() {
 
 async function fetchWorkerChatResponse(query) {
   try {
+    const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
+    const context = buildChatContextText(activeCase);
     const res = await fetch(CHAT_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: query })
+      body: JSON.stringify({ question: query, context })
     });
     const data = await res.json();
     removeChatTypingIndicator();
@@ -2026,7 +2375,7 @@ async function fetchWorkerChatResponse(query) {
 
 function appendAssistantChatMessage(text, { raw = false, resource = null } = {}) {
   const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  state.chatHistory.push({ sender: 'assistant', text, time: timeNow, raw, resource });
+  getActiveChatArray().push({ sender: 'assistant', text, time: timeNow, raw, resource });
   renderChatHistory();
   scrollChatBottom();
 }
@@ -2140,7 +2489,7 @@ function showChatTypingIndicator() {
   typingDiv.className = 'chat-message assistant typing-indicator-wrapper';
   typingDiv.id = 'chat-typing-indicator';
   
-  const avatarContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+  const avatarContent = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>`;
   
   typingDiv.innerHTML = `
     <div class="message-avatar">${avatarContent}</div>
@@ -2368,7 +2717,7 @@ function generateMockAIResponse(userQuery) {
 
   // Save to history
   const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  state.chatHistory.push({
+  getActiveChatArray().push({
     sender: 'assistant',
     text: text,
     time: timeNow,

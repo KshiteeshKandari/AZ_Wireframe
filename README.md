@@ -35,24 +35,6 @@ AZ Companion helps CHWs manage families across the full care lifecycle, from int
 | Hosting | GitHub Pages |
 
 ---
-
-## Running Locally
-
-No build step required — it's a static site.
-
-```bash
-# Clone the repo
-git clone https://github.com/KshiteeshKandari/AZ_Wireframe.git
-cd AZ_Wireframe
-
-# Serve with any static server, e.g.:
-npx serve .
-# or
-python -m http.server 5500
-```
-
-Open `http://localhost:5500` in your browser.
-
 > The AI Chat will run in **offline / mock mode** by default if the Worker URL is unreachable. To disable live AI and always use mock responses, set `CHAT_WORKER_URL = ''` on line 10 of `app.js`.
 
 ## Project Structure

@@ -6,17 +6,20 @@
 
 ## Overview
 
-AZ Companion helps CHWs manage families across the full care lifecycle — from intake and case planning through to archiving closed cases. An integrated AI Chat assistant (backed by a Cloudflare Worker + GPT-5-nano) answers care-related questions using a curated ADRD knowledge base, and can surface relevant resources directly into a family's report.
+AZ Companion helps CHWs manage families across the full care lifecycle — from intake and case planning through to archiving closed cases. An integrated AI Chat assistant (backed by a Cloudflare Worker + GPT-5-nano) answers care-related questions using a curated ADRD knowledge base, keeps a separate conversation and context window per family, and can turn that conversation into a real, personalized family report.
 
 ---
 
 ## Features
 
-- **Case Cards** — Track each family's phase, caregiver stress level, status, and timeline milestones. Maximize any card to edit intake info, resources, timeline, and AI summary in one place.
+- **Case Cards** — Track each family's phase, caregiver stress level, status, and timeline milestones. Maximize any card to edit intake info, resources, timeline, AI summary, and notes in one place.
 - **Intake Editor** — Structured intake form (patient profile, caregiver profile, focus areas, AI goal) pre-populated when editing an existing family. Saves back to the case and reflects everywhere.
-- **AI Chat Assistant** — RAG-powered chat using a manually curated ADRD knowledge base, deployed as a Cloudflare Worker. Context-aware: pin a family to the chat and add AI-suggested resources directly to their Family Report.
-- **Family Report** — Auto-generated bilingual (EN/ES) reports per family. Resources section updates live as resources are added via the AI Chat or the card editor.
-- **Curated Resources** — Two-column library: ADRD Resources (book icon) and ASI General Recommended Practice (people icon). Resources can be added when closing a case.
+- **AI Chat Assistant** — RAG-powered chat over a curated knowledge base (the ADRD care manual, plus separately curated ASI Verified Resources and ASI Peer Practices docs), deployed as a Cloudflare Worker. Answers built from the ASI-curated sources are labeled **"ASI Approved"** in-chat.
+- **Per-Family Chat Threads & Context** — Each family (and a general/no-family thread) keeps its own independent chat history, automatically switching when you pin a different family. A per-family context window — built from that family's Case Card fields plus recent conversation — is sent with every question so answers stay personalized without being treated as a factual source.
+- **Highlight-to-Notes** — Select any text in an AI Chat message and click the notes button in the chat header to add it straight to that family's Notes.
+- **Notes Tab** — A dedicated, freely editable Notes tab in the maximized Case Card editor, populated by the highlight-to-notes button or typed directly.
+- **Family Report Generation** — Generates a real, bilingual (EN/ES) report per family from the worker, synthesized from the family's Case Card info, CHW notes, and full AI Chat transcript — matching a fixed letter-style format (greeting, numbered action items, next check-up). A **Regenerate** action (in the reports list and the report viewer) rebuilds the report on demand using any new info added since the last generation. Resources section updates live as resources are added via the AI Chat or the card editor.
+- **Curated Resources** — Two-column library seeded from the ASI Verified Resources and ASI Peer Practices docs, each tagged "ASI Approved". Additional resources can be added when closing a case.
 - **Close Case Flow** — Guided archive dialog: auto-generates an anonymized case summary (editable before confirming), with clear options to close without saving, save to ADRD Resources, or save to ASI Practices.
 - **My Cases Dashboard** — Overview of all active families with quick stats, status filters, and one-click jump to a case card.
 - **Session Persistence** — App state persists across page refreshes via `sessionStorage`.
@@ -64,16 +67,23 @@ AZ_Wireframe/
 ├── styles.css          # All styles
 └── worker/             # Cloudflare Worker (AI Chat backend)
     ├── src/
-    │   ├── index.js        # Request handler, CORS, rate limiting
-    │   ├── embed-query.js  # Embeds incoming user question
-    │   ├── retrieval.js    # Cosine similarity retrieval over chunks
-    │   ├── prompt.js       # System prompt builder
-    │   └── rate-limit.js   # Per-IP KV-based rate limiter
+    │   ├── index.js          # Request handler, CORS, rate limiting, chat + report generation routes
+    │   ├── embed-query.js    # Embeds incoming user question
+    │   ├── retrieval.js      # Cosine similarity retrieval, merged across manual + curated sources
+    │   ├── prompt.js         # Chat system prompt builder (source-aware, ASI Approved labeling, family context)
+    │   ├── report-prompt.js  # Family report system prompt builder (bilingual, structured letter format)
+    │   └── rate-limit.js     # Per-IP KV-based rate limiter
     ├── data/
-    │   ├── manual-chunks.json      # Chunked ADRD knowledge base
-    │   └── manual-embeddings.json  # Pre-computed embeddings
+    │   ├── manual-chunks.json                  # Chunked ADRD manual knowledge base
+    │   ├── manual-embeddings.json               # Pre-computed embeddings
+    │   ├── verified-resources-chunks.json       # Chunked ASI Verified Resources doc
+    │   ├── verified-resources-embeddings.json   # Pre-computed embeddings
+    │   ├── peer-practices-chunks.json           # Chunked ASI Peer Practices doc
+    │   └── peer-practices-embeddings.json       # Pre-computed embeddings
     ├── scripts/
-    │   ├── chunk-manual.js   # Preprocessing: text → chunks
-    │   └── embed-chunks.js   # Preprocessing: chunks → embeddings
+    │   ├── chunk-manual.js    # Preprocessing: manual text → chunks
+    │   ├── embed-chunks.js    # Preprocessing: manual chunks → embeddings
+    │   ├── chunk-curated.js   # Preprocessing: curated docs → chunks
+    │   └── embed-curated.js   # Preprocessing: curated chunks → embeddings
     └── wrangler.toml
 ```

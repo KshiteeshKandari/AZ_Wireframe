@@ -136,11 +136,25 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
   padding: 20px;
+  overflow: hidden;
+}
+
+/* Blurred sidebar background image behind the login form */
+.login-gate-overlay::before {
+  content: '';
+  position: absolute;
+  inset: -30px;
+  background-image: url('Images/behind_nav%20bar.png');
+  background-size: cover;
+  background-position: center;
+  filter: blur(12px) brightness(0.6);
+  z-index: 0;
 }
 
 .login-gate-box {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 380px;
   background: var(--bg-card, #fff);
@@ -1074,6 +1088,10 @@ a:hover {
   color: var(--color-primary);
 }
 
+.btn-primary .sparkle-icon {
+  color: inherit;
+}
+
 /* Maximized Card Editor Modal Layout styles */
 .editor-modal {
   width: 720px;
@@ -1953,10 +1971,30 @@ button.pill-badge.active {
   font-weight: 800;
   text-transform: uppercase;
   white-space: nowrap;
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning);
+  background-color: #E4F5E8;
+  color: #1F9254;
   padding: 2px 8px;
   border-radius: 12px;
+}
+
+.text-orange {
+  color: #C05C00 !important;
+}
+
+/* Calendar day visual-selection state */
+.day.day-selected {
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+/* Highlight-to-notes button dims when no text is selected in chat */
+.notes-btn-inactive {
+  opacity: 0.4;
+}
+.notes-btn-inactive:hover {
+  opacity: 0.65;
 }
 
 .notes-btn-flash-success {

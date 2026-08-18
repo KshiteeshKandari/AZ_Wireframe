@@ -24,6 +24,7 @@ function cosineSimilarity(a, b) {
 // pooled across the manual and the two ASI-curated docs (verified resources, peer practices).
 export function retrieveTopChunks(queryEmbedding, topK = 5) {
   const scored = ALL_CHUNKS.map(chunk => ({
+    id: chunk.id,
     page: chunk.page,
     text: chunk.text,
     source: chunk.source,

@@ -43,23 +43,30 @@ function mapToCanonicalResourceTag(tags) {
 // Mirrors the resource cards on the Resources page (index.html) so chat answers can
 // surface a matching one. "verified" = ASI-sourced (from the Verified Resources / Peer
 // Practices docs) rather than general reading - these render with an "ASI Approved" badge.
+// id fields match the worker's chunk ids so the server-returned resource list can be
+// mapped back to full card data without client-side keyword guessing.
 const RESOURCES_DATA = [
   // -- Verified Resources doc -> ADRD Resources column --
-  { title: 'ASI Caregiver Support Program', tags: ['support', 'caregiver'], desc: "Stressbuster Course (9 weeks), education and training, gap-filling funds for items like grab bars and technology, respite care, and monthly caregiver support groups. Eligibility: age 18+, resident of the city of Chicago, caring for someone with Alzheimer's, dementia, or another chronic condition. Contact: DFSS Senior Services Information & Assistance, aging@cityofchicago.org, 312-744-4016", verified: true },
-  { title: "Alzheimer's Association 24/7 Helpline", tags: ['support', 'caregiver'], desc: '225 N. Michigan Ave, Floor 17, Chicago, IL 60601 · 24/7 Helpline (800) 272-3900', verified: true },
-  { title: 'Suicide Prevention Lifeline', tags: ['support'], desc: '1-800-273-8255 · 24/7 free and confidential support. Help available in Spanish.', verified: true },
-  { title: 'Latino Alzheimer\'s & Memory Disorders Alliance (LAMDA)', tags: ['support', 'caregiver'], desc: "1609 36th Ave, Melrose Park, IL 60160 · (224) 715-4673. Spanish-language caregiver education, support groups, and case management for Latino families affected by Alzheimer's and memory disorders.", verified: true },
-  { title: 'Dementia & Driving Guidance', tags: ['home safety', 'guides'], desc: 'wvpersonalinjury.com · 304-345-6789. Guidance on when a person with dementia should stop driving and how to manage the transition.', verified: true },
-  { title: 'ASI Senior Health Insurance Program (SHIP)', tags: ['consult', 'support'], desc: 'Free Medicare and Medicaid benefits counseling for beneficiaries. Main: (773) 278-5130', verified: true },
-  { title: 'Legal Aid Chicago', tags: ['consult', 'standard'], desc: '120 S. LaSalle St. #900, Chicago, IL 60603 · (312) 341-1070. Free civil legal services for people living in poverty in Cook County.', verified: true },
+  { id: 'verified-resources-0', title: 'ASI Caregiver Support Program', tags: ['support', 'caregiver'], desc: "Stressbuster Course (9 weeks), education and training, gap-filling funds for items like grab bars and technology, respite care, and monthly caregiver support groups. Eligibility: age 18+, resident of the city of Chicago, caring for someone with Alzheimer's, dementia, or another chronic condition. Contact: DFSS Senior Services Information & Assistance, aging@cityofchicago.org, 312-744-4016", verified: true },
+  { id: 'verified-resources-1', title: "Alzheimer's Association 24/7 Helpline", tags: ['support', 'caregiver'], desc: '225 N. Michigan Ave, Floor 17, Chicago, IL 60601 · 24/7 Helpline (800) 272-3900', verified: true },
+  { id: 'verified-resources-2', title: 'Suicide Prevention Lifeline', tags: ['support'], desc: '1-800-273-8255 · 24/7 free and confidential support. Help available in Spanish.', verified: true },
+  { id: 'verified-resources-3', title: 'Latino Alzheimer\'s & Memory Disorders Alliance (LAMDA)', tags: ['support', 'caregiver'], desc: "1609 36th Ave, Melrose Park, IL 60160 · (224) 715-4673. Spanish-language caregiver education, support groups, and case management for Latino families affected by Alzheimer's and memory disorders.", verified: true },
+  { id: 'verified-resources-4', title: 'Dementia & Driving Guidance', tags: ['home safety', 'guides'], desc: 'wvpersonalinjury.com · 304-345-6789. Guidance on when a person with dementia should stop driving and how to manage the transition.', verified: true },
+  { id: 'verified-resources-5', title: 'ASI Senior Health Insurance Program (SHIP)', tags: ['clinical', 'support'], desc: 'Free Medicare and Medicaid benefits counseling for beneficiaries. Main: (773) 278-5130', verified: true },
+  { id: 'verified-resources-6', title: 'Legal Aid Chicago', tags: ['coordination'], desc: '120 S. LaSalle St. #900, Chicago, IL 60603 · (312) 341-1070. Free civil legal services for people living in poverty in Cook County.', verified: true },
   // -- Peer Practices doc -> ASI General Recommended Practice column --
-  { title: 'Naming the Accusation as a Symptom', tags: ['behavioral', 'approved'], desc: 'Caregivers who hear first that an accusation is a known part of the disease, and not about them, are better able to use what comes next. Accusations often cluster at a particular time of day. Keeping a small amount of cash somewhere the person can find it themselves lets the search end without a confrontation.', verified: true },
-  { title: 'Reframing a Refused Service', tags: ['consult', 'case study'], desc: "Arguing the merits of a service tends not to work with caregivers who have refused help more than once. Asking what the care recipient would say if they could see how tired the caregiver was can move the conversation from the service to an earlier promise, opening the door to a short trial visit.", verified: true },
-  { title: 'Respite Before Support Group', tags: ['support', 'approved'], desc: "Caregivers who say they can't leave the person alone are usually right, and offering a group before solving that tends not to land. Raising the respite question first (an adult day program, a neighbor, a grandchild for two hours) makes the group offer usable. Where no respite option exists, a phone or online group has worked better than an in-person one.", verified: true },
-  { title: 'Answering the Placement Question', tags: ['consult', 'case study'], desc: 'Declining to answer the placement question directly, while offering to help think it through, has worked better than either answering or deflecting. Asking what a normal day looks like now, and what would have to change to keep going, often leads caregivers to answer their own question.', verified: true },
-  { title: "Raising a Caregiver's Own Symptom", tags: ['support', 'approved'], desc: "Raising a caregiver's own symptom again at a later call, rather than only at the call where they mention it, is what tends to get them to see a doctor. A single suggestion has usually not been enough on its own.", verified: true },
-  { title: 'Documenting Changes for the Doctor', tags: ['clinical', 'case study'], desc: 'Contradicting a family who says the person is just getting old has worked less well than asking what they have noticed that seemed different, and writing the examples down as they talk. Offering the list for them to take to the doctor changes what the visit produces.', verified: true }
+  { id: 'peer-practices-0', title: 'Naming the Accusation as a Symptom', tags: ['behavioral', 'caregiver'], desc: 'Caregivers who hear first that an accusation is a known part of the disease, and not about them, are better able to use what comes next. Accusations often cluster at a particular time of day. Keeping a small amount of cash somewhere the person can find it themselves lets the search end without a confrontation.', verified: true },
+  { id: 'peer-practices-1', title: 'Reframing a Refused Service', tags: ['caregiver', 'coordination'], desc: "Arguing the merits of a service tends not to work with caregivers who have refused help more than once. Asking what the care recipient would say if they could see how tired the caregiver was can move the conversation from the service to an earlier promise, opening the door to a short trial visit.", verified: true },
+  { id: 'peer-practices-2', title: 'Respite Before Support Group', tags: ['support', 'caregiver'], desc: "Caregivers who say they can't leave the person alone are usually right, and offering a group before solving that tends not to land. Raising the respite question first (an adult day program, a neighbor, a grandchild for two hours) makes the group offer usable. Where no respite option exists, a phone or online group has worked better than an in-person one.", verified: true },
+  { id: 'peer-practices-3', title: 'Answering the Placement Question', tags: ['coordination', 'caregiver'], desc: 'Declining to answer the placement question directly, while offering to help think it through, has worked better than either answering or deflecting. Asking what a normal day looks like now, and what would have to change to keep going, often leads caregivers to answer their own question.', verified: true },
+  { id: 'peer-practices-4', title: "Raising a Caregiver's Own Symptom", tags: ['caregiver', 'clinical'], desc: "Raising a caregiver's own symptom again at a later call, rather than only at the call where they mention it, is what tends to get them to see a doctor. A single suggestion has usually not been enough on its own.", verified: true },
+  { id: 'peer-practices-5', title: 'Documenting Changes for the Doctor', tags: ['clinical', 'coordination'], desc: 'Contradicting a family who says the person is just getting old has worked less well than asking what they have noticed that seemed different, and writing the examples down as they talk. Offering the list for them to take to the doctor changes what the visit produces.', verified: true }
 ];
+
+// Look up a curated resource card by the worker's chunk id (e.g. "verified-resources-0").
+function findResourceById(id) {
+  return RESOURCES_DATA.find(r => r.id === id) || null;
+}
 
 // --- Application State ---
 const state = {
@@ -371,7 +378,6 @@ const DOM = {
   reportModalTitle: document.getElementById('report-modal-title'),
   reportModalTextContent: document.getElementById('report-modal-text-content'),
   btnCloseReportModal: document.getElementById('btn-close-report-modal'),
-  btnModalCancel: document.getElementById('btn-modal-cancel'),
   btnModalDownload: document.getElementById('btn-modal-download'),
   btnToggleReportLanguage: document.getElementById('btn-toggle-report-language'),
   btnRegenerateReportModal: document.getElementById('btn-regenerate-report-modal'),
@@ -1531,21 +1537,50 @@ function addResourceToLibrary(name, url, familyName) {
   container.appendChild(card);
 }
 
-// Auto-generates a non-identifying starting point for the archived card: a title built
-// from the case phase (not the family name), and the AI summary with the patient's name
-// scrubbed out. This is a starting draft, not a guarantee - the CHW reviews and edits it
-// in the modal before anything is actually archived.
-function buildAnonymizedCaseSummary(c) {
-  const title = `${c.phase} Case Summary`;
-  let content = c.aiSummary || '';
-  const firstName = (c.patientName || '').split(' ')[0];
-  if (c.patientName) {
-    content = content.split(c.patientName).join('the patient');
+// Builds a context string for the close-summary LLM call: the case's structured fields
+// plus the full chat transcript so the model has enough to generate a useful case study.
+function buildCloseSummaryContext(c) {
+  const lines = [
+    `Patient: ${c.patientName || 'Unknown'}`,
+    `Caregiver: ${c.caregiverName || 'Unknown'}`,
+    `Phase: ${c.phase || 'Unknown'}`,
+    `Status: ${c.status || 'Unknown'}`,
+    `Diagnosis: ${c.diagnosis || 'Not specified'}`,
+    `Other info: ${c.otherInfo || 'None'}`,
+  ];
+  const transcript = (c.chatHistory || []).map(m => `${m.sender === 'user' ? 'CHW' : 'AI'}: ${m.text}`).join('\n');
+  if (transcript) lines.push('', 'Chat transcript:', transcript);
+  return lines.join('\n');
+}
+
+async function renderCloseCaseSummaryPreview(c, previewContainer) {
+  previewContainer.innerHTML = `<p style="color:var(--text-secondary);margin:0;">Generating summary...</p>`;
+  try {
+    const caseContext = buildCloseSummaryContext(c);
+    const res = await fetch(CHAT_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'generate_close_summary', caseContext })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.title || !data.content) throw new Error('Bad response');
+    previewContainer.innerHTML = `
+      <p style="margin: 0 0 10px; color: var(--text-secondary);">AI-generated summary - review and edit before confirming. No names or identifying details will be saved.</p>
+      <label class="group-label" for="archive-edit-title">Title</label>
+      <input type="text" id="archive-edit-title" value="${escapeHTML(data.title)}" style="width: 100%; margin-bottom: 10px;">
+      <label class="group-label" for="archive-edit-content">Content</label>
+      <textarea id="archive-edit-content" rows="4" style="width: 100%;">${escapeHTML(data.content)}</textarea>
+    `;
+  } catch {
+    // Fallback to simple phase-based placeholder if worker is unavailable
+    previewContainer.innerHTML = `
+      <p style="margin: 0 0 10px; color: var(--text-secondary);">Could not generate summary automatically - please fill in manually.</p>
+      <label class="group-label" for="archive-edit-title">Title</label>
+      <input type="text" id="archive-edit-title" value="${escapeHTML(c.phase + ' Case Study')}" style="width: 100%; margin-bottom: 10px;">
+      <label class="group-label" for="archive-edit-content">Content</label>
+      <textarea id="archive-edit-content" rows="4" style="width: 100%;"></textarea>
+    `;
   }
-  if (firstName && firstName !== c.patientName) {
-    content = content.replace(new RegExp(`\\b${firstName}\\b`, 'g'), 'the patient');
-  }
-  return { title, content };
 }
 
 function executeCaseArchiving(addResource = false, targetLibrary = '') {
@@ -1557,11 +1592,9 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
     const containerId = targetLibrary === 'adrd' ? 'adrd-resources-list' : 'practices-resources-list';
     const container = document.getElementById(containerId);
 
-    // Use the CHW-reviewed/edited title & content, not the raw case data - this is the
-    // whole point of the review step: nothing identifying gets archived without a look first.
-    const titleInput = document.getElementById('archive-edit-title');
+    // Use the CHW-reviewed/edited content only - no title on archived user-contributed cards
+    // to avoid any risk of identifying information leaking through the title field.
     const contentInput = document.getElementById('archive-edit-content');
-    const title = titleInput ? titleInput.value.trim() : `${c.phase} Case Summary`;
     const content = contentInput ? contentInput.value.trim() : '';
 
     if (container) {
@@ -1569,7 +1602,6 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
       card.className = 'resource-card-item';
       card.setAttribute('data-tags', 'case study,clinical');
       card.innerHTML = `
-        <h3>${escapeHTML(title)}</h3>
         <p>${escapeHTML(content)}</p>
         <div class="tag-row">
           <span class="mini-tag">Case Study</span>
@@ -1588,21 +1620,13 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
   renderAll();
 }
 
-function openCloseCaseOptionsModal(caseId) {
+async function openCloseCaseOptionsModal(caseId) {
   const c = state.cases.find(item => item.id === caseId);
   if (!c) return;
 
   DOM.btnCloseCaseFromReport.setAttribute('data-case-id', caseId);
-
-  const { title, content } = buildAnonymizedCaseSummary(c);
-  DOM.archiveRecommendationsPreview.innerHTML = `
-    <p style="margin: 0 0 10px; color: var(--text-secondary);">This is what would be added to your Curated Resources library. It's auto-generated to avoid naming the family - review and edit before confirming.</p>
-    <label class="group-label" for="archive-edit-title">Title</label>
-    <input type="text" id="archive-edit-title" value="${escapeHTML(title)}" style="width: 100%; margin-bottom: 10px;">
-    <label class="group-label" for="archive-edit-content">Content</label>
-    <textarea id="archive-edit-content" rows="4" style="width: 100%;">${escapeHTML(content)}</textarea>
-  `;
   DOM.modalCloseOptions.classList.add('active');
+  await renderCloseCaseSummaryPreview(c, DOM.archiveRecommendationsPreview);
 }
 
 // --- Report Viewer Modal ---
@@ -1612,12 +1636,69 @@ function setupReportViewer() {
   };
 
   DOM.btnCloseReportModal.addEventListener('click', closeModal);
-  DOM.btnModalCancel.addEventListener('click', closeModal);
-  
+
   DOM.btnModalDownload.addEventListener('click', () => {
-    alert('Report downloaded successfully as PDF!');
-    closeModal();
+    const caseItem = state.cases.find(c => c.id === state.currentReportCaseId);
+    const lang = state.reportLangSpanish ? 'es' : 'en';
+    const body = caseItem
+      ? (state.reportLangSpanish ? caseItem.reportContentEs : caseItem.reportContent) || ''
+      : '';
+    const resourcesText = caseItem
+      ? (caseItem.resources || []).map(r => `- ${r.name}${r.url && r.url !== '#' ? ': ' + r.url : ''}`).join('\n')
+      : '';
+    const fullText = resourcesText ? `${body}\n\nResources:\n${resourcesText}` : body;
+    // Strip HTML tags for plain-text clipboard output
+    const tmp = document.createElement('div');
+    tmp.innerHTML = fullText;
+    const plainText = tmp.textContent || tmp.innerText || '';
+
+    function execCommandFallback(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (_) {}
+      document.body.removeChild(ta);
+      return ok;
+    }
+
+    const btn = DOM.btnModalDownload;
+    const originalLabel = btn.textContent;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(plainText).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = originalLabel; }, 1800);
+      }).catch(() => {
+        if (execCommandFallback(plainText)) {
+          btn.textContent = 'Copied!';
+        } else {
+          btn.textContent = 'Copy failed';
+        }
+        setTimeout(() => { btn.textContent = originalLabel; }, 1800);
+      });
+    } else {
+      if (execCommandFallback(plainText)) {
+        btn.textContent = 'Copied!';
+      } else {
+        btn.textContent = 'Copy failed';
+      }
+      setTimeout(() => { btn.textContent = originalLabel; }, 1800);
+    }
   });
+
+  // Calendar date selection (visual only)
+  const calendarGrid = document.querySelector('.calendar-grid');
+  if (calendarGrid) {
+    calendarGrid.addEventListener('click', (e) => {
+      const day = e.target.closest('.day');
+      if (!day || day.classList.contains('empty') || day.classList.contains('active-date')) return;
+      calendarGrid.querySelectorAll('.day.day-selected').forEach(d => d.classList.remove('day-selected'));
+      day.classList.add('day-selected');
+    });
+  }
 
   DOM.btnToggleReportLanguage.addEventListener('click', toggleReportLanguage);
 
@@ -1645,7 +1726,11 @@ function buildReportResourcesSectionHTML(caseItem, lang) {
   const linkLabel = lang === 'es' ? 'enlace' : 'link';
   const itemsHTML = resources.map(r => {
     const tagBadge = r.tag ? `<span class="mini-tag">${escapeHTML(r.tag)}</span> ` : '';
-    return `<li>${tagBadge}<strong>${escapeHTML(r.name)}:</strong> <a href="${r.url || '#'}" onclick="event.stopPropagation()">${linkLabel}</a></li>`;
+    const hasRealUrl = r.url && r.url !== '#';
+    const linkPart = hasRealUrl
+      ? `<a href="${escapeHTML(r.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${linkLabel}</a>`
+      : '';
+    return `<li>${tagBadge}<strong>${escapeHTML(r.name)}</strong>${linkPart ? ': ' + linkPart : ''}</li>`;
   }).join('');
   return `
     <h5>${heading}</h5>
@@ -1918,6 +2003,17 @@ function setupChat() {
     DOM.btnAddToNotes.addEventListener('mousedown', (e) => e.preventDefault());
     DOM.btnAddToNotes.addEventListener('click', handleAddHighlightToNotes);
   }
+
+  // Dim the highlight-to-notes button when no text is selected inside the chat pane.
+  document.addEventListener('selectionchange', updateAddToNotesButtonLookState);
+}
+
+function updateAddToNotesButtonLookState() {
+  if (!DOM.btnAddToNotes || !DOM.chatMessagesBox) return;
+  const sel = window.getSelection();
+  const hasSelection = sel && sel.toString().trim().length > 0 &&
+    sel.anchorNode && DOM.chatMessagesBox.contains(sel.anchorNode);
+  DOM.btnAddToNotes.classList.toggle('notes-btn-inactive', !hasSelection);
 }
 
 // Reads the current text selection (must be inside the chat messages pane), and appends it
@@ -2198,28 +2294,28 @@ function renderChatHistory() {
       `;
     }
 
-    // Matched-resource card + Add to Family Report action
+    // Resource cards (one per ASI-flagged retrieval hit) + Add to Family Report action
     let resourceHTML = '';
-    if (msg.resource) {
-      const tagsHTML = msg.resource.tags.map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('');
-      // Add to Family Report only makes sense when the chat is scoped to a specific
-      // family - with no active case there's no case.resources list to add it to.
-      const addToReportBtnHTML = state.activeChatCaseId
-        ? `<button class="add-to-report-btn" ${msg.resource.addedToReport ? 'disabled' : ''}>
-            ${msg.resource.addedToReport ? '✓ Added to Family Report' : '+ Add to Family Report'}
-          </button>`
-        : '';
-      resourceHTML = `
-        <div class="chat-resource-card">
-          <div class="chat-resource-header">
-            <h4>${escapeHTML(msg.resource.title)}</h4>
-            ${msg.resource.verified ? '<span class="verified-badge">ASI Approved</span>' : ''}
+    if (msg.resources && msg.resources.length > 0) {
+      resourceHTML = msg.resources.map((res, resIdx) => {
+        const tagsHTML = res.tags.map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('');
+        const addToReportBtnHTML = state.activeChatCaseId
+          ? `<button class="add-to-report-btn" data-res-idx="${resIdx}" ${res.addedToReport ? 'disabled' : ''}>
+              ${res.addedToReport ? '✓ Added to Family Report' : '+ Add to Family Report'}
+            </button>`
+          : '';
+        return `
+          <div class="chat-resource-card">
+            <div class="chat-resource-header">
+              <h4>${escapeHTML(res.title)}</h4>
+              ${res.verified ? '<span class="verified-badge">ASI Approved</span>' : ''}
+            </div>
+            <p>${escapeHTML(res.desc)}</p>
+            <div class="tag-row">${tagsHTML}</div>
+            ${addToReportBtnHTML}
           </div>
-          <p>${escapeHTML(msg.resource.desc)}</p>
-          <div class="tag-row">${tagsHTML}</div>
-          ${addToReportBtnHTML}
-        </div>
-      `;
+        `;
+      }).join('');
     }
 
     // In-Chat Options buttons block logic
@@ -2248,30 +2344,30 @@ function renderChatHistory() {
 
     DOM.chatMessagesBox.appendChild(msgDiv);
 
-    // Bind Add to Family Report click: writes the resource into the active case's
-    // resources list (so it shows on the case card AND feeds the generated report),
-    // then flips the button in place without a full chat re-render.
-    if (msg.resource) {
-      const addBtn = msgDiv.querySelector('.add-to-report-btn');
-      if (addBtn) {
+    // Bind Add to Family Report click for each resource card
+    if (msg.resources && msg.resources.length > 0) {
+      msgDiv.querySelectorAll('.add-to-report-btn').forEach(addBtn => {
         addBtn.addEventListener('click', () => {
+          const resIdx = parseInt(addBtn.getAttribute('data-res-idx'), 10);
+          const res = msg.resources[resIdx];
+          if (!res) return;
           const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
           if (activeCase) {
-            const alreadyExists = activeCase.resources.some(r => r.name === msg.resource.title);
+            const alreadyExists = activeCase.resources.some(r => r.name === res.title);
             if (!alreadyExists) {
               activeCase.resources.push({
-                name: msg.resource.title,
-                url: '#',
-                tag: mapToCanonicalResourceTag(msg.resource.tags)
+                name: res.title,
+                url: res.url || '#',
+                tag: mapToCanonicalResourceTag(res.tags)
               });
             }
           }
-          msg.resource.addedToReport = true;
+          res.addedToReport = true;
           addBtn.disabled = true;
           addBtn.textContent = '✓ Added to Family Report';
           persistState();
         });
-      }
+      });
     }
 
     // Bind event listeners for in-chat dynamic buttons
@@ -2365,17 +2461,20 @@ async function fetchWorkerChatResponse(query) {
       appendAssistantChatMessage(data.error || "Something went wrong reaching the assistant.", { raw: true });
       return;
     }
-    const matched = findMatchingResource(query, data.answer);
-    appendAssistantChatMessage(data.answer, { raw: true, resource: matched ? { ...matched, addedToReport: false } : null });
+    const resources = (data.resources || [])
+      .map(r => findResourceById(r.id))
+      .filter(Boolean)
+      .map(r => ({ ...r, addedToReport: false }));
+    appendAssistantChatMessage(data.answer, { raw: true, resources });
   } catch (err) {
     removeChatTypingIndicator();
     appendAssistantChatMessage("Couldn't reach the assistant right now. Please try again in a moment.", { raw: true });
   }
 }
 
-function appendAssistantChatMessage(text, { raw = false, resource = null } = {}) {
+function appendAssistantChatMessage(text, { raw = false, resources = [] } = {}) {
   const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  getActiveChatArray().push({ sender: 'assistant', text, time: timeNow, raw, resource });
+  getActiveChatArray().push({ sender: 'assistant', text, time: timeNow, raw, resources });
   renderChatHistory();
   scrollChatBottom();
 }
@@ -2435,54 +2534,6 @@ function formatAssistantAnswer(rawText) {
   return htmlBlocks.join('') || '<p></p>';
 }
 
-// Lightweight keyword/tag match against the curated Resources list - not a real
-// search index, just enough to surface a plausibly-related resource card under
-// an answer. See RESOURCES_DATA.
-// "caregiver"/"support" show up in nearly every caregiving answer, so they're
-// down-weighted - otherwise Caregiver Support Directory wins every match.
-const GENERIC_RESOURCE_TERMS = new Set(['support', 'caregiver']);
-
-function scoreTextForResource(text, resource) {
-  let score = 0;
-  resource.tags.forEach(tag => {
-    const tagLower = tag.toLowerCase();
-    const tagWords = tagLower.split(/\s+/).filter(w => w.length > 2 && !GENERIC_RESOURCE_TERMS.has(w));
-    if (tagWords.length === 0) return;
-    const hits = tagWords.filter(w => text.includes(w)).length;
-    if (hits === 0) return;
-    const weight = GENERIC_RESOURCE_TERMS.has(tagLower) ? 1 : 4;
-    score += weight * (hits / tagWords.length);
-  });
-  resource.title.toLowerCase().split(/\s+/).forEach(word => {
-    const clean = word.replace(/[^a-z]/g, '');
-    if (clean.length > 5 && !GENERIC_RESOURCE_TERMS.has(clean) && text.includes(clean)) {
-      score += 3;
-    }
-  });
-  return score;
-}
-
-// The AI's answer is discursive by nature and will touch related topics beyond what was
-// actually asked (e.g. a question about caregiver guilt might mention wandering behavior
-// in passing) - scoring the answer as heavily as the question caused resource cards to
-// surface for tangentially-related content. The question carries the user's real intent,
-// so it's weighted full strength; the answer only counts as a weak supporting signal.
-function findMatchingResource(question, answer) {
-  const questionText = question.toLowerCase();
-  const answerText = answer.toLowerCase();
-  let best = null;
-  let bestScore = 0;
-
-  RESOURCES_DATA.forEach(resource => {
-    const score = scoreTextForResource(questionText, resource) + scoreTextForResource(answerText, resource) * 0.25;
-    if (score > bestScore) {
-      bestScore = score;
-      best = resource;
-    }
-  });
-
-  return bestScore >= 4 ? best : null;
-}
 
 function showChatTypingIndicator() {
   const typingDiv = document.createElement('div');

@@ -2,17 +2,24 @@ import { embedQuery } from './embed-query.js';
 import { retrieveTopChunks } from './retrieval.js';
 import { buildSystemPrompt } from './prompt.js';
 import { buildReportSystemPrompt } from './report-prompt.js';
+import { buildCloseSummaryPrompt } from './close-summary-prompt.js';
 import { isRateLimited } from './rate-limit.js';
 
 const MAX_QUESTION_LENGTH = 1000;
 const MAX_CONTEXT_LENGTH = 4000; // app-generated (case info + recent chat), not raw user input - truncate rather than reject
 const MAX_REPORT_CONTEXT_LENGTH = 12000; // report generation needs the full case + chat transcript, not just a tail
+const MAX_CLOSE_SUMMARY_CONTEXT_LENGTH = 12000;
 const OPENAI_CHAT_MODEL = 'gpt-5-nano';
 // gpt-5-nano is a reasoning model: max_completion_tokens covers hidden reasoning tokens
 // AND the visible answer. reasoning_effort 'minimal' avoided that but produced unreliable,
 // occasionally self-contradictory answers; 'low' + a bigger budget is consistently clean.
 const MAX_RESPONSE_TOKENS = 1500;
 const MAX_REPORT_RESPONSE_TOKENS = 3000; // two full HTML letters (en + es) in one JSON response
+const MAX_CLOSE_SUMMARY_RESPONSE_TOKENS = 800;
+// Chunks below this cosine similarity aren't relevant enough to surface as a suggested
+// resource card, even if they're ASI-flagged and happened to land in the top-K.
+const ASI_RESOURCE_SCORE_THRESHOLD = 0.3;
+const MAX_CITED_RESOURCES = 3;
 
 // ALLOWED_ORIGIN is a comma-separated list (e.g. production + localhost for dev).
 // Echo back the request's Origin only if it's on the list - never wildcard, and
@@ -83,6 +90,39 @@ async function generateReport(reportContext, env) {
   return parsed;
 }
 
+async function generateCloseSummary(caseContext, env) {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: OPENAI_CHAT_MODEL,
+      max_completion_tokens: MAX_CLOSE_SUMMARY_RESPONSE_TOKENS,
+      reasoning_effort: 'low',
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: buildCloseSummaryPrompt() },
+        { role: 'user', content: caseContext }
+      ]
+    })
+  });
+  if (!res.ok) throw new Error(`OpenAI API error ${res.status}: ${await res.text()}`);
+  const json = await res.json();
+  const raw = json.choices[0].message.content;
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    throw new Error('Close summary generation returned invalid JSON');
+  }
+  if (!parsed || typeof parsed.title !== 'string' || typeof parsed.content !== 'string') {
+    throw new Error('Close summary generation returned an unexpected shape');
+  }
+  return parsed;
+}
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
@@ -119,6 +159,21 @@ export default {
         });
       }
 
+      if (body && body.action === 'generate_close_summary') {
+        const caseContext = typeof body.caseContext === 'string' ? body.caseContext.trim() : '';
+        if (!caseContext) {
+          return new Response(JSON.stringify({ error: 'Missing case context' }), {
+            status: 400,
+            headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
+          });
+        }
+        const safeCaseContext = caseContext.slice(0, MAX_CLOSE_SUMMARY_CONTEXT_LENGTH);
+        const { title, content } = await generateCloseSummary(safeCaseContext, env);
+        return new Response(JSON.stringify({ title, content }), {
+          headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
+        });
+      }
+
       const { question, context } = body;
 
       if (!question || typeof question !== 'string' || !question.trim()) {
@@ -142,7 +197,16 @@ export default {
       const systemPrompt = buildSystemPrompt(topChunks, safeContext);
       const answer = await askOpenAI(systemPrompt, question, env);
 
-      return new Response(JSON.stringify({ answer }), {
+      // Surface every ASI-flagged chunk that was actually retrieved for this question
+      // (not just ones the model happened to quote) so the frontend can offer a resource
+      // card + "Add to Family Report" for anything relevant - capped so the chat doesn't
+      // get cluttered with marginal matches.
+      const resources = topChunks
+        .filter(c => c.asiApproved && c.score >= ASI_RESOURCE_SCORE_THRESHOLD)
+        .slice(0, MAX_CITED_RESOURCES)
+        .map(c => ({ id: c.id, source: c.source }));
+
+      return new Response(JSON.stringify({ answer, resources }), {
         headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
       });
     } catch (err) {

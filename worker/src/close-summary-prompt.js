@@ -12,12 +12,20 @@ markdown fences, no commentary outside the JSON object.
 
 - "title": a short (under 8 words) descriptive title for the case study, based on the care phase
   or situation - NEVER the family's or patient's name (e.g. "Sundowning and Respite Care Case
-  Study", not "Oklaz Family Report").
-- "content": 2-4 sentences summarizing the situation, what was tried or recommended, and the
-  outcome or current status - written for another CHW reading it later. Replace the patient and
-  caregiver's names with neutral terms like "the patient" and "the caregiver". Do not include
-  street addresses, phone numbers, or other identifying details even if present in the source
-  context.
+  Study", not "Oklaz Family Report"). Match the style of existing library entries such as
+  "Answering the Placement Question" or "Early-Stage Denial Conversation Guide" - a named
+  practice or scenario, not a report title.
+- "content": 2-4 sentences written in the SAME voice as the other entries already in this
+  resource library - a generalized, third-person "practice tip" for another CHW to apply to a
+  similar situation, not a play-by-play narrative of this specific case. For example, prefer
+  "Offering to help think through the decision, rather than answering the placement question
+  directly, has worked better than either answering or deflecting" over "The caregiver asked
+  about placement and the CHW suggested waiting." Ground the guidance in what actually happened
+  in the source case, but phrase it as a transferable insight/practice, not a chronological
+  retelling. Replace the patient and caregiver's names with neutral terms like "the patient" and
+  "the caregiver" (or omit the actor entirely when the generalized phrasing doesn't need one). Do
+  not include street addresses, phone numbers, or other identifying details even if present in
+  the source context.
 
 Rules:
 - Base the summary strictly on the provided case context and conversation - never invent details.

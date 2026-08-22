@@ -105,7 +105,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
                   </div>
                   <div class="noti-details">
-                    <p class="noti-text"><strong>Marcus Family</strong> card shared with you by <strong>Robert Mercer</strong>.</p>
+                    <p class="noti-text"><strong>Whitaker Family</strong> card shared with you by <strong>Robert Mercer</strong>.</p>
                     <span class="noti-time">Just now</span>
                   </div>
                 </div>
@@ -795,52 +795,12 @@
         <div class="report-calendar-pane">
           <div class="calendar-card">
             <div class="calendar-header">
-              <span class="calendar-month">SEPTEMBER 2025</span>
+              <span class="calendar-month" id="report-calendar-month"><!-- Dynamically set --></span>
             </div>
-            <div class="calendar-days-grid">
-              <div class="day-name">S</div>
-              <div class="day-name">M</div>
-              <div class="day-name">T</div>
-              <div class="day-name">W</div>
-              <div class="day-name">T</div>
-              <div class="day-name">F</div>
-              <div class="day-name">S</div>
-
-              <!-- Sept 1, 2025 is a Monday — one blank Sunday cell -->
-              <div class="day empty"></div>
-
-              <!-- September days -->
-              <div class="day">1</div>
-              <div class="day">2</div>
-              <div class="day">3</div>
-              <div class="day">4</div>
-              <div class="day">5</div>
-              <div class="day">6</div>
-              <div class="day">7</div>
-              <div class="day">8</div>
-              <div class="day">9</div>
-              <div class="day">10</div>
-              <div class="day">11</div>
-              <div class="day">12</div>
-              <div class="day">13</div>
-              <div class="day">14</div>
-              <div class="day active-date">15</div>
-              <div class="day">16</div>
-              <div class="day">17</div>
-              <div class="day">18</div>
-              <div class="day">19</div>
-              <div class="day">20</div>
-              <div class="day">21</div>
-              <div class="day">22</div>
-              <div class="day">23</div>
-              <div class="day">24</div>
-              <div class="day">25</div>
-              <div class="day">26</div>
-              <div class="day">27</div>
-              <div class="day">28</div>
-              <div class="day">29</div>
-              <div class="day">30</div>
+            <div class="calendar-days-grid" id="report-calendar-grid">
+              <!-- Dynamically rendered - see renderReportCalendar in app.js -->
             </div>
+            <p class="calendar-action-note" id="report-calendar-suggested-label"><!-- Dynamically set --></p>
           </div>
         </div>
       </div>

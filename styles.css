@@ -1654,6 +1654,48 @@ button.pill-badge.active {
   color: var(--text-secondary);
 }
 
+/* Archive action buttons are disabled while the close-case summary is still generating -
+   see setArchiveActionsDisabled in app.js */
+.archive-action-btn.is-disabled,
+.archive-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Close-case summary loading state */
+.archive-summary-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2.5px solid var(--border-color);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.archived-resources-heading {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 10px 0 4px;
+}
+
 /* Bottom Actions */
 .intake-form-actions {
   display: flex;

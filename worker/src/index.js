@@ -28,8 +28,12 @@ const MAX_CLOSE_SUMMARY_RESPONSE_TOKENS = 800;
 const ASI_RESOURCE_SCORE_THRESHOLD = 0.45;
 const MAX_CITED_RESOURCES = 3;
 // How many manual chunks to pull into the answer's excerpts, ranked separately from the ASI
-// lane - see retrieveSplitChunks in retrieval.js for why the two pools are kept apart.
-const MANUAL_EXCERPT_COUNT = 3;
+// lane - see retrieveSplitChunks in retrieval.js for why the two pools are kept apart. Kept at
+// 5 (not trimmed to make room for the ASI lane) because the two pools are fully independent now
+// - shrinking this doesn't help ASI surfacing, it only starves the model of grounding material
+// and produces thinner answers. Answer richness depends on this number, so don't lower it to
+// "balance" against asiK.
+const MANUAL_EXCERPT_COUNT = 5;
 
 // ALLOWED_ORIGIN is a comma-separated list (e.g. production + localhost for dev).
 // Echo back the request's Origin only if it's on the list - never wildcard, and

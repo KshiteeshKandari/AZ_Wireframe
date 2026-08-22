@@ -77,177 +77,63 @@ const state = {
   
   cases: [
     {
-      id: 'rivera-family',
-      name: 'Rivera Family',
-      details: 'Intake Completed &bull; Primary: Sophia Rivera',
-      phase: 'Care Plan Review',
-      blurb: 'Early-stage ADRD, daughter Sophia is primary caregiver. Focus on daily structuring and wandering safety.',
-      cardStatus: 'Continuing Services',
-      patientName: 'Maria Rivera',
-      patientAge: 74,
-      intakeNotes: `Maria Rivera (Age 74) has early-stage ADRD diagnosed Q3 2025. Maria lives with her daughter, Sophia, who acts as primary caregiver. Sophia reports gradual increase in memory loss, word-finding difficulty, and mild anxiety in unfamiliar surroundings. Social support is limited to bi-weekly visits from a cousin. Sophia requests advice on daily structuring, safety measures at home (wandering mitigation), and caregiver burnout prevention groups.`,
+      id: 'test-case',
+      name: 'Test Family (TEST)',
+      details: 'TEST DATA &bull; Primary: Terry Testerson',
+      phase: 'Intake Submitted',
+      blurb: 'Placeholder test case with random sample data. Use this to try out the UI without touching real family data.',
+      cardStatus: 'Waiting on Referral',
+      patientName: 'Pat Testerson',
+      patientAge: 77,
+      intakeNotes: `Primary Contact: Terry Testerson
+Zip Code: 90210
+Relationship to Patient: Spouse/Partner
+
+Patient Profile:
+- Age Range: 75 - 84
+- Dementia Stage: Middle-Stage (Moderate)
+- Language: Spanish
+- Living Situation: Patient lives alone
+- Mobility: Uses a walker
+
+Caregiver Profile:
+- Relationship: Spouse/Partner
+- Observed Stress Level: High / Burnout Risk
+
+Focus Areas: Setting Role Boundaries, Unrealistic Expectations
+Cultural/Language Notes: Prefers materials in Spanish.`,
       intakeFields: {
-        primaryContact: 'Sophia Rivera', zipCode: '', mobility: 'No mobility issues',
-        patientAge: '65 - 74', patientStage: 'Early-Stage (Mild)',
-        patientLanguage: 'English', livingSituation: 'All adults',
-        caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
-        focusAreas: ['Caregiver Guilt / Self-Care', 'Safety Concerns (Wandering, Falls)'],
-        aiGoal: 'Find local resources',
-        notes: 'Social support is limited to bi-weekly visits from a cousin.'
-      },
-      timeline: [
-        { date: 'Oct 12, 2025', label: 'Initial Diagnosis (ADRD)' },
-        { date: 'Jan 08, 2026', label: 'Intake Assessment Registered' },
-        { date: 'Jun 18, 2026', label: 'Care Plan Review (Active)' }
-      ],
-      resources: [
-        { name: 'ADRD Communication Guide (PDF)', url: '#', tag: 'Guides' },
-        { name: 'Home Safety Checklist for Dementia', url: '#', tag: 'Safety' },
-        { name: 'Local Support Group Directory', url: '#', tag: 'Support' }
-      ],
-      aiSummary: 'Maria Rivera presents with progressive cognitive decline consistent with early ADRD, supported by primary caregiver Sophia. Recommended actions include establishing a daily structured routine, installing smart safety monitors, and referring Sophia to the local ADRD Caregiver Support Network.',
-      reportStatus: 'Generated',
-      reportPeriod: 'Q2 2024',
-      reportContent: `
-        <h4>Rivera Family Report</h4>
-        <p class="report-meta">Date: 6/18/26<br>Assigned CHW: Jane Doe</p>
-        <p class="report-greeting">Hi Sophia,</p>
-        <p>It was good talking with you. You're doing the right thing by paying attention to these changes in your mom — noticing them and following up is exactly how families get answers. Here's a short guide to help you at Maria's next appointment so the doctor takes a closer look this time.</p>
-        <p><strong>1. Write down what you've noticed.</strong> Before the visit, jot down a few specific examples and roughly when they started — the word-finding difficulty, the anxiety in unfamiliar places. Specific, dated examples are much harder for a doctor to wave off than "she's been more forgetful." Bring the list and hand it over or read it at the start of the appointment.</p>
-        <p><strong>2. Ask directly for an evaluation.</strong> You can request this yourself. Try: "I'd like my mom screened for cognitive changes. Can we do a cognitive assessment, or get a referral to a specialist?" Naming exactly what you want makes it harder to brush past.</p>
-        <p><strong>3. Enroll Maria in structured daytime support.</strong> The adult day-enrichment program (2 days/week) gives Maria social engagement while giving you, Sophia, room to rest — burnout indicators are currently high.</p>
-        <p><strong>4. Add home safety measures.</strong> Wandering risk is low-moderate right now, but door sensors and a consistent daily routine will help keep it that way.</p>
-        <p><strong>5. Know that it may take more than one visit.</strong> Getting a proper diagnosis and care plan sometimes takes a few appointments. Keep going, and I'm here to help you through it.</p>
-        <p><strong>Next Check-up:</strong> Care Plan Review scheduled for Jun 18, 2026. We'll follow up shortly after to see how the new routine is going.</p>
-      `,
-      reportContentEs: `
-        <h4>Informe de la Familia Rivera</h4>
-        <p class="report-meta">Fecha: 18/6/26<br>Trabajadora de salud asignada: Jane Doe</p>
-        <p class="report-greeting">Hola Sophia,</p>
-        <p>Fue un gusto hablar contigo. Estás haciendo lo correcto al prestar atención a estos cambios en tu mamá — notarlos y darles seguimiento es exactamente cómo las familias obtienen respuestas. Aquí tienes una breve guía para ayudarte en la próxima cita de Maria, para que el médico le preste más atención esta vez.</p>
-        <p><strong>1. Anota lo que has notado.</strong> Antes de la visita, escribe algunos ejemplos específicos y aproximadamente cuándo comenzaron — la dificultad para encontrar palabras, la ansiedad en lugares desconocidos. Los ejemplos específicos y fechados son mucho más difíciles de ignorar para un médico que decir "ha estado más olvidadiza". Lleva la lista o léela al inicio de la cita.</p>
-        <p><strong>2. Pide directamente una evaluación.</strong> Puedes solicitarla tú misma. Intenta decir: "Me gustaría que evaluaran a mi mamá por cambios cognitivos. ¿Podemos hacer una evaluación cognitiva o conseguir una referencia a un especialista?" Nombrar exactamente lo que quieres hace más difícil que lo pasen por alto.</p>
-        <p><strong>3. Inscribe a Maria en apoyo estructurado durante el día.</strong> El programa de enriquecimiento diurno para adultos (2 días a la semana) le da a Maria interacción social mientras te da a ti, Sophia, tiempo para descansar — los indicadores de agotamiento están altos actualmente.</p>
-        <p><strong>4. Agrega medidas de seguridad en el hogar.</strong> El riesgo de deambular es bajo-moderado por ahora, pero los sensores de puerta y una rutina diaria constante ayudarán a mantenerlo así.</p>
-        <p><strong>5. Ten en cuenta que puede tomar más de una visita.</strong> Obtener un diagnóstico y un plan de cuidado adecuado a veces toma varias citas. Sigue adelante, y estoy aquí para ayudarte en el proceso.</p>
-        <p><strong>Próxima Revisión:</strong> Revisión del plan de cuidado programada para el 18 de junio de 2026. Nos comunicaremos contigo poco después para ver cómo va la nueva rutina.</p>
-      `,
-      shared: false
-    },
-    {
-      id: 'oklaz-family',
-      name: 'Oklaz Family',
-      details: 'Awaiting AI Report &bull; Primary: Viktor Oklaz',
-      phase: 'Home Nurse Scheduling',
-      blurb: 'Moderate Alzheimer\'s with sundowning episodes. Son Alex requests respite care and behavioral strategies.',
-      cardStatus: 'Continuing Services',
-      patientName: 'Viktor Oklaz',
-      patientAge: 81,
-      intakeNotes: `Viktor Oklaz (Age 81) moderate stage Alzheimer's. Managed jointly by his son, Alex Oklaz, and a visiting nurse service twice a week. Viktor exhibits moderate disorientation regarding time and place, as well as periodic agitation in late afternoons ("sundowning"). Alex requested professional respite care resources and behavioral strategies to calm Viktor during Sundowning episodes.`,
-      intakeFields: {
-        primaryContact: 'Alex Oklaz', zipCode: '', mobility: 'No mobility issues',
+        primaryContact: 'Terry Testerson', zipCode: '90210', mobility: 'Uses a walker',
         patientAge: '75 - 84', patientStage: 'Middle-Stage (Moderate)',
-        patientLanguage: 'English', livingSituation: 'All adults',
-        caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'High / Burnout Risk',
-        focusAreas: ['Safety Concerns (Wandering, Falls)'],
-        aiGoal: 'Find local resources',
-        notes: 'Managed jointly with a visiting nurse service twice a week.'
+        patientLanguage: 'Spanish', livingSituation: 'Patient lives alone',
+        caregiverRel: 'Spouse/Partner', caregiverAge: '65 - 74', caregiverStress: 'High / Burnout Risk',
+        focusAreas: ['Setting Role Boundaries', 'Unrealistic Expectations'],
+        aiGoal: 'Draft a conversation starter',
+        notes: 'This is placeholder test data, not a real family.'
       },
       timeline: [
-        { date: 'Feb 14, 2024', label: 'Initial Consultation' },
-        { date: 'Dec 19, 2025', label: 'Shared Case Registered in Org' },
-        { date: 'Jun 05, 2026', label: 'Home Nurse Schedule Updated' }
+        { date: 'Aug 22, 2026', label: 'Intake Form Submitted (Test)' }
       ],
       resources: [
-        { name: 'Sundowning Management Protocols', url: '#', tag: 'Behavioral' },
-        { name: 'Respite Care Subsidy Options', url: '#', tag: 'Support' },
-        { name: 'GPS Tracking Wristband Providers', url: '#', tag: 'Devices' }
+        { name: 'Sample Resource Card One', url: '#', tag: 'Support' },
+        { name: 'Sample Resource Card Two', url: '#', tag: 'Devices' }
       ],
-      aiSummary: 'Viktor Oklaz is an 81-year-old patient experiencing moderate sundowning-related agitation and wandering behavior. Recommendation includes immediate exploration of wearable GPS trackers, implementation of sensory light therapies in late afternoons, and facilitating temporary respite care relief for Alex Oklaz.',
+      aiSummary: 'This is a placeholder test case with randomly generated sample data, kept around for UI testing purposes.',
       reportStatus: 'Not Generated',
-      reportPeriod: 'Q2 2024',
+      reportPeriod: 'Q3 2026',
       reportContent: `
-        <h4>Oklaz Family Report</h4>
-        <p class="report-meta">Date: 6/18/26<br>Assigned CHW: Jane Doe</p>
-        <p class="report-greeting">Hi Alex,</p>
-        <p>Thanks for keeping us updated on your dad's afternoons — the pattern you're seeing between 4 and 7 PM lines up with classic "sundowning," and there's a lot we can do to make that window calmer for both of you.</p>
-        <p><strong>1. Track the sundowning window.</strong> Note what time agitation starts, what seems to trigger it (light changes, noise, hunger), and how long it lasts. This helps the visiting nurse adjust his schedule around it.</p>
-        <p><strong>2. Use light and routine to your advantage.</strong> Keeping the home brightly lit in the late afternoon and sticking to a consistent dinner/wind-down routine can reduce disorientation before it starts.</p>
-        <p><strong>3. Address the wandering risk now.</strong> Viktor has attempted to exit unassisted — this is worth flagging to his care team immediately and pairing with door sensors or a GPS wristband.</p>
-        <p><strong>4. Ask about respite care.</strong> You're managing a lot solo between visits. A few hours of respite care a week can make a real difference in how sustainable this is for you.</p>
-        <p><strong>5. Loop in the visiting nurse on all of this.</strong> Sharing your notes with the twice-weekly nurse visits keeps everyone working from the same picture.</p>
-        <p><strong>Next Check-up:</strong> Home Nurse Schedule review on Jun 05, 2026. We'll follow up after that visit to see how the sundowning window is trending.</p>
+        <h4>Test Family Report</h4>
+        <p class="report-meta">Date: 8/22/26<br>Assigned CHW: Jane Doe</p>
+        <p class="report-greeting">Hi Terry,</p>
+        <p>This is placeholder test report content used for trying out the UI. It is not a real family.</p>
+        <p><strong>Next Check-up:</strong> N/A (test case).</p>
       `,
       reportContentEs: `
-        <h4>Informe de la Familia Oklaz</h4>
-        <p class="report-meta">Fecha: 18/6/26<br>Trabajador de salud asignado: Jane Doe</p>
-        <p class="report-greeting">Hola Alex,</p>
-        <p>Gracias por mantenernos al tanto de las tardes de tu papá — el patrón que estás viendo entre las 4 y las 7 PM coincide con el clásico "sundowning", y hay mucho que podemos hacer para que esa hora sea más tranquila para ambos.</p>
-        <p><strong>1. Registra la ventana de sundowning.</strong> Anota a qué hora comienza la agitación, qué parece provocarla (cambios de luz, ruido, hambre) y cuánto dura. Esto ayuda a la enfermera visitante a ajustar su horario en torno a eso.</p>
-        <p><strong>2. Usa la luz y la rutina a tu favor.</strong> Mantener la casa bien iluminada por la tarde y seguir una rutina constante de cena y relajación puede reducir la desorientación antes de que comience.</p>
-        <p><strong>3. Atiende el riesgo de deambular ahora.</strong> Viktor ha intentado salir sin ayuda — esto vale la pena reportarlo de inmediato a su equipo de cuidado y combinarlo con sensores de puerta o una pulsera GPS.</p>
-        <p><strong>4. Pregunta sobre cuidado de relevo.</strong> Estás manejando mucho tú solo entre visitas. Unas horas de cuidado de relevo a la semana pueden hacer una gran diferencia en qué tan sostenible es esto para ti.</p>
-        <p><strong>5. Comparte todo esto con la enfermera visitante.</strong> Compartir tus notas con las visitas de enfermería dos veces por semana mantiene a todos con la misma información.</p>
-        <p><strong>Próxima Revisión:</strong> Revisión del horario de enfermería en el hogar el 5 de junio de 2026. Daremos seguimiento después de esa visita para ver cómo evoluciona la ventana de sundowning.</p>
-      `,
-      shared: true
-    },
-    {
-      id: 'pierre-family',
-      name: 'Pierre Family',
-      details: 'Awaiting Physical Exam &bull; Primary: Henri Pierre',
-      phase: 'Awaiting Physical Exam',
-      blurb: 'Vascular screening review. Niece Marcelle needs medication tracking and nutrition support tools.',
-      cardStatus: 'Awaiting Follow Up',
-      followUpValue: '2',
-      followUpUnit: 'weeks',
-      patientName: 'Henri Pierre',
-      patientAge: 79,
-      intakeNotes: `Henri Pierre (Age 79) vascular screening review. Niece Marcelle Pierre daily checks. Focus is on maintaining cognitive engagement, nutrition management, and tracking medical adherence. Intake pending full physical exam. Initial screenings show minor short-term recall impairment. Marcelle is requesting support tools to organize medication dosages and ensure Henri receives healthy daily meals.`,
-      intakeFields: {
-        primaryContact: 'Marcelle Pierre', zipCode: '', mobility: 'No mobility issues',
-        patientAge: '75 - 84', patientStage: 'Suspected / Undiagnosed',
-        patientLanguage: 'English', livingSituation: 'Patient lives alone',
-        caregiverRel: 'Other Relative', caregiverAge: 'Under 65', caregiverStress: 'Low / Managing Well',
-        focusAreas: ['Medical Advocacy / Doctor Communication'],
-        aiGoal: 'Find local resources',
-        notes: 'Intake pending full physical exam; initial screenings show minor short-term recall impairment.'
-      },
-      timeline: [
-        { date: 'May 20, 2026', label: 'Vascular Screening Review' },
-        { date: 'Jun 25, 2026', label: 'Scheduled Physical Exam (Pending)' }
-      ],
-      resources: [
-        { name: 'Vascular Dementia Lifestyle Guidelines', url: '#', tag: 'Clinical' },
-        { name: 'Medication Reminder Apps & Dispensers', url: '#', tag: 'Devices' },
-        { name: 'Meal Delivery Services for Seniors', url: '#', tag: 'Coordination' }
-      ],
-      aiSummary: 'Henri Pierre is in the initial phases of vascular dementia care. Main support requirements center on dietary adherence and medication scheduling. Recommended strategy includes deploying an automated pill dispenser, enrolling in senior meal programs, and introducing routine memory exercises.',
-      reportStatus: 'Not Generated',
-      reportPeriod: 'Q2 2024',
-      reportContent: `
-        <h4>Pierre Family Report</h4>
-        <p class="report-meta">Date: 6/18/26<br>Assigned CHW: Jane Doe</p>
-        <p class="report-greeting">Hi Marcelle,</p>
-        <p>Thanks for staying on top of your uncle's daily check-ins. Since Henri's full physical exam is still pending, here's what's helpful to focus on in the meantime.</p>
-        <p><strong>1. Keep a simple medication log.</strong> Note what Henri takes and when — this becomes very useful once his physical results come back and dosages may need adjusting.</p>
-        <p><strong>2. Bring your recall observations to the exam.</strong> The minor short-term recall impairment you've noticed is worth describing in specific terms (what he forgot, how often) at the June 25th appointment.</p>
-        <p><strong>3. Support consistent nutrition.</strong> Vascular health benefits a lot from regular, balanced meals — a meal delivery service can help if daily cooking is hard to keep up with.</p>
-        <p><strong>4. Ask about a pill dispenser.</strong> An automated dispenser can reduce missed or doubled doses between your daily check-ins.</p>
-        <p><strong>5. We'll follow up after the physical exam.</strong> Once results are in, we'll update this care plan together.</p>
-        <p><strong>Next Check-up:</strong> Physical exam scheduled for Jun 25, 2026. We'll follow up right after to update this plan with the results.</p>
-      `,
-      reportContentEs: `
-        <h4>Informe de la Familia Pierre</h4>
-        <p class="report-meta">Fecha: 18/6/26<br>Trabajadora de salud asignada: Jane Doe</p>
-        <p class="report-greeting">Hola Marcelle,</p>
-        <p>Gracias por mantenerte al pendiente de las revisiones diarias de tu tío. Como el examen físico completo de Henri sigue pendiente, aquí está en qué enfocarte mientras tanto.</p>
-        <p><strong>1. Lleva un registro simple de medicamentos.</strong> Anota qué toma Henri y cuándo — esto será muy útil una vez que lleguen los resultados de su examen físico y sea necesario ajustar las dosis.</p>
-        <p><strong>2. Comparte tus observaciones sobre la memoria en el examen.</strong> Vale la pena describir en términos específicos (qué olvidó, con qué frecuencia) el leve deterioro de memoria a corto plazo que has notado, en la cita del 25 de junio.</p>
-        <p><strong>3. Apoya una nutrición constante.</strong> La salud vascular se beneficia mucho de comidas regulares y balanceadas — un servicio de entrega de comidas puede ayudar si cocinar a diario es difícil de mantener.</p>
-        <p><strong>4. Pregunta sobre un dispensador de pastillas.</strong> Un dispensador automático puede reducir las dosis olvidadas o duplicadas entre tus revisiones diarias.</p>
-        <p><strong>5. Daremos seguimiento después del examen físico.</strong> Una vez que tengamos los resultados, actualizaremos este plan de cuidado juntos.</p>
-        <p><strong>Próxima Revisión:</strong> Examen físico programado para el 25 de junio de 2026. Daremos seguimiento justo después para actualizar este plan con los resultados.</p>
+        <h4>Informe de la Familia de Prueba</h4>
+        <p class="report-meta">Fecha: 22/8/26<br>Trabajadora de salud asignada: Jane Doe</p>
+        <p class="report-greeting">Hola Terry,</p>
+        <p>Este es contenido de prueba de marcador de posición usado para probar la interfaz. No es una familia real.</p>
+        <p><strong>Próxima Revisión:</strong> N/D (caso de prueba).</p>
       `,
       shared: false
     }
@@ -258,7 +144,7 @@ const state = {
   generalChatHistory: [
     {
       sender: 'assistant',
-      text: 'Hello! I am your AI Companion. I can help summarize case notes, generate local resources, draft family care plans, or analyze trends. Ask me anything about your active families (Rivera, Oklaz, Pierre).',
+      text: 'Hello! I am your AI Companion. I can help summarize case notes, generate local resources, draft family care plans, or analyze trends. Ask me anything about your active families',
       time: '15:15'
     }
   ],
@@ -382,6 +268,9 @@ const DOM = {
   btnToggleReportLanguage: document.getElementById('btn-toggle-report-language'),
   btnRegenerateReportModal: document.getElementById('btn-regenerate-report-modal'),
   btnCloseCaseFromReport: document.getElementById('btn-close-case-from-report'),
+  reportCalendarMonth: document.getElementById('report-calendar-month'),
+  reportCalendarGrid: document.getElementById('report-calendar-grid'),
+  reportCalendarSuggestedLabel: document.getElementById('report-calendar-suggested-label'),
   
   modalShareCard: document.getElementById('modal-share-card'),
   shareModalTitle: document.getElementById('share-modal-title'),
@@ -1540,21 +1429,40 @@ function addResourceToLibrary(name, url, familyName) {
 // Builds a context string for the close-summary LLM call: the case's structured fields
 // plus the full chat transcript so the model has enough to generate a useful case study.
 function buildCloseSummaryContext(c) {
+  const fields = c.intakeFields || {};
   const lines = [
     `Patient: ${c.patientName || 'Unknown'}`,
-    `Caregiver: ${c.caregiverName || 'Unknown'}`,
+    `Caregiver: ${fields.primaryContact || 'Unknown'}`,
     `Phase: ${c.phase || 'Unknown'}`,
-    `Status: ${c.status || 'Unknown'}`,
-    `Diagnosis: ${c.diagnosis || 'Not specified'}`,
-    `Other info: ${c.otherInfo || 'None'}`,
+    `Status: ${c.cardStatus || 'Unknown'}`,
+    `Disease stage: ${fields.patientStage || 'Not specified'}`,
+    `Focus areas: ${(fields.focusAreas || []).join(', ') || 'Not specified'}`,
+    `Other info: ${fields.notes || 'None'}`,
   ];
   const transcript = (c.chatHistory || []).map(m => `${m.sender === 'user' ? 'CHW' : 'AI'}: ${m.text}`).join('\n');
   if (transcript) lines.push('', 'Chat transcript:', transcript);
   return lines.join('\n');
 }
 
+// Archive action buttons must stay disabled until the summary preview has finished loading -
+// the archived card is built directly from the title/content inputs this preview renders, so
+// letting a CHW click "Save" before they exist would archive blank/stale content.
+function setArchiveActionsDisabled(disabled) {
+  [DOM.btnArchiveOnly, DOM.btnArchiveResources, DOM.btnArchivePractices].forEach(btn => {
+    if (!btn) return;
+    btn.disabled = disabled;
+    btn.classList.toggle('is-disabled', disabled);
+  });
+}
+
 async function renderCloseCaseSummaryPreview(c, previewContainer) {
-  previewContainer.innerHTML = `<p style="color:var(--text-secondary);margin:0;">Generating summary...</p>`;
+  setArchiveActionsDisabled(true);
+  previewContainer.innerHTML = `
+    <div class="archive-summary-loading">
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <p style="color:var(--text-secondary);margin:0;">Generating summary...</p>
+    </div>
+  `;
   try {
     const caseContext = buildCloseSummaryContext(c);
     const res = await fetch(CHAT_WORKER_URL, {
@@ -1580,7 +1488,24 @@ async function renderCloseCaseSummaryPreview(c, previewContainer) {
       <label class="group-label" for="archive-edit-content">Content</label>
       <textarea id="archive-edit-content" rows="4" style="width: 100%;"></textarea>
     `;
+  } finally {
+    setArchiveActionsDisabled(false);
   }
+}
+
+// Renders the case's own resources as a plain sub-list on the archived card - only when the
+// case actually had resources attached, so we never show an empty/fake "Related resources"
+// list on cases that never had any. Resource names/tags aren't identifying information, so
+// these are safe to carry over as-is (unlike the title/content, which are always CHW-reviewed
+// AI text to keep names and other identifying details out).
+function buildArchivedResourcesListHTML(c) {
+  const resources = c.resources || [];
+  if (resources.length === 0) return '';
+  const items = resources.map(r => `<li>${r.tag ? `<span class="mini-tag">${escapeHTML(r.tag)}</span> ` : ''}${escapeHTML(r.name)}</li>`).join('');
+  return `
+    <p class="archived-resources-heading">Related resources</p>
+    <ul class="report-resource-list">${items}</ul>
+  `;
 }
 
 function executeCaseArchiving(addResource = false, targetLibrary = '') {
@@ -1592,9 +1517,12 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
     const containerId = targetLibrary === 'adrd' ? 'adrd-resources-list' : 'practices-resources-list';
     const container = document.getElementById(containerId);
 
-    // Use the CHW-reviewed/edited content only - no title on archived user-contributed cards
-    // to avoid any risk of identifying information leaking through the title field.
+    // Title and content are both CHW-reviewed/edited before archiving - the generation prompt
+    // (see close-summary-prompt.js) already forbids proper names in either field, so it's safe
+    // to show the title on the archived card.
+    const titleInput = document.getElementById('archive-edit-title');
     const contentInput = document.getElementById('archive-edit-content');
+    const title = titleInput ? titleInput.value.trim() : '';
     const content = contentInput ? contentInput.value.trim() : '';
 
     if (container) {
@@ -1602,7 +1530,9 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
       card.className = 'resource-card-item';
       card.setAttribute('data-tags', 'case study,clinical');
       card.innerHTML = `
+        ${title ? `<h3>${escapeHTML(title)}</h3>` : ''}
         <p>${escapeHTML(content)}</p>
+        ${buildArchivedResourcesListHTML(c)}
         <div class="tag-row">
           <span class="mini-tag">Case Study</span>
           <span class="mini-tag">Clinical</span>
@@ -1689,17 +1619,6 @@ function setupReportViewer() {
     }
   });
 
-  // Calendar date selection (visual only)
-  const calendarGrid = document.querySelector('.calendar-grid');
-  if (calendarGrid) {
-    calendarGrid.addEventListener('click', (e) => {
-      const day = e.target.closest('.day');
-      if (!day || day.classList.contains('empty') || day.classList.contains('active-date')) return;
-      calendarGrid.querySelectorAll('.day.day-selected').forEach(d => d.classList.remove('day-selected'));
-      day.classList.add('day-selected');
-    });
-  }
-
   DOM.btnToggleReportLanguage.addEventListener('click', toggleReportLanguage);
 
   if (DOM.btnRegenerateReportModal) {
@@ -1740,6 +1659,85 @@ function buildReportResourcesSectionHTML(caseItem, lang) {
   `;
 }
 
+const CALENDAR_MONTH_NAMES = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+const CALENDAR_MONTH_NAMES_SHORT = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+// Default suggested follow-up date: uses the case's own follow-up cadence (followUpValue/
+// followUpUnit, set on the "Awaiting Follow Up" status fields) when present, otherwise falls
+// back to 2 weeks out from today so every case always has a sensible starting suggestion.
+function computeDefaultFollowUpDate(caseItem) {
+  const base = new Date();
+  const rawValue = Number(caseItem.followUpValue);
+  const hasValue = caseItem.followUpValue != null && caseItem.followUpValue !== '' && !isNaN(rawValue) && rawValue >= 0;
+  const unit = caseItem.followUpUnit || 'weeks';
+
+  if (hasValue && unit === 'months') {
+    const d = new Date(base);
+    d.setMonth(d.getMonth() + rawValue);
+    return d;
+  }
+
+  const days = hasValue ? (unit === 'days' ? rawValue : rawValue * 7) : 14;
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function formatSuggestedFollowUpDate(date) {
+  return `${CALENDAR_MONTH_NAMES_SHORT[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+// Renders the interactive follow-up calendar for the Report Viewer modal. Every date is a
+// clickable option - clicking one sets it as the case's suggested follow-up date, re-renders
+// the grid with that date highlighted, and updates the label at the bottom. The choice is
+// persisted on the case (suggestedFollowUpDate) so it survives closing/reopening the modal.
+function renderCalendarForMonth(caseItem, year, month, selectedDate) {
+  if (!DOM.reportCalendarGrid) return;
+
+  DOM.reportCalendarMonth.textContent = `${CALENDAR_MONTH_NAMES[month]} ${year}`;
+
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  let html = ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<div class="day-name">${d}</div>`).join('');
+  for (let i = 0; i < firstWeekday; i++) {
+    html += `<div class="day empty"></div>`;
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const isSelected = selectedDate && selectedDate.getFullYear() === year && selectedDate.getMonth() === month && selectedDate.getDate() === day;
+    html += `<div class="day${isSelected ? ' active-date' : ''}" data-day="${day}">${day}</div>`;
+  }
+  DOM.reportCalendarGrid.innerHTML = html;
+
+  DOM.reportCalendarGrid.querySelectorAll('.day:not(.empty)').forEach(dayEl => {
+    dayEl.addEventListener('click', () => {
+      const day = parseInt(dayEl.getAttribute('data-day'), 10);
+      const newDate = new Date(year, month, day);
+      caseItem.suggestedFollowUpDate = newDate.toISOString();
+      persistState();
+      renderCalendarForMonth(caseItem, year, month, newDate);
+    });
+  });
+
+  if (DOM.reportCalendarSuggestedLabel) {
+    DOM.reportCalendarSuggestedLabel.textContent = selectedDate
+      ? `Suggested follow-up date: ${formatSuggestedFollowUpDate(selectedDate)}`
+      : '';
+  }
+}
+
+function renderReportCalendar(caseItem) {
+  let selected;
+  if (caseItem.suggestedFollowUpDate) {
+    selected = new Date(caseItem.suggestedFollowUpDate);
+  } else {
+    selected = computeDefaultFollowUpDate(caseItem);
+    caseItem.suggestedFollowUpDate = selected.toISOString();
+    persistState();
+  }
+  renderCalendarForMonth(caseItem, selected.getFullYear(), selected.getMonth(), selected);
+}
+
 function openReportModal(caseItem) {
   DOM.reportModalTitle.textContent = `${caseItem.name} - ${caseItem.reportPeriod} Report`;
   state.currentReportCaseId = caseItem.id;
@@ -1747,6 +1745,7 @@ function openReportModal(caseItem) {
   DOM.reportModalTextContent.innerHTML = caseItem.reportContent + buildReportResourcesSectionHTML(caseItem, 'en');
   DOM.btnCloseCaseFromReport.setAttribute('data-case-id', caseItem.id);
   DOM.btnToggleReportLanguage.innerHTML = DOM.btnToggleReportLanguage.innerHTML.replace(/Traducir al español|Translate to English/, 'Traducir al español');
+  renderReportCalendar(caseItem);
 
   DOM.modalReportViewer.classList.add('active');
 }
@@ -1781,63 +1780,87 @@ function setupNotifications() {
     e.stopPropagation();
   });
 
-  // Clicking "Marcus Family" notification
+  // Clicking "Whitaker Family" notification
   DOM.notiSharedCase.addEventListener('click', () => {
     DOM.notificationsMenu.classList.remove('active');
-    
-    // Add Marcus Family case
-    const id = 'marcus-family';
+
+    // Add Whitaker Family case (shared by CHW Robert Mercer; Tanya Whitaker is the caregiver)
+    const id = 'whitaker-family';
     const exists = state.cases.some(c => c.id === id);
-    
+
     if (!exists) {
-      const marcusCase = {
+      const whitakerCase = {
         id: id,
-        name: 'Marcus Family',
-        details: 'Shared by: Robert Mercer &bull; Primary: Sarah Marcus',
-        patientName: 'Sarah Marcus',
-        patientAge: 76,
+        name: 'Whitaker Family',
+        details: 'Shared by: Robert Mercer &bull; Caregiver: Tanya Whitaker',
+        patientName: 'Whitaker',
+        patientAge: 80,
         phase: 'Case Shared',
-        blurb: 'Early cognitive lapses, shared by CHW Robert Mercer to coordinate home safety and daily routines.',
+        blurb: 'Early-stage diagnosis, shared by CHW Robert Mercer. Caregiver Tanya Whitaker (other relative) is navigating the patient\'s denial. Based in Berwyn, IL.',
         cardStatus: 'Follow up due',
-        handoffNotes: 'Sarah responds well to morning visits; avoid late-afternoon check-ins as she tires easily. Family prefers phone calls over email for scheduling.',
-        intakeNotes: `Sarah Marcus (Age 76) is experiencing early cognitive lapses. Case shared by CHW Robert Mercer to collaborate on home safety checklists. Family is eager to establish structured daily routine support systems.`,
+        handoffNotes: 'Robert Mercer notes that the patient responds better to calm, low-pressure conversations and becomes defensive if the diagnosis is raised directly. Tanya prefers phone calls over email for scheduling.',
+        intakeNotes: `Shared by: Robert Mercer (CHW)
+Caregiver: Tanya Whitaker (Other Relative)
+Zip Code: 60402 (Berwyn)
+
+Patient Profile:
+- Age Range: 75 - 84
+- Dementia Stage: Early-Stage (Mild)
+- Language: English
+- Living Situation: All adults
+- Mobility: No mobility issues
+
+Caregiver Profile:
+- Relationship: Other Relative
+- Observed Stress Level: Moderate / Needs Support
+
+Focus Areas: Patient Denial
+Cultural/Language Notes: None reported.`,
         intakeFields: {
-          primaryContact: '', zipCode: '', mobility: 'No mobility issues',
-          patientAge: '75 - 84', patientStage: 'Suspected / Undiagnosed',
+          primaryContact: 'Tanya Whitaker', zipCode: '60402', mobility: 'No mobility issues',
+          patientAge: '75 - 84', patientStage: 'Early-Stage (Mild)',
           patientLanguage: 'English', livingSituation: 'All adults',
-          caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
-          focusAreas: ['Safety Concerns (Wandering, Falls)'],
+          caregiverRel: 'Other Relative', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
+          focusAreas: ['Patient Denial'],
           aiGoal: 'Find local resources',
-          notes: 'Family is eager to establish structured daily routine support systems.'
+          notes: 'No cultural or language notes reported.'
         },
         timeline: [
-          { date: 'Jun 18, 2026', label: 'Case Shared by Robert Mercer' }
+          { date: 'Aug 22, 2026', label: 'Case Shared by Robert Mercer' }
         ],
         resources: [
-          { name: 'Home Safety Audit Sheet', url: '#', tag: 'Safety' },
-          { name: 'Cognitive Exercises Guide', url: '#', tag: 'Engagement' }
+          { name: 'Early-Stage Denial Conversation Guide', url: '#', tag: 'Guides' },
+          { name: 'Local Resources for 60402 (Berwyn)', url: '#', tag: 'Coordination' }
         ],
-        aiSummary: 'Marcus Family case shared by CHW Robert Mercer. Immediate recommended tasks include establishing basic check-in protocols and coordinating on safety wristbands.',
+        aiSummary: 'Whitaker Family case shared by CHW Robert Mercer. Tanya Whitaker (other relative) is the caregiver contact for an early-stage ADRD case with no mobility constraints. Main focus is navigating the patient\'s denial of diagnosis. Recommended next steps include grounding conversations in specific safety incidents rather than direct confrontation, and connecting Tanya with local Berwyn-area resources.',
         reportStatus: 'Not Generated',
-        reportPeriod: 'Q2 2024',
+        reportPeriod: 'Q3 2026',
         reportContent: `
-          <h4>Marcus Family Report</h4>
+          <h4>Whitaker Family Report</h4>
           <p class="report-meta">Date: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Assigned CHW: Robert Mercer</p>
-          <p class="report-greeting">Hi there,</p>
-          <p>This case was shared via the org neurology network. Sarah is experiencing mild temporal adjustments, and we're setting up basic check-in protocols and safety coordination to start.</p>
-          <p><strong>Next Check-up:</strong> Follow-up to be scheduled after initial check-in protocols are established.</p>
+          <p class="report-greeting">Hi Tanya,</p>
+          <p>Thanks for staying on top of this since the case was shared with our team. Here is a starting summary based on what's been shared, along with some resources to help going forward.</p>
+          <p><strong>1. Expect denial early on.</strong> It's common for patients in the early stage to resist acknowledging changes. Leading with specific incidents rather than labels tends to land better than direct confrontation.</p>
+          <p><strong>2. Keep a simple log.</strong> Jot down specific moments that concern you and when they happened — these become useful both for future doctor visits and for tracking how things progress.</p>
+          <p><strong>3. Start with small compromises.</strong> Rather than proposing a big change all at once, one small adjustment at a time tends to be easier for the patient to accept.</p>
+          <p><strong>4. Lean on local resources.</strong> We've included a few Berwyn-area resources and a conversation guide to help with the denial conversation specifically.</p>
+          <p><strong>Next Check-up:</strong> Follow-up to be scheduled based on the handoff above.</p>
         `,
         reportContentEs: `
-          <h4>Informe de la Familia Marcus</h4>
+          <h4>Informe de la Familia Whitaker</h4>
           <p class="report-meta">Fecha: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Trabajador de salud asignado: Robert Mercer</p>
-          <p class="report-greeting">Hola,</p>
-          <p>Este caso fue compartido a través de la red de neurología de la organización. Sarah está experimentando ajustes temporales leves, y estamos estableciendo protocolos básicos de seguimiento y coordinación de seguridad para empezar.</p>
-          <p><strong>Próxima Revisión:</strong> Se programará un seguimiento después de establecer los protocolos iniciales de contacto.</p>
+          <p class="report-greeting">Hola Tanya,</p>
+          <p>Gracias por mantenerte al tanto de esto desde que el caso fue compartido con nuestro equipo. Aquí tienes un resumen inicial basado en lo compartido, junto con algunos recursos para ayudarte a seguir adelante.</p>
+          <p><strong>1. Espera algo de negación al principio.</strong> Es común que los pacientes en etapa temprana se resistan a reconocer los cambios. Partir de incidentes específicos en lugar de etiquetas suele funcionar mejor que la confrontación directa.</p>
+          <p><strong>2. Lleva un registro simple.</strong> Anota momentos específicos que te preocupen y cuándo ocurrieron — esto es útil tanto para futuras citas médicas como para dar seguimiento a la evolución.</p>
+          <p><strong>3. Comienza con pequeños acuerdos.</strong> En lugar de proponer un gran cambio de una vez, un ajuste pequeño a la vez suele ser más fácil de aceptar para el paciente.</p>
+          <p><strong>4. Apóyate en recursos locales.</strong> Incluimos algunos recursos del área de Berwyn y una guía de conversación específica para el tema de la negación.</p>
+          <p><strong>Próxima Revisión:</strong> Se programará un seguimiento según la información compartida arriba.</p>
         `,
         shared: true
       };
 
-      state.cases.push(marcusCase);
+      state.cases.push(whitakerCase);
     }
     
     // Mark as read
@@ -2644,11 +2667,11 @@ function generateMockAIResponse(userQuery) {
     text = `${modelHeadline}Caregivers often experience intense guilt when taking time for themselves. We need to help them reframe this perspective:`;
     additionalText = `
       <p><strong>Recommended Phrasing:</strong><br>
-      <em>"Sophia, taking care of your own well-being is a core part of taking care of Maria. If you run out of fuel, you will not be physically able to maintain the exit chimes and schedules she depends on."</em></p>
+      <em>"Tanya, taking care of your own well-being is a core part of taking care of your family member. If you run out of fuel, you will not be physically able to maintain the routines and schedules they depend on."</em></p>
       <p><strong>Steps to take:</strong></p>
       <ul>
         <li>Prescribe respite care as a <strong>medical necessity</strong>, not a luxury.</li>
-        <li>Enroll them in the weekly Day-Enrichment Program (which we've added to Sophia Rivera's Rivera Family care plan).</li>
+        <li>Enroll them in the weekly Day-Enrichment Program (which we've added to Tanya Whitaker's Whitaker Family care plan).</li>
       </ul>
     `;
   }
@@ -2688,8 +2711,8 @@ function generateMockAIResponse(userQuery) {
     text = `${modelHeadline}If a family is reticent to share details, they may fear losing control or being judged. Adjust your questioning style:`;
     additionalText = `
       <ul>
-        <li><strong>Ask Indirect Safety Questions:</strong> Instead of asking <em>"Does he wander?"</em>, ask <em>"How do you both manage if Viktor decides to head outside in the afternoon?"</em></li>
-        <li><strong>Normalize the Experience:</strong> Pre-phrase questions with <em>"Many caregivers tell me that evening sundowning gets very stressful. Have you noticed any changes in Viktor's afternoon mood?"</em></li>
+        <li><strong>Ask Indirect Safety Questions:</strong> Instead of asking <em>"Does he wander?"</em>, ask <em>"How do you both manage if they decide to head outside in the afternoon?"</em></li>
+        <li><strong>Normalize the Experience:</strong> Pre-phrase questions with <em>"Many caregivers tell me that evening sundowning gets very stressful. Have you noticed any changes in their afternoon mood?"</em></li>
         <li><strong>Assure Confidentiality:</strong> Emphasize that notes are strictly used to lock in funding subsidies.</li>
       </ul>
     `;
@@ -2706,80 +2729,24 @@ function generateMockAIResponse(userQuery) {
     `;
   }
 
-  // --- 5. Context-aware keywords (Cases Rivera, Oklaz, Pierre, Marcus) ---
-  else if (queryLower.includes('marcus') || queryLower.includes('sarah marcus')) {
-    text = `${modelHeadline}Here is the active care summary checklist for the newly added <strong>Marcus Family</strong>:`;
+  // --- 5. Context-aware keywords (Case: Whitaker) ---
+  else if (queryLower.includes('whitaker') || queryLower.includes('tanya')) {
+    text = `${modelHeadline}Here is the active care checklist overview for the <strong>Whitaker Family</strong>, focusing on the patient's denial of diagnosis:`;
     embedCard = {
-      title: 'Care Summary: Marcus Family',
-      tag: 'Shared Case',
-      caregiver: 'Robert Mercer & Sarah Marcus',
-      focus: 'Coordinating events, door locks safety audit, caregiver support.',
-      metrics: [
-        { label: 'Caregiver Burnout Risk', val: 'Low', width: '25%', color: '#10b981' },
-        { label: 'Wandering Risk', val: 'Low', width: '30%', color: '#10b981' }
-      ]
-    };
-    additionalText = `<strong>Recommended initial steps:</strong>
-      <ul>
-        <li><strong>Home safety audit:</strong> Check exit door locks.</li>
-        <li><strong>Event scheduling:</strong> Coordinate with event managers for respite visits.</li>
-      </ul>`;
-  }
-  else if (queryLower.includes('oklaz') || queryLower.includes('viktor')) {
-    text = `${modelHeadline}For <strong>Viktor Oklaz</strong>, the care profile recommends custom measures addressing late-afternoon agitation (Sundowning) and exit-egress risks.`;
-    embedCard = {
-      title: 'Care Summary: Viktor Oklaz',
-      tag: 'Moderate ADRD',
-      caregiver: 'Alex Oklaz (Son) & Visiting Nurse',
-      focus: 'Sundowning mitigation, exit safety tracking, respite support.',
-      metrics: [
-        { label: 'Sundowning Severity', val: 'Mod-High', width: '82%', color: '#f59e0b' },
-        { label: 'Exit Egress Risk', val: 'High', width: '90%', color: '#ef4444' }
-      ]
-    };
-    additionalText = `<strong>Immediate Recommended Interventions:</strong>
-      <ul>
-        <li><strong>Sensory Lighting:</strong> Instruct Alex to implement full-spectrum light panel illumination in Viktor's main living area at 3:30 PM to delay melatonin onset.</li>
-        <li><strong>Agitation Calming:</strong> Structure repetitive motor activities (like sorting colored discs) during peak agitation.</li>
-        <li><strong>Wandering Safety:</strong> Deploy exits chimes and register for the municipal Alzheimer's Wandering Registry database.</li>
-      </ul>`;
-  } 
-  else if (queryLower.includes('pierre') || queryLower.includes('henri')) {
-    text = `${modelHeadline}For <strong>Henri Pierre</strong>, the primary focus centers around vascular dementia adherence safety and nutritional consistency.`;
-    embedCard = {
-      title: 'Vascular Care: Henri Pierre',
-      tag: 'Vascular Screening',
-      caregiver: 'Marcelle Pierre (Niece)',
-      focus: 'Medication reminders, meal delivery schedules, cognitive exercises.',
-      metrics: [
-        { label: 'Cognitive Decline Pace', val: 'Low', width: '35%', color: '#10b981' },
-        { label: 'Nutrition Adherence', val: 'Mod', width: '60%', color: '#f59e0b' }
-      ]
-    };
-    additionalText = `<strong>Key Care Strategies:</strong>
-      <ol>
-        <li><strong>Medication Compliance:</strong> Establish an automated audio pill-dispenser reminder system in the home.</li>
-        <li><strong>Nutrition Support:</strong> Set up a senior meal coordination delivery rotation twice a week to ease burden on Marcelle.</li>
-        <li><strong>Activity Tracking:</strong> Refer to Henri's <em>Timeline</em> tab to track his upcoming physical examination schedules.</li>
-      </ol>`;
-  } 
-  else if (queryLower.includes('rivera') || queryLower.includes('maria')) {
-    text = `${modelHeadline}Here is the active care checklist overview for the <strong>Rivera Family</strong>, focusing on Sophia's primary care fatigue indices:`;
-    embedCard = {
-      title: 'Case Summary: Rivera Family',
+      title: 'Case Summary: Whitaker Family',
       tag: 'Early ADRD',
-      caregiver: 'Sophia Rivera (Daughter)',
-      focus: 'Memory preservation, wandering anxiety, caregiver burnout.',
+      caregiver: 'Tanya Whitaker (Other Relative)',
+      focus: 'Navigating patient denial, safety-incident-based conversations, local resource coordination.',
       metrics: [
-        { label: 'Caregiver Burden Risk', val: 'High', width: '75%', color: '#ef4444' },
-        { label: 'Wandering Risk', val: 'Mod', width: '40%', color: '#f59e0b' }
+        { label: 'Caregiver Burden Risk', val: 'Mod', width: '55%', color: '#f59e0b' },
+        { label: 'Denial / Engagement Risk', val: 'Mod', width: '50%', color: '#f59e0b' }
       ]
     };
     additionalText = `<strong>Recommended Actions:</strong>
       <ul>
-        <li><strong>Caregiver Support:</strong> Schedule Sophia for a local ADRD Support Group consult.</li>
-        <li><strong>Daily Structuring:</strong> Set up a visual, predictable schedule board for Maria at home.</li>
-        <li><strong>Safety Audit:</strong> Recommend simple wandering safeguards (e.g. chime alarm on exit doors).</li>
+        <li><strong>Denial Conversations:</strong> Lead with specific safety incidents rather than clinical labels when talking with the patient.</li>
+        <li><strong>Caregiver Support:</strong> Check in with Tanya on her own stress level, currently reported as moderate.</li>
+        <li><strong>Local Resources:</strong> Share Berwyn-area (60402) support options from the Whitaker care plan.</li>
       </ul>`;
   }
   else {

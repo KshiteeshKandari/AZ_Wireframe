@@ -2175,6 +2175,25 @@ function buildChatContextText(caseItem) {
   return lines.join('\n').slice(0, CHAT_CONTEXT_MAX_CHARS);
 }
 
+// Builds a short retrieval hint from the 2 messages immediately before the question just
+// asked (i.e. the prior CHW/Assistant turn). This is embedded together with the new question
+// so vague follow-ups ("can you tell me more about this?") still retrieve relevant knowledge
+// base chunks - the raw question embedded alone often has no topical signal on its own.
+// Kept separate from buildChatContextText: that one personalizes the model's phrasing, this
+// one only ever feeds the retrieval embedding.
+const RETRIEVAL_HINT_MSG_CHARS = 200;
+function buildRetrievalHint(caseItem) {
+  if (!caseItem) return '';
+  const hist = caseItem.chatHistory || [];
+  // The current question has already been pushed onto history by the time this runs, so the
+  // last entry is that question itself - grab the 2 entries before it.
+  const priorTurns = hist.slice(-3, -1);
+  if (!priorTurns.length) return '';
+  return priorTurns
+    .map(m => stripHTMLTags(m.text).slice(0, RETRIEVAL_HINT_MSG_CHARS))
+    .join(' ');
+}
+
 // Builds the full context sent to the worker to generate (or regenerate) a family report.
 // Unlike buildChatContextText (which trims to a short recent tail to keep chat replies snappy
 // and cheap), this pulls the FULL per-family chat transcript plus notes and intake fields,
@@ -2449,10 +2468,11 @@ async function fetchWorkerChatResponse(query) {
   try {
     const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
     const context = buildChatContextText(activeCase);
+    const retrievalHint = buildRetrievalHint(activeCase);
     const res = await fetch(CHAT_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question: query, context })
+      body: JSON.stringify({ question: query, context, retrievalHint })
     });
     const data = await res.json();
     removeChatTypingIndicator();

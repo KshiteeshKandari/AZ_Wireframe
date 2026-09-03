@@ -120,7 +120,6 @@ Cultural/Language Notes: Prefers materials in Spanish.`,
       ],
       aiSummary: 'This is a placeholder test case with randomly generated sample data, kept around for UI testing purposes.',
       reportStatus: 'Not Generated',
-      reportPeriod: 'Q3 2026',
       reportContent: `
         <h4>Test Family Report</h4>
         <p class="report-meta">Date: 8/22/26<br>Assigned CHW: Jane Doe</p>
@@ -219,10 +218,13 @@ const DOM = {
   
   // Case cards DOM
   caseCardsContainer: document.getElementById('case-cards-container'),
+  caseCardsInactiveContainer: document.getElementById('case-cards-inactive-container'),
   tabBtnList: document.getElementById('tab-btn-list'),
   tabBtnNew: document.getElementById('tab-btn-new'),
+  tabBtnInactive: document.getElementById('tab-btn-inactive'),
   subviewList: document.getElementById('subview-cards-list'),
   subviewForm: document.getElementById('subview-create-form'),
+  subviewInactive: document.getElementById('subview-cards-inactive'),
   btnCancelCreate: document.getElementById('btn-cancel-create'),
   newCaseForm: document.getElementById('new-case-form'),
   caseNameInput: document.getElementById('case-name'),
@@ -415,6 +417,7 @@ function renderAll() {
   renderStats();
   renderDashboard();
   renderCaseCards();
+  renderInactiveCaseCards();
   renderReportsList();
   renderChatHistory();
   renderNotificationBadge();
@@ -588,6 +591,9 @@ function clearCaseCardFilter() {
 function setupCaseCardTabs() {
   DOM.tabBtnList.addEventListener('click', () => { showCaseCardsSubview('list'); clearCaseCardFilter(); });
   DOM.tabBtnNew.addEventListener('click', () => showCaseCardsSubview('form'));
+  if (DOM.tabBtnInactive) {
+    DOM.tabBtnInactive.addEventListener('click', () => { showCaseCardsSubview('inactive'); renderInactiveCaseCards(); });
+  }
   if (DOM.btnCancelCreate) {
     DOM.btnCancelCreate.addEventListener('click', () => showCaseCardsSubview('list'));
   }
@@ -672,7 +678,6 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
         ],
         aiSummary: `Intake registered for ${caseTitle}. Stage: ${patientStage}. Primary caregiver (${caregiverRel}) reports stress level: ${caregiverStress}. Focus areas identified: ${focusAreas.join(', ') || 'General ADRD care'}. AI goal: ${aiGoal}.`,
         reportStatus: 'Not Generated',
-        reportPeriod: 'Q2 2024',
         reportContent: `
           <h4>${caseTitle} Report</h4>
           <p class="report-meta">Date: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Assigned CHW: Jane Doe</p>
@@ -708,17 +713,12 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
 }
 
 function showCaseCardsSubview(subview) {
-  if (subview === 'list') {
-    DOM.tabBtnList.classList.add('active');
-    DOM.tabBtnNew.classList.remove('active');
-    DOM.subviewList.classList.add('active');
-    DOM.subviewForm.classList.remove('active');
-  } else {
-    DOM.tabBtnList.classList.remove('active');
-    DOM.tabBtnNew.classList.add('active');
-    DOM.subviewList.classList.remove('active');
-    DOM.subviewForm.classList.add('active');
-  }
+  DOM.tabBtnList.classList.toggle('active', subview === 'list');
+  DOM.subviewList.classList.toggle('active', subview === 'list');
+  DOM.tabBtnNew.classList.toggle('active', subview === 'form');
+  DOM.subviewForm.classList.toggle('active', subview === 'form');
+  if (DOM.tabBtnInactive) DOM.tabBtnInactive.classList.toggle('active', subview === 'inactive');
+  if (DOM.subviewInactive) DOM.subviewInactive.classList.toggle('active', subview === 'inactive');
 }
 
 function setupDashboardStatClicks() {
@@ -738,17 +738,18 @@ function setupDashboardStatClicks() {
 
 // --- Render Dashboard ---
 function renderStats() {
-  DOM.statWaitingReferralCount.textContent = state.cases.filter(c => c.cardStatus === 'Waiting on Referral').length;
-  DOM.statContinuingServicesCount.textContent = state.cases.filter(c => c.cardStatus === 'Continuing Services').length;
-  DOM.statWaitingFollowupCount.textContent = state.cases.filter(c => c.cardStatus === 'Awaiting Follow Up').length;
-  DOM.familiesBadge.textContent = `${state.cases.length} ${state.cases.length === 1 ? 'Family' : 'Families'}`;
+  const activeCases = state.cases.filter(c => !c.inactive);
+  DOM.statWaitingReferralCount.textContent = activeCases.filter(c => c.cardStatus === 'Waiting on Referral').length;
+  DOM.statContinuingServicesCount.textContent = activeCases.filter(c => c.cardStatus === 'Continuing Services').length;
+  DOM.statWaitingFollowupCount.textContent = activeCases.filter(c => c.cardStatus === 'Awaiting Follow Up').length;
+  DOM.familiesBadge.textContent = `${activeCases.length} ${activeCases.length === 1 ? 'Family' : 'Families'}`;
   persistState();
 }
 
 function renderDashboard() {
   DOM.dashboardList.innerHTML = '';
-  
-  state.cases.forEach(c => {
+
+  state.cases.filter(c => !c.inactive).forEach(c => {
     const item = document.createElement('div');
     item.className = `family-item ${c.shared ? 'shared' : ''}`;
     item.setAttribute('data-case-id', c.id);
@@ -797,7 +798,7 @@ function getStatusChipClass(status) {
 function renderCaseCards() {
   DOM.caseCardsContainer.innerHTML = '';
 
-  state.cases.forEach(c => {
+  state.cases.filter(c => !c.inactive).forEach(c => {
     const card = document.createElement('div');
     card.className = 'case-card-item';
     card.id = `card-${c.id}`;
@@ -813,11 +814,11 @@ function renderCaseCards() {
           <h3>${c.name}</h3>
         </div>
         <div class="card-header-actions">
-          <button class="btn-ask-ai-from-card" data-case-id="${c.id}" title="Ask AI Companion about ${c.name}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
+          <button class="btn-ask-ai-from-card icon-tooltip" data-case-id="${c.id}" data-tooltip="Ask AI Companion about ${c.name}" aria-label="Ask AI Companion about ${c.name}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
           </button>
-          <button class="card-share-btn" data-family="${c.name}" title="Share Case Card">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          <button class="card-share-btn icon-tooltip" data-family="${c.name}" data-tooltip="Share Case Card" aria-label="Share Case Card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
           </button>
         </div>
       </div>
@@ -922,6 +923,60 @@ function renderCaseCards() {
   });
 }
 
+// --- Render Inactive (Closed) Case Cards ---
+// Cases closed via "Close Case" are no longer deleted - they're kept in state.cases with
+// inactive: true and shown here instead, so a CHW can re-open one if it turns out the family
+// needs to come back into active care.
+function renderInactiveCaseCards() {
+  if (!DOM.caseCardsInactiveContainer) return;
+  DOM.caseCardsInactiveContainer.innerHTML = '';
+
+  const inactiveCases = state.cases.filter(c => c.inactive);
+
+  if (inactiveCases.length === 0) {
+    DOM.caseCardsInactiveContainer.innerHTML = `<p class="empty-state-text">No inactive cases yet. Cases closed from Family Follow-up will show up here.</p>`;
+    return;
+  }
+
+  inactiveCases.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'case-card-item is-inactive-card';
+    card.id = `inactive-card-${c.id}`;
+
+    card.innerHTML = `
+      <div class="case-card-header">
+        <div class="card-title-group">
+          <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          <h3>${c.name}</h3>
+        </div>
+      </div>
+
+      <p class="card-phase">Phase: ${c.phase}</p>
+      <p class="card-blurb">${c.blurb}</p>
+
+      <div class="card-footer-row">
+        <span class="status-badge neutral">Case Closed</span>
+      </div>
+
+      <button class="btn btn-secondary btn-reopen-case" data-case-id="${c.id}">Re-open Case</button>
+    `;
+
+    DOM.caseCardsInactiveContainer.appendChild(card);
+  });
+
+  document.querySelectorAll('.btn-reopen-case').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const caseId = btn.getAttribute('data-case-id');
+      const caseItem = state.cases.find(c => c.id === caseId);
+      if (caseItem) {
+        caseItem.inactive = false;
+        renderAll();
+        renderInactiveCaseCards();
+      }
+    });
+  });
+}
+
 // --- Render Reports List ---
 // Pending Intake should only ever describe missing/empty intake data - not "waiting on
 // something external" (a physical exam, a referral, etc). Those are real reasons a report
@@ -930,10 +985,18 @@ function isIntakeIncomplete(c) {
   return !c.intakeNotes || c.intakeNotes.trim().length < 40;
 }
 
+// Suggested follow-up display used in the Family Follow-up list - reuses whatever the CHW
+// already picked on the report calendar (case.suggestedFollowUpDate), or the same computed
+// default the calendar itself falls back to when nothing's been picked yet.
+function getSuggestedFollowUpDisplay(c) {
+  const date = c.suggestedFollowUpDate ? new Date(c.suggestedFollowUpDate) : computeDefaultFollowUpDate(c);
+  return formatSuggestedFollowUpDate(date);
+}
+
 function renderReportsList() {
   DOM.reportsRowsList.innerHTML = '';
 
-  state.cases.forEach(c => {
+  state.cases.filter(c => !c.inactive).forEach(c => {
     const row = document.createElement('div');
     row.className = 'report-row';
     row.setAttribute('data-family', c.name);
@@ -962,11 +1025,11 @@ function renderReportsList() {
       `;
     } else if (c.reportStatus === 'Generated') {
       actionHTML = `
-        <button class="btn btn-secondary btn-sm btn-open-report" data-id="${c.id}" data-family="${c.name}" data-period="${c.reportPeriod}">
+        <button class="btn btn-secondary btn-sm btn-open-report" data-id="${c.id}" data-family="${c.name}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          View Report
+          View Follow-up
         </button>
-        <button class="btn btn-secondary btn-sm btn-regenerate-report-action" data-id="${c.id}" title="Regenerate this report using the latest case info and chat conversation">
+        <button class="btn btn-secondary btn-sm btn-regenerate-report-action" data-id="${c.id}" title="Regenerate this follow-up response using the latest case info and chat conversation">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
           Regenerate
         </button>
@@ -975,14 +1038,14 @@ function renderReportsList() {
       actionHTML = `
         <button class="btn btn-primary btn-sm btn-generate-report-action" data-id="${c.id}">
           <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="margin-right: 4px; color: white;"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
-          Generate Report
+          Generate Follow up response
         </button>
       `;
     }
 
     row.innerHTML = `
       <div class="col-family font-semibold">${c.name}</div>
-      <div class="col-period">${c.reportPeriod}</div>
+      <div class="col-period">${getSuggestedFollowUpDisplay(c)}</div>
       <div class="col-status">
         ${statusHTML}
       </div>
@@ -1071,7 +1134,6 @@ async function generateReportSimulated(caseId, buttonElement, isRegenerate = fal
     caseItem.reportContent = data.reportContent;
     caseItem.reportContentEs = data.reportContentEs;
     caseItem.reportStatus = 'Generated';
-    caseItem.reportPeriod = caseItem.reportPeriod || 'Q2 2024';
     persistState();
     renderAll();
 
@@ -1455,7 +1517,38 @@ function setArchiveActionsDisabled(disabled) {
   });
 }
 
-async function renderCloseCaseSummaryPreview(c, previewContainer) {
+// Renders the (already-known) title/content into the editable preview box, plus a Regenerate
+// button. Regenerating is a real LLM call and takes a few seconds, so the button is only
+// enabled when there's actually a reason to re-run it - i.e. isStale is true.
+function renderCloseCaseSummaryHTML(c, previewContainer, isStale, noticeText) {
+  const title = c.closeSummaryTitle || `${c.phase} Case Study`;
+  const content = c.closeSummaryContent || '';
+  previewContainer.innerHTML = `
+    <div class="archive-summary-header">
+      <p class="archive-summary-note">${noticeText}</p>
+      <button type="button" class="btn btn-secondary btn-sm btn-regenerate-close-summary" ${isStale ? '' : 'disabled'}
+        title="${isStale ? 'Regenerate using the latest case info' : 'Nothing has changed on this case since this summary was generated'}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="margin-right: 4px;"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
+        Regenerate
+      </button>
+    </div>
+    <label class="group-label" for="archive-edit-title">Title</label>
+    <input type="text" id="archive-edit-title" value="${escapeHTML(title)}" style="width: 100%; margin-bottom: 10px;">
+    <label class="group-label" for="archive-edit-content">Content</label>
+    <textarea id="archive-edit-content" rows="4" style="width: 100%;">${escapeHTML(content)}</textarea>
+  `;
+  const regenBtn = previewContainer.querySelector('.btn-regenerate-close-summary');
+  if (regenBtn && isStale) {
+    regenBtn.addEventListener('click', () => generateCloseSummary(c, previewContainer));
+  }
+}
+
+// Actually calls the worker to (re)generate the close-case summary, then caches the result -
+// title, content, and the exact context string it was generated from - on the case itself so
+// state.cases persists it. Re-opening the Close Case modal later can compare the case's
+// current context against closeSummaryContext to know whether anything changed.
+async function generateCloseSummary(c, previewContainer) {
+  const currentContext = buildCloseSummaryContext(c);
   setArchiveActionsDisabled(true);
   previewContainer.innerHTML = `
     <div class="archive-summary-loading">
@@ -1464,33 +1557,55 @@ async function renderCloseCaseSummaryPreview(c, previewContainer) {
     </div>
   `;
   try {
-    const caseContext = buildCloseSummaryContext(c);
     const res = await fetch(CHAT_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'generate_close_summary', caseContext })
+      body: JSON.stringify({ action: 'generate_close_summary', caseContext: currentContext })
     });
     const data = await res.json();
     if (!res.ok || !data.title || !data.content) throw new Error('Bad response');
-    previewContainer.innerHTML = `
-      <p style="margin: 0 0 10px; color: var(--text-secondary);">AI-generated summary - review and edit before confirming. No names or identifying details will be saved.</p>
-      <label class="group-label" for="archive-edit-title">Title</label>
-      <input type="text" id="archive-edit-title" value="${escapeHTML(data.title)}" style="width: 100%; margin-bottom: 10px;">
-      <label class="group-label" for="archive-edit-content">Content</label>
-      <textarea id="archive-edit-content" rows="4" style="width: 100%;">${escapeHTML(data.content)}</textarea>
-    `;
+    c.closeSummaryTitle = data.title;
+    c.closeSummaryContent = data.content;
+    c.closeSummaryContext = currentContext;
+    persistState();
+    renderCloseCaseSummaryHTML(c, previewContainer, false,
+      'AI-generated summary - review and edit before confirming. No names or identifying details will be saved.');
   } catch {
-    // Fallback to simple phase-based placeholder if worker is unavailable
-    previewContainer.innerHTML = `
-      <p style="margin: 0 0 10px; color: var(--text-secondary);">Could not generate summary automatically - please fill in manually.</p>
-      <label class="group-label" for="archive-edit-title">Title</label>
-      <input type="text" id="archive-edit-title" value="${escapeHTML(c.phase + ' Case Study')}" style="width: 100%; margin-bottom: 10px;">
-      <label class="group-label" for="archive-edit-content">Content</label>
-      <textarea id="archive-edit-content" rows="4" style="width: 100%;"></textarea>
-    `;
+    // Don't clear out a previously-good cached summary just because a regeneration attempt
+    // failed (network blip, worker down, etc) - fall back to showing it, flagged stale so
+    // Regenerate stays available for a retry, rather than a blank box.
+    if (c.closeSummaryContent) {
+      renderCloseCaseSummaryHTML(c, previewContainer, true,
+        'Could not refresh the summary right now - showing the last generated version.');
+    } else {
+      previewContainer.innerHTML = `
+        <p style="margin: 0 0 10px; color: var(--text-secondary);">Could not generate summary automatically - please fill in manually.</p>
+        <label class="group-label" for="archive-edit-title">Title</label>
+        <input type="text" id="archive-edit-title" value="${escapeHTML(c.phase + ' Case Study')}" style="width: 100%; margin-bottom: 10px;">
+        <label class="group-label" for="archive-edit-content">Content</label>
+        <textarea id="archive-edit-content" rows="4" style="width: 100%;"></textarea>
+      `;
+    }
   } finally {
     setArchiveActionsDisabled(false);
   }
+}
+
+// Entry point when the Close Case modal opens. Only triggers a real (slow) LLM call when
+// there's no cached summary yet, or the case's info (intake fields / chat transcript, via
+// buildCloseSummaryContext) has changed since the cached summary was generated - otherwise it
+// just re-shows the cached summary instantly with Regenerate disabled.
+async function renderCloseCaseSummaryPreview(c, previewContainer) {
+  const currentContext = buildCloseSummaryContext(c);
+  const isStale = !c.closeSummaryContent || c.closeSummaryContext !== currentContext;
+
+  if (!isStale) {
+    renderCloseCaseSummaryHTML(c, previewContainer, false,
+      'AI-generated summary - review and edit before confirming. No names or identifying details will be saved.');
+    return;
+  }
+
+  await generateCloseSummary(c, previewContainer);
 }
 
 // Renders the case's own resources as a plain sub-list on the archived card - only when the
@@ -1545,9 +1660,12 @@ function executeCaseArchiving(addResource = false, targetLibrary = '') {
     alert('Case successfully closed and archived.');
   }
 
-  // Remove case from state
-  state.cases = state.cases.filter(item => item.id !== caseId);
+  // Cases are no longer deleted on close - they're kept in state (with all their history)
+  // but marked inactive, and moved into the Inactive Cases tab where a CHW can re-open them
+  // later if the family needs to come back into active care.
+  c.inactive = true;
   renderAll();
+  renderInactiveCaseCards();
 }
 
 async function openCloseCaseOptionsModal(caseId) {
@@ -1739,7 +1857,7 @@ function renderReportCalendar(caseItem) {
 }
 
 function openReportModal(caseItem) {
-  DOM.reportModalTitle.textContent = `${caseItem.name} - ${caseItem.reportPeriod} Report`;
+  DOM.reportModalTitle.textContent = `${caseItem.name} - Follow-up Response`;
   state.currentReportCaseId = caseItem.id;
   state.reportLangSpanish = false;
   DOM.reportModalTextContent.innerHTML = caseItem.reportContent + buildReportResourcesSectionHTML(caseItem, 'en');
@@ -1834,7 +1952,6 @@ Cultural/Language Notes: None reported.`,
         ],
         aiSummary: 'Whitaker Family case shared by CHW Robert Mercer. Tanya Whitaker (other relative) is the caregiver contact for an early-stage ADRD case with no mobility constraints. Main focus is navigating the patient\'s denial of diagnosis. Recommended next steps include grounding conversations in specific safety incidents rather than direct confrontation, and connecting Tanya with local Berwyn-area resources.',
         reportStatus: 'Not Generated',
-        reportPeriod: 'Q3 2026',
         reportContent: `
           <h4>Whitaker Family Report</h4>
           <p class="report-meta">Date: ${new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' })}<br>Assigned CHW: Robert Mercer</p>
@@ -2436,9 +2553,51 @@ function renderChatHistory() {
   scrollChatBottom();
 }
 
+// If a chat isn't already tagged to a family, but the CHW's question names one (e.g. "can you
+// summarize the Kiki Family case?"), this finds the matching case so handleChatSend can apply
+// the tag automatically - otherwise the question would run untagged, with no family context
+// sent at all, and the worker has no way to answer anything case-specific. Matches on the full
+// case name, the name with any trailing "(...)" tag stripped (e.g. "Test Family (TEST)" ->
+// "Test Family"), and the "short" form with a trailing "Family" word dropped (e.g. "Kiki") -
+// whichever match is longest/most specific wins if more than one case matches.
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+function detectFamilyMentionInQuery(query) {
+  let best = null;
+  state.cases.forEach(c => {
+    if (c.inactive) return; // don't auto-tag a closed case back into an active conversation
+    const fullName = c.name.trim();
+    const baseName = fullName.replace(/\s*\([^)]*\)\s*$/, '').trim();
+    const shortName = baseName.replace(/\s+family$/i, '').trim();
+    const candidates = [...new Set([fullName, baseName, shortName])].filter(s => s.length >= 3);
+    candidates.forEach(candidate => {
+      const re = new RegExp(`\\b${escapeRegExp(candidate)}\\b`, 'i');
+      if (re.test(query) && (!best || candidate.length > best.matchLength)) {
+        best = { caseItem: c, matchLength: candidate.length };
+      }
+    });
+  });
+  return best ? best.caseItem : null;
+}
+
 function handleChatSend() {
   const query = DOM.chatInput.value.trim();
   if (!query) return;
+
+  // Auto-apply a family tag if the question names a family - see detectFamilyMentionInQuery
+  // above. Runs even if a tag is already set: "New Chat" only clears the active thread's
+  // messages, not the tag (see clearActiveChatArray), so a stale tag can otherwise linger and
+  // silently answer under the wrong family's context when the CHW names a different one. Only
+  // switches when the named family differs from whatever's currently active, so an ordinary
+  // follow-up question (no family name in it) never gets bumped off its thread. Must happen
+  // before getActiveChatArray() below so the message (and the worker's context) land in the
+  // right family's thread.
+  const matchedCase = detectFamilyMentionInQuery(query);
+  if (matchedCase && matchedCase.id !== state.activeChatCaseId) {
+    state.activeChatCaseId = matchedCase.id;
+    renderChatContextChip();
+  }
 
   DOM.chatInput.value = '';
   DOM.chatInput.style.height = 'auto';

@@ -14,7 +14,16 @@ const OPENAI_CHAT_MODEL = 'gpt-5-nano';
 // gpt-5-nano is a reasoning model: max_completion_tokens covers hidden reasoning tokens
 // AND the visible answer. reasoning_effort 'minimal' avoided that but produced unreliable,
 // occasionally self-contradictory answers; 'low' + a bigger budget is consistently clean.
-const MAX_RESPONSE_TOKENS = 1500;
+// 1500 was measured to be too tight for open-ended asks ("detailed checklist" etc): reasoning
+// token usage varies run-to-run (seen 256-1500 tokens on an identical question), and roughly
+// 1 in 3 runs at 1500 consumed the ENTIRE budget on hidden reasoning, leaving 0 tokens for the
+// visible answer (finish_reason "length", empty content) - i.e. a silent blank reply. 3000
+// gives enough headroom that reasoning variance no longer crowds out the answer.
+const MAX_RESPONSE_TOKENS = 3000;
+// Defense in depth for the failure mode above: if a call still comes back with finish_reason
+// "length" and empty content (reasoning ate the whole budget), retry once with more headroom
+// rather than surfacing a blank bubble to the CHW.
+const RETRY_RESPONSE_TOKENS = 4500;
 const MAX_REPORT_RESPONSE_TOKENS = 3000; // two full HTML letters (en + es) in one JSON response
 const MAX_CLOSE_SUMMARY_RESPONSE_TOKENS = 800;
 // Chunks below this cosine similarity aren't relevant enough to surface as a suggested
@@ -88,7 +97,7 @@ function mentionsCrisisRisk(...texts) {
   return texts.some(t => t && CRISIS_PATTERNS.some(re => re.test(t)));
 }
 
-async function askOpenAI(systemPrompt, question, env) {
+async function callOpenAIChat(systemPrompt, question, env, maxTokens) {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -97,7 +106,7 @@ async function askOpenAI(systemPrompt, question, env) {
     },
     body: JSON.stringify({
       model: OPENAI_CHAT_MODEL,
-      max_completion_tokens: MAX_RESPONSE_TOKENS,
+      max_completion_tokens: maxTokens,
       reasoning_effort: 'low',
       messages: [
         { role: 'system', content: systemPrompt },
@@ -107,7 +116,17 @@ async function askOpenAI(systemPrompt, question, env) {
   });
   if (!res.ok) throw new Error(`OpenAI API error ${res.status}: ${await res.text()}`);
   const json = await res.json();
-  return json.choices[0].message.content;
+  return json.choices[0].message.content || '';
+}
+
+async function askOpenAI(systemPrompt, question, env) {
+  const answer = await callOpenAIChat(systemPrompt, question, env, MAX_RESPONSE_TOKENS);
+  if (answer.trim()) return answer;
+  // Reasoning consumed the entire token budget with nothing left for the visible answer (see
+  // MAX_RESPONSE_TOKENS comment above) - retry once with more headroom instead of returning a
+  // silent blank reply.
+  const retryAnswer = await callOpenAIChat(systemPrompt, question, env, RETRY_RESPONSE_TOKENS);
+  return retryAnswer;
 }
 
 async function generateReport(reportContext, env) {

@@ -2716,9 +2716,27 @@ function formatAssistantAnswer(rawText) {
 
   // Consecutive bullet lines merge into one list (even across blank lines);
   // a blank line otherwise breaks the current paragraph into its own block.
+  // "### Heading" lines (per the worker's formatting rules) become their own
+  // labeled block instead of a literal "###" in the paragraph text, and a
+  // "Safety note:" line (the standardized disclaimer the prompt appends to
+  // medical-advice answers) gets its own quieter, visually separated style.
   lines.forEach(line => {
     if (!line) {
       flushPara();
+      return;
+    }
+    const headingMatch = line.match(/^#{1,4}\s+(.*)$/);
+    if (headingMatch) {
+      flushList();
+      flushPara();
+      htmlBlocks.push(`<div class="chat-answer-heading">${headingMatch[1]}</div>`);
+      return;
+    }
+    const disclaimerMatch = line.match(/^(Safety note:.*)$/i);
+    if (disclaimerMatch) {
+      flushList();
+      flushPara();
+      htmlBlocks.push(`<p class="chat-answer-disclaimer">${disclaimerMatch[1]}</p>`);
       return;
     }
     const bulletMatch = line.match(/^[-•]\s+(.*)$/);

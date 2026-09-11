@@ -2169,14 +2169,24 @@ button.pill-badge.active {
   font-weight: 700;
 }
 
-/* Notes button is blue by default; dims when no text is selected */
+/* Notes button is muted/disabled by default; turns blue when text is selected */
 #btn-add-to-notes {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background-color: var(--color-primary-glow, rgba(79, 70, 229, 0.08));
+  color: var(--text-muted, #9ca3af);
+  border-color: var(--border-color, #d1d5db);
+  background-color: transparent;
+  opacity: 0.5;
 }
 #btn-add-to-notes:hover {
-  background-color: var(--color-primary-glow, rgba(79, 70, 229, 0.15));
+  background-color: rgba(0, 0, 0, 0.04);
+}
+#btn-add-to-notes.notes-btn-active {
+  color: rgb(0, 0, 255);
+  border-color: rgb(0, 0, 255);
+  background-color: rgba(0, 0, 255, 0.08);
+  opacity: 1;
+}
+#btn-add-to-notes.notes-btn-active:hover {
+  background-color: rgba(0, 0, 255, 0.15);
 }
 .notes-btn-inactive {
   opacity: 0.4;
@@ -2735,6 +2745,7 @@ button.pill-badge.active {
   flex: 3;
   overflow-y: auto;
   padding-right: 12px;
+  font-family: var(--font-body);
 }
 
 .report-text-pane h4 {
@@ -2785,16 +2796,7 @@ button.pill-badge.active {
 }
 
 .report-resource-list li {
-  position: relative;
-  padding-left: 16px;
-}
-
-.report-resource-list li::before {
-  content: '→';
-  position: absolute;
-  left: 0;
-  color: var(--color-primary);
-  font-weight: bold;
+  padding-left: 0;
 }
 
 .report-text-pane h5 {

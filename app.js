@@ -2103,6 +2103,7 @@ function updateAddToNotesButtonLookState() {
   const hasSelection = sel && sel.toString().trim().length > 0 &&
     sel.anchorNode && DOM.chatMessagesBox.contains(sel.anchorNode);
   DOM.btnAddToNotes.classList.toggle('notes-btn-inactive', !hasSelection);
+  DOM.btnAddToNotes.classList.toggle('notes-btn-active', !!hasSelection);
 }
 
 // Reads the current text selection (must be inside the chat messages pane), and appends it

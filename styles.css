@@ -1405,6 +1405,8 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  border-top: 2px solid var(--border-color);
+  padding-top: 8px;
 }
 
 .section-title {
@@ -2167,12 +2169,30 @@ button.pill-badge.active {
   font-weight: 700;
 }
 
-/* Highlight-to-notes button dims when no text is selected in chat */
+/* Notes button is blue by default; dims when no text is selected */
+#btn-add-to-notes {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-glow, rgba(79, 70, 229, 0.08));
+}
+#btn-add-to-notes:hover {
+  background-color: var(--color-primary-glow, rgba(79, 70, 229, 0.15));
+}
 .notes-btn-inactive {
   opacity: 0.4;
 }
 .notes-btn-inactive:hover {
   opacity: 0.65;
+}
+
+.chat-message-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 7px;
+  margin-bottom: 8px;
+  margin-top: 0;
+  line-height: 1.4;
 }
 
 .notes-btn-flash-success {

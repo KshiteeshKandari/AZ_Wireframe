@@ -20,7 +20,9 @@ const DEFAULT_INTAKE_FIELDS = {
   primaryContact: '', zipCode: '', mobility: '',
   patientAge: '65 - 74', patientStage: 'Middle-Stage (Moderate)',
   patientLanguage: 'English', livingSituation: 'All adults',
+  patientGender: '',
   caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
+  caregiverGender: '',
   focusAreas: [], aiGoal: 'Find local resources', otherInfo: '', notes: ''
 };
 
@@ -75,68 +77,7 @@ const state = {
   activeEditTab: 'intake',
   activeChatCaseId: null, // Tracks which family case (if any) the AI Chat is currently scoped to
   
-  cases: [
-    {
-      id: 'test-case',
-      name: 'Test Family (TEST)',
-      details: 'TEST DATA &bull; Primary: Terry Testerson',
-      phase: 'Intake Submitted',
-      blurb: 'Placeholder test case with random sample data. Use this to try out the UI without touching real family data.',
-      cardStatus: 'Waiting on Referral',
-      patientName: 'Pat Testerson',
-      patientAge: 77,
-      intakeNotes: `Primary Contact: Terry Testerson
-Zip Code: 90210
-Relationship to Patient: Spouse/Partner
-
-Patient Profile:
-- Age Range: 75 - 84
-- Dementia Stage: Middle-Stage (Moderate)
-- Language: Spanish
-- Living Situation: Patient lives alone
-- Mobility: Uses a walker
-
-Caregiver Profile:
-- Relationship: Spouse/Partner
-- Observed Stress Level: High / Burnout Risk
-
-Focus Areas: Setting Role Boundaries, Unrealistic Expectations
-Cultural/Language Notes: Prefers materials in Spanish.`,
-      intakeFields: {
-        primaryContact: 'Terry Testerson', zipCode: '90210', mobility: 'Uses a walker',
-        patientAge: '75 - 84', patientStage: 'Middle-Stage (Moderate)',
-        patientLanguage: 'Spanish', livingSituation: 'Patient lives alone',
-        caregiverRel: 'Spouse/Partner', caregiverAge: '65 - 74', caregiverStress: 'High / Burnout Risk',
-        focusAreas: ['Setting Role Boundaries', 'Unrealistic Expectations'],
-        aiGoal: 'Draft a conversation starter',
-        notes: 'This is placeholder test data, not a real family.'
-      },
-      timeline: [
-        { date: 'Aug 22, 2026', label: 'Intake Form Submitted (Test)' }
-      ],
-      resources: [
-        { name: 'Sample Resource Card One', url: '#', tag: 'Support' },
-        { name: 'Sample Resource Card Two', url: '#', tag: 'Devices' }
-      ],
-      aiSummary: 'This is a placeholder test case with randomly generated sample data, kept around for UI testing purposes.',
-      reportStatus: 'Not Generated',
-      reportContent: `
-        <h4>Test Family Report</h4>
-        <p class="report-meta">Date: 8/22/26<br>Assigned CHW: Jane Doe</p>
-        <p class="report-greeting">Hi Terry,</p>
-        <p>This is placeholder test report content used for trying out the UI. It is not a real family.</p>
-        <p><strong>Next Check-up:</strong> N/A (test case).</p>
-      `,
-      reportContentEs: `
-        <h4>Informe de la Familia de Prueba</h4>
-        <p class="report-meta">Fecha: 22/8/26<br>Trabajadora de salud asignada: Jane Doe</p>
-        <p class="report-greeting">Hola Terry,</p>
-        <p>Este es contenido de prueba de marcador de posición usado para probar la interfaz. No es una familia real.</p>
-        <p><strong>Próxima Revisión:</strong> N/D (caso de prueba).</p>
-      `,
-      shared: false
-    }
-  ],
+  cases: [],
   // General (no family pinned) chat thread. Each case additionally carries its own
   // `chatHistory` array (see getActiveChatArray) so every family's conversation - and the
   // context window built from it - stays separate and switches when the family tag changes.
@@ -521,11 +462,12 @@ function setActiveMultiPillValues(fieldId, values, root = document) {
 // by isIntakeIncomplete() and the case card's Intake Info display.
 function buildIntakeNotesText(f) {
   return `
-Primary Contact: ${f.primaryContact || 'N/A'}
+Primary Caregiver: ${f.primaryContact || 'N/A'}
 Zip Code: ${f.zipCode || 'N/A'}
 
 Patient Profile:
 - Age Range: ${f.patientAge}
+- Gender: ${f.patientGender || 'Not specified'}
 - Dementia Stage: ${f.patientStage}
 - Language: ${f.patientLanguage}
 - Living Situation: ${f.livingSituation}
@@ -534,6 +476,7 @@ Patient Profile:
 Caregiver Profile:
 - Relationship: ${f.caregiverRel}
 - Age Range: ${f.caregiverAge}
+- Gender: ${f.caregiverGender || 'Not specified'}
 - Observed Stress Level: ${f.caregiverStress}
 
 Focus Areas: ${f.focusAreas && f.focusAreas.length > 0 ? f.focusAreas.join(', ') : 'None selected'}
@@ -611,6 +554,7 @@ function setupCaseCardTabs() {
     const notes = DOM.intakeNotesInput ? DOM.intakeNotesInput.value.trim() : '';
 
     const patientAge = getSelectedPillValue('patient-age', DOM.newCaseForm) || '65 - 74';
+    const patientGender = getSelectedPillValue('patient-gender', DOM.newCaseForm) || '';
     const patientStage = getSelectedPillValue('patient-stage', DOM.newCaseForm) || 'Middle-Stage (Moderate)';
     const patientLanguage = getSelectedPillValue('patient-language', DOM.newCaseForm) || 'English';
     const livingSituation = getSelectedPillValue('living-situation', DOM.newCaseForm) || 'All adults';
@@ -618,6 +562,7 @@ function setupCaseCardTabs() {
 
     const caregiverRel = getSelectedPillValue('caregiver-rel', DOM.newCaseForm) || 'Adult Child';
     const caregiverAge = getSelectedPillValue('caregiver-age', DOM.newCaseForm) || 'Under 65';
+    const caregiverGender = getSelectedPillValue('caregiver-gender', DOM.newCaseForm) || '';
     const caregiverStress = getSelectedPillValue('caregiver-stress', DOM.newCaseForm) || 'High / Burnout Risk';
     const bestCallTime = getSelectedPillValue('best-call-time', DOM.newCaseForm) || 'Morning (8am-12pm)';
 
@@ -665,8 +610,8 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
         intakeNotes: fullIntakeText,
         intakeFields: {
           primaryContact, zipCode, mobility: patientMobility,
-          patientAge, patientStage, patientLanguage, livingSituation,
-          caregiverRel, caregiverAge, caregiverStress,
+          patientAge, patientGender, patientStage, patientLanguage, livingSituation,
+          caregiverRel, caregiverAge, caregiverGender, caregiverStress,
           focusAreas, aiGoal, otherInfo, notes
         },
         timeline: [
@@ -934,7 +879,7 @@ function renderInactiveCaseCards() {
   const inactiveCases = state.cases.filter(c => c.inactive);
 
   if (inactiveCases.length === 0) {
-    DOM.caseCardsInactiveContainer.innerHTML = `<p class="empty-state-text">No inactive cases yet. Cases closed from Family Follow-up will show up here.</p>`;
+    DOM.caseCardsInactiveContainer.innerHTML = `<p class="empty-state-text">No inactive cases yet. Cases closed from Contact Family will show up here.</p>`;
     return;
   }
 
@@ -1027,7 +972,7 @@ function renderReportsList() {
       actionHTML = `
         <button class="btn btn-secondary btn-sm btn-open-report" data-id="${c.id}" data-family="${c.name}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          View Follow-up
+          View Email Response
         </button>
         <button class="btn btn-secondary btn-sm btn-regenerate-report-action" data-id="${c.id}" title="Regenerate this follow-up response using the latest case info and chat conversation">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="margin-right: 4px;"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>
@@ -1038,7 +983,7 @@ function renderReportsList() {
       actionHTML = `
         <button class="btn btn-primary btn-sm btn-generate-report-action" data-id="${c.id}">
           <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="margin-right: 4px; color: white;"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
-          Generate Follow up response
+          Generate Email Response
         </button>
       `;
     }
@@ -1376,11 +1321,13 @@ function openEditIntakePage(caseId) {
   DOM.eiNotes.value = f.notes;
 
   setActivePillValue('ei-patient-age', f.patientAge, form);
+  setActivePillValue('ei-patient-gender', f.patientGender, form);
   setActivePillValue('ei-patient-stage', f.patientStage, form);
   setActivePillValue('ei-patient-language', f.patientLanguage, form);
   setActivePillValue('ei-living-situation', f.livingSituation, form);
   setActivePillValue('ei-caregiver-rel', f.caregiverRel, form);
   setActivePillValue('ei-caregiver-age', f.caregiverAge, form);
+  setActivePillValue('ei-caregiver-gender', f.caregiverGender, form);
   setActivePillValue('ei-caregiver-stress', f.caregiverStress, form);
   setActiveMultiPillValues('ei-focus-areas', f.focusAreas, form);
   setActivePillValue('ei-ai-assist-goal', f.aiGoal, form);
@@ -1413,11 +1360,13 @@ function setupEditIntakePage() {
       zipCode: DOM.eiZipCode.value.trim(),
       mobility: DOM.eiMobility.value.trim(),
       patientAge: getSelectedPillValue('ei-patient-age', form) || '65 - 74',
+      patientGender: getSelectedPillValue('ei-patient-gender', form) || '',
       patientStage: getSelectedPillValue('ei-patient-stage', form) || 'Middle-Stage (Moderate)',
       patientLanguage: getSelectedPillValue('ei-patient-language', form) || 'English',
       livingSituation: getSelectedPillValue('ei-living-situation', form) || 'All adults',
       caregiverRel: getSelectedPillValue('ei-caregiver-rel', form) || 'Adult Child',
       caregiverAge: getSelectedPillValue('ei-caregiver-age', form) || 'Under 65',
+      caregiverGender: getSelectedPillValue('ei-caregiver-gender', form) || '',
       caregiverStress: getSelectedPillValue('ei-caregiver-stress', form) || 'High / Burnout Risk',
       focusAreas: getSelectedMultiPillValues('ei-focus-areas', form),
       aiGoal: getSelectedPillValue('ei-ai-assist-goal', form) || 'Find local resources',
@@ -1857,7 +1806,7 @@ function renderReportCalendar(caseItem) {
 }
 
 function openReportModal(caseItem) {
-  DOM.reportModalTitle.textContent = `${caseItem.name} - Follow-up Response`;
+  DOM.reportModalTitle.textContent = `${caseItem.name} - Email Response`;
   state.currentReportCaseId = caseItem.id;
   state.reportLangSpanish = false;
   DOM.reportModalTextContent.innerHTML = caseItem.reportContent + buildReportResourcesSectionHTML(caseItem, 'en');
@@ -2487,11 +2436,13 @@ function renderChatHistory() {
       optionsHTML += `</div>`;
     }
 
+    const showHint = msg.sender === 'assistant' && !msg.optionsList;
     msgDiv.innerHTML = `
       <div class="message-avatar">${avatarContent}</div>
       <div class="message-content-wrapper">
         <div class="message-sender">${msg.sender === 'assistant' ? 'AZ Companion' : 'You'}</div>
         <div class="message-bubble">
+          ${showHint ? `<p class="chat-message-hint">Highlight any text below and click the blue notes icon to save it to this family's Notes.</p>` : ''}
           ${msg.raw ? formatAssistantAnswer(msg.text) : `<p>${msg.text}</p>`}
           ${embedHTML}
           ${msg.additionalText ? `<p>${msg.additionalText}</p>` : ''}
@@ -2646,6 +2597,12 @@ async function checkAgentStatus() {
   }
 }
 
+// Returns true when the query seems to be looking for a resource, service, or support contact.
+// Used to decide whether to inject the Alzheimer's Association fallback when retrieval returns nothing.
+function isResourceSeekingQuery(query) {
+  return /\b(resource|resources|help|support|program|service|services|contact|hotline|helpline|referral|assistance|where|find|local|available|connect|refer|organization|agency|call|number|phone)\b/i.test(query);
+}
+
 async function fetchWorkerChatResponse(query) {
   try {
     const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
@@ -2663,10 +2620,18 @@ async function fetchWorkerChatResponse(query) {
       appendAssistantChatMessage(data.error || "Something went wrong reaching the assistant.", { raw: true });
       return;
     }
-    const resources = (data.resources || [])
+    let resources = (data.resources || [])
       .map(r => findResourceById(r.id))
       .filter(Boolean)
       .map(r => ({ ...r, addedToReport: false }));
+
+    // Fallback: if the query was resource-seeking but retrieval returned nothing above threshold,
+    // surface the Alzheimer's Association 24/7 Helpline so there's always at least one contact.
+    if (resources.length === 0 && isResourceSeekingQuery(query)) {
+      const helpline = findResourceById('verified-resources-1');
+      if (helpline) resources = [{ ...helpline, addedToReport: false }];
+    }
+
     appendAssistantChatMessage(data.answer, { raw: true, resources });
   } catch (err) {
     removeChatTypingIndicator();

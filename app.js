@@ -2403,29 +2403,8 @@ function renderChatHistory() {
       `;
     }
 
-    // Resource cards (one per ASI-flagged retrieval hit) + Add to Family Report action
-    let resourceHTML = '';
-    if (msg.resources && msg.resources.length > 0) {
-      resourceHTML = msg.resources.map((res, resIdx) => {
-        const tagsHTML = res.tags.map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('');
-        const addToReportBtnHTML = state.activeChatCaseId
-          ? `<button class="add-to-report-btn" data-res-idx="${resIdx}" ${res.addedToReport ? 'disabled' : ''}>
-              ${res.addedToReport ? '✓ Added to Family Report' : '+ Add to Family Report'}
-            </button>`
-          : '';
-        return `
-          <div class="chat-resource-card">
-            <div class="chat-resource-header">
-              <h4>${escapeHTML(res.title)}</h4>
-              ${res.verified ? '<span class="verified-badge">ASI Approved</span>' : ''}
-            </div>
-            <p>${escapeHTML(res.desc)}</p>
-            <div class="tag-row">${tagsHTML}</div>
-            ${addToReportBtnHTML}
-          </div>
-        `;
-      }).join('');
-    }
+    // Resource cards — built via shared helper (same markup as finalizeStreamingMessage)
+    const resourceHTML = buildResourceCardsHTML(msg.resources || []);
 
     // In-Chat Options buttons block logic
     let optionsHTML = '';
@@ -2438,10 +2417,11 @@ function renderChatHistory() {
     }
 
     const showHint = msg.sender === 'assistant' && !msg.optionsList;
+    const senderLabel = msg.sender === 'assistant' ? 'AZ Companion' : 'You';
     msgDiv.innerHTML = `
       <div class="message-avatar">${avatarContent}</div>
       <div class="message-content-wrapper">
-        <div class="message-sender">${msg.sender === 'assistant' ? 'AZ Companion' : 'You'}</div>
+        <div class="message-sender">${senderLabel}</div>
         <div class="message-bubble">
           ${showHint ? `<p class="chat-message-hint">Highlight any text below and click the blue notes icon to save it to this family's Notes.</p>` : ''}
           ${msg.raw ? formatAssistantAnswer(msg.text) : `<p>${msg.text}</p>`}
@@ -2455,31 +2435,8 @@ function renderChatHistory() {
 
     DOM.chatMessagesBox.appendChild(msgDiv);
 
-    // Bind Add to Family Report click for each resource card
-    if (msg.resources && msg.resources.length > 0) {
-      msgDiv.querySelectorAll('.add-to-report-btn').forEach(addBtn => {
-        addBtn.addEventListener('click', () => {
-          const resIdx = parseInt(addBtn.getAttribute('data-res-idx'), 10);
-          const res = msg.resources[resIdx];
-          if (!res) return;
-          const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
-          if (activeCase) {
-            const alreadyExists = activeCase.resources.some(r => r.name === res.title);
-            if (!alreadyExists) {
-              activeCase.resources.push({
-                name: res.title,
-                url: res.url || '#',
-                tag: mapToCanonicalResourceTag(res.tags)
-              });
-            }
-          }
-          res.addedToReport = true;
-          addBtn.disabled = true;
-          addBtn.textContent = '✓ Added to Family Report';
-          persistState();
-        });
-      });
-    }
+    // Bind Add to Family Report buttons via shared helper
+    bindResourceCardButtons(msgDiv, msg.resources || []);
 
     // Bind event listeners for in-chat dynamic buttons
     if (msg.optionsList && msg.optionsList.length > 0) {
@@ -2562,13 +2519,9 @@ function handleChatSend() {
   });
 
   renderChatHistory();
-  showChatTypingIndicator();
 
   if (!CHAT_WORKER_URL) {
-    setTimeout(() => {
-      removeChatTypingIndicator();
-      generateMockAIResponse(query);
-    }, 1500);
+    generateMockStreamResponse(query);
     return;
   }
 
@@ -2604,39 +2557,189 @@ function isResourceSeekingQuery(query) {
   return /\b(resource|resources|help|support|program|service|services|contact|hotline|helpline|referral|assistance|where|find|local|available|connect|refer|organization|agency|call|number|phone)\b/i.test(query);
 }
 
+// Shared SVG used in every assistant message avatar — defined once to avoid duplication.
+const ASSISTANT_AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>`;
+
+// ── Resource card helpers ─────────────────────────────────────────────────────
+// Extracted so both renderChatHistory (history render) and finalizeStreamingMessage
+// (live stream finalization) produce identical markup and bindings.
+
+function buildResourceCardsHTML(resources) {
+  if (!resources || resources.length === 0) return '';
+  return resources.map((res, resIdx) => {
+    const tagsHTML = (res.tags || []).map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('');
+    const addToReportBtnHTML = state.activeChatCaseId
+      ? `<button class="add-to-report-btn" data-res-idx="${resIdx}" ${res.addedToReport ? 'disabled' : ''}>
+          ${res.addedToReport ? '✓ Added to Family Report' : '+ Add to Family Report'}
+        </button>`
+      : '';
+    return `
+      <div class="chat-resource-card">
+        <div class="chat-resource-header">
+          <h4>${escapeHTML(res.title)}</h4>
+          ${res.verified ? '<span class="verified-badge">ASI Approved</span>' : ''}
+        </div>
+        <p>${escapeHTML(res.desc)}</p>
+        <div class="tag-row">${tagsHTML}</div>
+        ${addToReportBtnHTML}
+      </div>
+    `;
+  }).join('');
+}
+
+function bindResourceCardButtons(containerEl, resources) {
+  if (!resources || resources.length === 0) return;
+  containerEl.querySelectorAll('.add-to-report-btn').forEach(addBtn => {
+    addBtn.addEventListener('click', () => {
+      const resIdx = parseInt(addBtn.getAttribute('data-res-idx'), 10);
+      const res = resources[resIdx];
+      if (!res) return;
+      const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
+      if (activeCase) {
+        const alreadyExists = activeCase.resources.some(r => r.name === res.title);
+        if (!alreadyExists) {
+          activeCase.resources.push({ name: res.title, url: res.url || '#', tag: mapToCanonicalResourceTag(res.tags) });
+        }
+      }
+      res.addedToReport = true;
+      addBtn.disabled = true;
+      addBtn.textContent = '✓ Added to Family Report';
+      persistState();
+    });
+  });
+}
+
+// ── Streaming message helpers ─────────────────────────────────────────────────
+
+// Creates a live assistant message element in the DOM with a blinking cursor.
+// Scrolls so the TOP of the new message is visible — the user can scroll down freely.
+function createStreamingMessageEl() {
+  const div = document.createElement('div');
+  div.className = 'chat-message assistant streaming';
+  div.id = 'chat-streaming-message';
+  div.innerHTML = `
+    <div class="message-avatar">${ASSISTANT_AVATAR_SVG}</div>
+    <div class="message-content-wrapper">
+      <div class="message-sender">AZ Companion</div>
+      <div class="message-bubble">
+        <p class="chat-message-hint">Highlight any text below and click the blue notes icon to save it to this family's Notes.</p>
+        <div class="streaming-text"></div><span class="streaming-cursor"></span>
+      </div>
+    </div>
+  `;
+  DOM.chatMessagesBox.appendChild(div);
+  setTimeout(() => div.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  return div;
+}
+
+// Updates the raw text shown during streaming (before markdown formatting).
+function appendTokenToStreamingEl(el, rawText) {
+  const textEl = el.querySelector('.streaming-text');
+  if (textEl) textEl.textContent = rawText;
+}
+
+// Finalizes a streaming element: formats markdown, removes cursor, shows model badge,
+// appends resource cards, pushes the completed message to chat history.
+function finalizeStreamingMessage(el, fullText, resources, model) {
+  el.id = '';
+  el.classList.remove('streaming');
+
+  // model is stored in history for internal use but not shown in the UI
+
+  const bubble = el.querySelector('.message-bubble');
+  bubble.innerHTML = `
+    <p class="chat-message-hint">Highlight any text below and click the blue notes icon to save it to this family's Notes.</p>
+    ${formatAssistantAnswer(fullText)}
+    ${buildResourceCardsHTML(resources)}
+  `;
+  bindResourceCardButtons(bubble, resources);
+
+  const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  getActiveChatArray().push({ sender: 'assistant', text: fullText, time: timeNow, raw: true, resources, model });
+  persistState();
+}
+
+// ── Mock streaming (offline / no worker URL) ──────────────────────────────────
+// Shows the streaming cursor for ~1.5s so the UI path is exercised even without
+// a live worker, then delivers the full mock response via the existing path.
+function generateMockStreamResponse(query) {
+  const streamEl = createStreamingMessageEl();
+  setTimeout(() => {
+    streamEl.remove();
+    generateMockAIResponse(query);
+  }, 1500);
+}
+
 async function fetchWorkerChatResponse(query) {
+  // Create the live streaming element immediately — this IS the "typing indicator" now.
+  const streamEl = createStreamingMessageEl();
+
   try {
     const activeCase = state.activeChatCaseId ? state.cases.find(c => c.id === state.activeChatCaseId) : null;
     const context = buildChatContextText(activeCase);
     const retrievalHint = buildRetrievalHint(activeCase);
+
     const res = await fetch(CHAT_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ question: query, context, retrievalHint })
     });
-    const data = await res.json();
-    removeChatTypingIndicator();
 
-    if (!res.ok) {
-      appendAssistantChatMessage(data.error || "Something went wrong reaching the assistant.", { raw: true });
+    if (!res.ok || !res.body) {
+      const errData = await res.json().catch(() => ({}));
+      finalizeStreamingMessage(streamEl, errData.error || 'Something went wrong reaching the assistant.', [], null);
       return;
     }
-    let resources = (data.resources || [])
-      .map(r => findResourceById(r.id))
-      .filter(Boolean)
-      .map(r => ({ ...r, addedToReport: false }));
 
-    // Fallback: if the query was resource-seeking but retrieval returned nothing above threshold,
-    // surface the Alzheimer's Association 24/7 Helpline so there's always at least one contact.
-    if (resources.length === 0 && isResourceSeekingQuery(query)) {
-      const helpline = findResourceById('verified-resources-1');
-      if (helpline) resources = [{ ...helpline, addedToReport: false }];
+    // Read NDJSON stream line by line
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let rawText = '';
+    let resources = [];
+    let model = null;
+    let done = false;
+
+    while (!done) {
+      const { done: streamDone, value } = await reader.read();
+      if (streamDone) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        let msg;
+        try { msg = JSON.parse(line); } catch { continue; }
+
+        if (msg.type === 'resources') {
+          // Resources arrive first — resolve IDs to full resource objects immediately
+          model = msg.model || null;
+          resources = (msg.data || [])
+            .map(r => findResourceById(r.id))
+            .filter(Boolean)
+            .map(r => ({ ...r, addedToReport: false }));
+          // Fallback: inject helpline if resource-seeking and retrieval returned nothing
+          if (resources.length === 0 && isResourceSeekingQuery(query)) {
+            const helpline = findResourceById('verified-resources-1');
+            if (helpline) resources = [{ ...helpline, addedToReport: false }];
+          }
+        } else if (msg.type === 'token') {
+          rawText += msg.text;
+          appendTokenToStreamingEl(streamEl, rawText);
+        } else if (msg.type === 'done') {
+          done = true;
+          break;
+        } else if (msg.type === 'error') {
+          finalizeStreamingMessage(streamEl, msg.message || 'Something went wrong.', [], null);
+          return;
+        }
+      }
     }
 
-    appendAssistantChatMessage(data.answer, { raw: true, resources });
+    finalizeStreamingMessage(streamEl, rawText, resources, model);
   } catch (err) {
-    removeChatTypingIndicator();
-    appendAssistantChatMessage("Couldn't reach the assistant right now. Please try again in a moment.", { raw: true });
+    finalizeStreamingMessage(streamEl, "Couldn't reach the assistant right now. Please try again in a moment.", [], null);
   }
 }
 

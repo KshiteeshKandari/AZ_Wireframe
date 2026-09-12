@@ -2211,6 +2211,34 @@ button.pill-badge.active {
   border-color: var(--color-success, #1F9254) !important;
 }
 
+/* ── Streaming response cursor ───────────────────────────────────────────── */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming-cursor::after {
+  content: '▏';
+  display: inline-block;
+  animation: cursor-blink 0.7s step-end infinite;
+  color: var(--color-primary);
+  font-size: 1em;
+  line-height: 1;
+  margin-left: 1px;
+  vertical-align: middle;
+}
+
+/* Raw text shown during streaming (before markdown formatting is applied) */
+.streaming-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+
+
 .notes-btn-flash-error {
   background-color: var(--color-danger-bg, #FBE7E7) !important;
   color: var(--color-danger, #C0392B) !important;

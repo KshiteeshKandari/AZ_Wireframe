@@ -6,47 +6,41 @@ import { buildCloseSummaryPrompt } from './close-summary-prompt.js';
 import { isRateLimited } from './rate-limit.js';
 
 const MAX_QUESTION_LENGTH = 1000;
-const MAX_CONTEXT_LENGTH = 4000; // app-generated (case info + recent chat), not raw user input - truncate rather than reject
-const MAX_RETRIEVAL_HINT_LENGTH = 500; // app-generated (prior 2 messages), only ever used to enrich the retrieval embedding
-const MAX_REPORT_CONTEXT_LENGTH = 12000; // report generation needs the full case + chat transcript, not just a tail
+const MAX_CONTEXT_LENGTH = 4000;
+const MAX_RETRIEVAL_HINT_LENGTH = 500;
+const MAX_REPORT_CONTEXT_LENGTH = 12000;
 const MAX_CLOSE_SUMMARY_CONTEXT_LENGTH = 12000;
-const OPENAI_CHAT_MODEL = 'gpt-5-nano';
-// gpt-5-nano is a reasoning model: max_completion_tokens covers hidden reasoning tokens
-// AND the visible answer. reasoning_effort 'minimal' avoided that but produced unreliable,
-// occasionally self-contradictory answers; 'low' + a bigger budget is consistently clean.
-// 1500 was measured to be too tight for open-ended asks ("detailed checklist" etc): reasoning
-// token usage varies run-to-run (seen 256-1500 tokens on an identical question), and roughly
-// 1 in 3 runs at 1500 consumed the ENTIRE budget on hidden reasoning, leaving 0 tokens for the
-// visible answer (finish_reason "length", empty content) - i.e. a silent blank reply. 3000
-// gives enough headroom that reasoning variance no longer crowds out the answer.
+
+// --- Model routing ---
+// Fast (non-reasoning): used for factual lookups, case-fact questions, simple "what is X".
+// No hidden reasoning tokens → responds in ~300-500ms with streaming.
+const FAST_MODEL = 'gpt-4o-mini';
+const FAST_MAX_TOKENS = 1500;
+// Reasoning: used for care plans, multi-step strategy, synthesis across case + manual.
+// reasoning_effort:'low' is the minimum reliable setting — 'minimal' produced self-contradictory
+// answers. 3000 gives enough headroom that reasoning token variance doesn't crowd out the answer.
+const REASONING_MODEL = 'gpt-5-nano';
 const MAX_RESPONSE_TOKENS = 3000;
-// Defense in depth for the failure mode above: if a call still comes back with finish_reason
-// "length" and empty content (reasoning ate the whole budget), retry once with more headroom
-// rather than surfacing a blank bubble to the CHW.
+// Defense in depth: if reasoning ate the entire budget (empty visible output), retry once with
+// more headroom. The streaming path detects this by counting emitted tokens.
 const RETRY_RESPONSE_TOKENS = 4500;
-const MAX_REPORT_RESPONSE_TOKENS = 3000; // two full HTML letters (en + es) in one JSON response
+
+const MAX_REPORT_RESPONSE_TOKENS = 3000;
 const MAX_CLOSE_SUMMARY_RESPONSE_TOKENS = 800;
-// Chunks below this cosine similarity aren't relevant enough to surface as a suggested
-// resource card. Also used as the ASI-lane cutoff in retrieveSplitChunks - see retrieval.js.
-// 0.45, not 0.3: once the ASI lane is ranked on its own (see retrieveSplitChunks) it no longer
-// has to out-score manual chunks to pass this bar, so a lower threshold let same-domain noise
-// through - e.g. an accusation-handling chunk scoring 0.44 against an unrelated sundowning
-// question, purely from shared caregiving vocabulary. Live-tested across 5 queries: genuine
-// top matches scored 0.49-0.54, the best (wrong) match on an off-topic query topped out at
-// 0.44 - 0.45 cleanly separates the two.
 const ASI_RESOURCE_SCORE_THRESHOLD = 0.45;
 const MAX_CITED_RESOURCES = 3;
-// How many manual chunks to pull into the answer's excerpts, ranked separately from the ASI
-// lane - see retrieveSplitChunks in retrieval.js for why the two pools are kept apart. Kept at
-// 5 (not trimmed to make room for the ASI lane) because the two pools are fully independent now
-// - shrinking this doesn't help ASI surfacing, it only starves the model of grounding material
-// and produces thinner answers. Answer richness depends on this number, so don't lower it to
-// "balance" against asiK.
 const MANUAL_EXCERPT_COUNT = 5;
 
-// ALLOWED_ORIGIN is a comma-separated list (e.g. production + localhost for dev).
-// Echo back the request's Origin only if it's on the list - never wildcard, and
-// never trust an Origin that isn't an exact match.
+// Heuristic classifier: routes to the reasoning model when the question is long (>25 words) or
+// explicitly asks for synthesis, planning, or multi-step analysis. Everything else goes to the
+// fast model. Zero added latency — runs before any API call.
+const REASONING_PATTERNS = /\b(create a|develop a|build a|generate a|design a|care plan|action plan|step[\s-]by[\s-]step|comprehensive|detailed|in[\s-]depth|full guide|action items|walk me through|analy[sz]e|compare|full assessment|everything about|guide me through|give me a plan|strategic plan|strategy)\b/i;
+function requiresReasoning(question) {
+  return REASONING_PATTERNS.test(question) ||
+    question.trim().split(/\s+/).filter(Boolean).length > 25;
+}
+
+// CORS: echo back the request's Origin only if it's in the allow-list.
 function corsHeaders(request, env) {
   const allowed = (env.ALLOWED_ORIGIN || '').split(',').map(o => o.trim());
   const origin = request.headers.get('Origin');
@@ -58,13 +52,8 @@ function corsHeaders(request, env) {
   };
 }
 
-// Guardrail for the retrieval-hint blend below: only treat a question as a vague follow-up
-// (and worth borrowing the prior 2 messages for) when it's short AND leans on a pronoun/
-// demonstrative or a bare continuation phrase with no topic of its own, e.g. "can you tell
-// me more about this?" or "why?". Longer or self-contained questions carry their own topical
-// signal and retrieve best standalone - blending in an unrelated prior turn can drag the
-// embedding away from a chunk that would otherwise rank first (observed live: a doctor-visits
-// follow-up buried its own top-ranked ASI resource this way once an unrelated hint was added).
+// Vague follow-up detection: short questions with pronouns/continuations borrow the prior 2
+// messages for retrieval enrichment (but NOT for the model prompt — the user's exact words stay).
 const VAGUE_MAX_WORDS = 12;
 const VAGUE_PATTERNS = [
   /\b(this|that|these|those|it)\b/i,
@@ -77,12 +66,8 @@ function isVagueFollowUp(question) {
   return VAGUE_PATTERNS.some(re => re.test(question));
 }
 
-// Safety guardrail, independent of retrieval ranking: the suicide/crisis hotline is a short,
-// sparse chunk that can't win a cosine-similarity contest against long manual passages, so it
-// can legitimately fall outside the top-5 pool the resource card is drawn from even when the
-// question is explicitly about suicidal ideation. That's not acceptable for a crisis resource -
-// if the message mentions suicide/self-harm, surface the hotline unconditionally rather than
-// leaving it to embedding rank.
+// Crisis override: the hotline chunk is too short to win cosine similarity — force it in if any
+// crisis keywords appear in the question or recent context.
 const CRISIS_PATTERNS = [
   /\bsuicid\w*/i,
   /\bkill(ing)?\s+(myself|herself|himself|themselves|yourself)\b/i,
@@ -97,65 +82,90 @@ function mentionsCrisisRisk(...texts) {
   return texts.some(t => t && CRISIS_PATTERNS.some(re => re.test(t)));
 }
 
-async function callOpenAIChat(systemPrompt, question, env, maxTokens) {
+// Parses OpenAI's Server-Sent Events stream into plain JSON objects.
+// Yields one parsed chunk per "data: {...}" line; stops on "[DONE]".
+async function* parseSSEChunks(body) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        const payload = trimmed.slice(6);
+        if (payload === '[DONE]') return;
+        try { yield JSON.parse(payload); } catch { /* skip malformed SSE chunk */ }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+// Calls OpenAI with stream:true and returns the raw response body for parseSSEChunks.
+async function fetchOpenAIStream(model, maxTokens, reasoningEffort, systemPrompt, question, env) {
+  const body = {
+    model,
+    max_completion_tokens: maxTokens,
+    stream: true,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: question }
+    ]
+  };
+  if (reasoningEffort) body.reasoning_effort = reasoningEffort;
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      model: OPENAI_CHAT_MODEL,
-      max_completion_tokens: maxTokens,
-      reasoning_effort: 'low',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: question }
-      ]
-    })
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`OpenAI API error ${res.status}: ${await res.text()}`);
+  return res.body;
+}
+
+// Non-streaming call used by generate_report and generate_close_summary (both need full JSON
+// output before we can send anything — no benefit from streaming there).
+async function callOpenAIJSON(model, maxTokens, reasoningEffort, systemPrompt, userContent, env, responseFormat) {
+  const body = {
+    model,
+    max_completion_tokens: maxTokens,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userContent }
+    ]
+  };
+  if (reasoningEffort) body.reasoning_effort = reasoningEffort;
+  if (responseFormat) body.response_format = responseFormat;
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
   });
   if (!res.ok) throw new Error(`OpenAI API error ${res.status}: ${await res.text()}`);
   const json = await res.json();
   return json.choices[0].message.content || '';
 }
 
-async function askOpenAI(systemPrompt, question, env) {
-  const answer = await callOpenAIChat(systemPrompt, question, env, MAX_RESPONSE_TOKENS);
-  if (answer.trim()) return answer;
-  // Reasoning consumed the entire token budget with nothing left for the visible answer (see
-  // MAX_RESPONSE_TOKENS comment above) - retry once with more headroom instead of returning a
-  // silent blank reply.
-  const retryAnswer = await callOpenAIChat(systemPrompt, question, env, RETRY_RESPONSE_TOKENS);
-  return retryAnswer;
-}
-
 async function generateReport(reportContext, env) {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: OPENAI_CHAT_MODEL,
-      max_completion_tokens: MAX_REPORT_RESPONSE_TOKENS,
-      reasoning_effort: 'low',
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: buildReportSystemPrompt() },
-        { role: 'user', content: reportContext }
-      ]
-    })
-  });
-  if (!res.ok) throw new Error(`OpenAI API error ${res.status}: ${await res.text()}`);
-  const json = await res.json();
-  const raw = json.choices[0].message.content;
+  const raw = await callOpenAIJSON(
+    REASONING_MODEL, MAX_REPORT_RESPONSE_TOKENS, 'low',
+    buildReportSystemPrompt(), reportContext, env,
+    { type: 'json_object' }
+  );
   let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (e) {
-    throw new Error('Report generation returned invalid JSON');
-  }
+  try { parsed = JSON.parse(raw); } catch (e) { throw new Error('Report generation returned invalid JSON'); }
   if (!parsed || typeof parsed.en !== 'string' || typeof parsed.es !== 'string') {
     throw new Error('Report generation returned an unexpected shape');
   }
@@ -163,32 +173,13 @@ async function generateReport(reportContext, env) {
 }
 
 async function generateCloseSummary(caseContext, env) {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: OPENAI_CHAT_MODEL,
-      max_completion_tokens: MAX_CLOSE_SUMMARY_RESPONSE_TOKENS,
-      reasoning_effort: 'low',
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: buildCloseSummaryPrompt() },
-        { role: 'user', content: caseContext }
-      ]
-    })
-  });
-  if (!res.ok) throw new Error(`OpenAI API error ${res.status}: ${await res.text()}`);
-  const json = await res.json();
-  const raw = json.choices[0].message.content;
+  const raw = await callOpenAIJSON(
+    REASONING_MODEL, MAX_CLOSE_SUMMARY_RESPONSE_TOKENS, 'low',
+    buildCloseSummaryPrompt(), caseContext, env,
+    { type: 'json_object' }
+  );
   let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (e) {
-    throw new Error('Close summary generation returned invalid JSON');
-  }
+  try { parsed = JSON.parse(raw); } catch (e) { throw new Error('Close summary generation returned invalid JSON'); }
   if (!parsed || typeof parsed.title !== 'string' || typeof parsed.content !== 'string') {
     throw new Error('Close summary generation returned an unexpected shape');
   }
@@ -200,7 +191,6 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders(request, env) });
     }
-
     if (request.method !== 'POST') {
       return new Response('Method not allowed', { status: 405, headers: corsHeaders(request, env) });
     }
@@ -216,81 +206,62 @@ export default {
 
       const body = await request.json();
 
+      // --- generate_report (non-streaming JSON) ---
       if (body && body.action === 'generate_report') {
         const reportContext = typeof body.reportContext === 'string' ? body.reportContext.trim() : '';
         if (!reportContext) {
           return new Response(JSON.stringify({ error: 'Missing report context' }), {
-            status: 400,
-            headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
+            status: 400, headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
           });
         }
-        const safeReportContext = reportContext.slice(0, MAX_REPORT_CONTEXT_LENGTH);
-        const { en, es } = await generateReport(safeReportContext, env);
+        const { en, es } = await generateReport(reportContext.slice(0, MAX_REPORT_CONTEXT_LENGTH), env);
         return new Response(JSON.stringify({ reportContent: en, reportContentEs: es }), {
           headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
         });
       }
 
+      // --- generate_close_summary (non-streaming JSON) ---
       if (body && body.action === 'generate_close_summary') {
         const caseContext = typeof body.caseContext === 'string' ? body.caseContext.trim() : '';
         if (!caseContext) {
           return new Response(JSON.stringify({ error: 'Missing case context' }), {
-            status: 400,
-            headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
+            status: 400, headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
           });
         }
-        const safeCaseContext = caseContext.slice(0, MAX_CLOSE_SUMMARY_CONTEXT_LENGTH);
-        const { title, content } = await generateCloseSummary(safeCaseContext, env);
+        const { title, content } = await generateCloseSummary(caseContext.slice(0, MAX_CLOSE_SUMMARY_CONTEXT_LENGTH), env);
         return new Response(JSON.stringify({ title, content }), {
           headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
         });
       }
 
+      // --- Chat (streaming NDJSON) ---
       const { question, context, retrievalHint } = body;
 
       if (!question || typeof question !== 'string' || !question.trim()) {
         return new Response(JSON.stringify({ error: 'Missing question' }), {
-          status: 400,
-          headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
+          status: 400, headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
         });
       }
       if (question.length > MAX_QUESTION_LENGTH) {
         return new Response(JSON.stringify({ error: 'Question too long' }), {
-          status: 400,
-          headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
+          status: 400, headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
         });
       }
 
-      // Per-family context window (case info + recent conversation) - optional, app-generated.
       const safeContext = typeof context === 'string' ? context.slice(0, MAX_CONTEXT_LENGTH) : '';
-
-      // The last 2 messages before this question, used ONLY to enrich the retrieval
-      // embedding - a vague follow-up like "can you tell me more about this?" has no
-      // topical signal on its own, so folding in the prior turn gives retrieval something
-      // to match against. The model-facing question below stays exactly what the user typed.
       const safeRetrievalHint = typeof retrievalHint === 'string' ? retrievalHint.slice(0, MAX_RETRIEVAL_HINT_LENGTH) : '';
-      // Only blend the hint in when the question itself is too vague to retrieve well alone -
-      // see isVagueFollowUp above.
       const retrievalQuery = (safeRetrievalHint && isVagueFollowUp(question))
         ? `${safeRetrievalHint}\n${question}`
         : question;
 
+      // Retrieval (same split-lane design as before)
       const queryEmbedding = await embedQuery(retrievalQuery, env);
-      // Manual and ASI chunks are ranked as separate pools so the 13 short ASI chunks don't
-      // have to out-score the 291-chunk manual corpus to be surfaced - see retrieveSplitChunks
-      // in retrieval.js for the full rationale.
       const { manualChunks, asiChunks } = retrieveSplitChunks(queryEmbedding, {
         manualK: MANUAL_EXCERPT_COUNT,
         asiK: MAX_CITED_RESOURCES,
         asiThreshold: ASI_RESOURCE_SCORE_THRESHOLD
       });
 
-      // Crisis override: if the question or recent context signals suicidal ideation/self-harm,
-      // force the crisis hotline chunk into the ASI lane ahead of whatever retrieval ranked -
-      // see mentionsCrisisRisk above. Checked against the question and the app-supplied context
-      // (recent conversation) so a same-turn disclosure is always caught. This still matters
-      // even with the split lane: the hotline is short enough that it doesn't reliably win the
-      // top-3 ASI-only ranking either (a longer, adjacent-topic peer practice can out-score it).
       if (mentionsCrisisRisk(question, safeContext)) {
         const crisisChunk = findAsiChunk(/suicide prevention lifeline/i);
         if (crisisChunk && !asiChunks.some(c => c.id === crisisChunk.id)) {
@@ -299,18 +270,72 @@ export default {
       }
 
       const systemPrompt = buildSystemPrompt([...manualChunks, ...asiChunks], safeContext);
-      const answer = await askOpenAI(systemPrompt, question, env);
 
-      // Resource cards come straight from the ASI lane, already score-gated and capped above -
-      // no longer dependent on whether an ASI chunk also survived a merged top-K with manual
-      // content.
+      // Model routing
+      const useReasoning = requiresReasoning(question);
+      const chatModel = useReasoning ? REASONING_MODEL : FAST_MODEL;
+      const maxTok = useReasoning ? MAX_RESPONSE_TOKENS : FAST_MAX_TOKENS;
+      const reasoningEffort = useReasoning ? 'low' : undefined;
+
+      // Resources are ready now — send them to the client before waiting for the LLM
       const resources = asiChunks
         .slice(0, MAX_CITED_RESOURCES)
         .map(c => ({ id: c.id, source: c.source }));
 
-      return new Response(JSON.stringify({ answer, resources }), {
-        headers: { ...corsHeaders(request, env), 'Content-Type': 'application/json' }
+      const encoder = new TextEncoder();
+      const cors = corsHeaders(request, env);
+
+      const readable = new ReadableStream({
+        async start(controller) {
+          try {
+            // Line 1: resources + which model was selected (client uses this for the badge)
+            controller.enqueue(encoder.encode(
+              JSON.stringify({ type: 'resources', data: resources, model: useReasoning ? 'reasoning' : 'fast' }) + '\n'
+            ));
+
+            // Stream the answer
+            const sseBody = await fetchOpenAIStream(chatModel, maxTok, reasoningEffort, systemPrompt, question, env);
+            let totalText = '';
+            for await (const chunk of parseSSEChunks(sseBody)) {
+              const delta = chunk.choices?.[0]?.delta?.content ?? '';
+              if (delta) {
+                totalText += delta;
+                controller.enqueue(encoder.encode(JSON.stringify({ type: 'token', text: delta }) + '\n'));
+              }
+            }
+
+            // Retry: reasoning model sometimes uses its entire token budget on hidden reasoning,
+            // leaving zero visible tokens. Detect and retry with more headroom — transparently,
+            // so the client just sees more tokens arriving after a short pause.
+            if (!totalText.trim() && useReasoning) {
+              const retryBody = await fetchOpenAIStream(REASONING_MODEL, RETRY_RESPONSE_TOKENS, 'low', systemPrompt, question, env);
+              for await (const chunk of parseSSEChunks(retryBody)) {
+                const delta = chunk.choices?.[0]?.delta?.content ?? '';
+                if (delta) {
+                  controller.enqueue(encoder.encode(JSON.stringify({ type: 'token', text: delta }) + '\n'));
+                }
+              }
+            }
+
+            controller.enqueue(encoder.encode(JSON.stringify({ type: 'done' }) + '\n'));
+          } catch (err) {
+            controller.enqueue(encoder.encode(
+              JSON.stringify({ type: 'error', message: 'Something went wrong' }) + '\n'
+            ));
+          }
+          controller.close();
+        }
       });
+
+      return new Response(readable, {
+        headers: {
+          ...cors,
+          'Content-Type': 'application/x-ndjson',
+          'Cache-Control': 'no-cache',
+          'X-Content-Type-Options': 'nosniff'
+        }
+      });
+
     } catch (err) {
       return new Response(JSON.stringify({ error: 'Something went wrong' }), {
         status: 500,

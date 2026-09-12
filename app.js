@@ -2638,11 +2638,18 @@ function appendTokenToStreamingEl(el, rawText) {
   if (textEl) textEl.textContent = rawText;
 }
 
-// Finalizes a streaming element: formats markdown, removes cursor, shows model badge,
+// Finalizes a streaming element: formats markdown, removes cursor,
 // appends resource cards, pushes the completed message to chat history.
+// If the model replied with the "not covered" fallback, resource cards are
+// suppressed — retrieval ran before the LLM responded, so we clear them here.
+const NOT_COVERED_PHRASE = "That's not covered in the manual I have access to.";
 function finalizeStreamingMessage(el, fullText, resources, model) {
   el.id = '';
   el.classList.remove('streaming');
+
+  // Suppress resource cards when the model says the answer isn't in the manual.
+  const isFallback = fullText.trim().startsWith(NOT_COVERED_PHRASE);
+  const displayResources = isFallback ? [] : resources;
 
   // model is stored in history for internal use but not shown in the UI
 
@@ -2650,12 +2657,12 @@ function finalizeStreamingMessage(el, fullText, resources, model) {
   bubble.innerHTML = `
     <p class="chat-message-hint">Highlight any text below and click the blue notes icon to save it to this family's Notes.</p>
     ${formatAssistantAnswer(fullText)}
-    ${buildResourceCardsHTML(resources)}
+    ${buildResourceCardsHTML(displayResources)}
   `;
-  bindResourceCardButtons(bubble, resources);
+  bindResourceCardButtons(bubble, displayResources);
 
   const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  getActiveChatArray().push({ sender: 'assistant', text: fullText, time: timeNow, raw: true, resources, model });
+  getActiveChatArray().push({ sender: 'assistant', text: fullText, time: timeNow, raw: true, resources: displayResources, model });
   persistState();
 }
 

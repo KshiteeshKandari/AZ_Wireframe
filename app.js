@@ -22,7 +22,7 @@ const DEFAULT_INTAKE_FIELDS = {
   patientLanguage: 'English', livingSituation: 'All adults',
   patientGender: '',
   caregiverRel: 'Adult Child', caregiverAge: 'Under 65', caregiverStress: 'Moderate / Needs Support',
-  caregiverGender: '',
+  caregiverGender: '', caregiverRole: 'Primary Caregiver',
   focusAreas: [], aiGoal: 'Find local resources', otherInfo: '', notes: ''
 };
 
@@ -474,6 +474,7 @@ Patient Profile:
 - Mobility: ${f.mobility || 'No mobility issues'}
 
 Caregiver Profile:
+- Role: ${f.caregiverRole || 'Primary Caregiver'}
 - Relationship: ${f.caregiverRel}
 - Age Range: ${f.caregiverAge}
 - Gender: ${f.caregiverGender || 'Not specified'}
@@ -564,6 +565,7 @@ function setupCaseCardTabs() {
     const caregiverAge = getSelectedPillValue('caregiver-age', DOM.newCaseForm) || 'Under 65';
     const caregiverGender = getSelectedPillValue('caregiver-gender', DOM.newCaseForm) || '';
     const caregiverStress = getSelectedPillValue('caregiver-stress', DOM.newCaseForm) || 'High / Burnout Risk';
+    const caregiverRole = getSelectedPillValue('caregiver-role', DOM.newCaseForm) || 'Primary Caregiver';
     const bestCallTime = getSelectedPillValue('best-call-time', DOM.newCaseForm) || 'Morning (8am-12pm)';
 
     const focusAreas = getSelectedMultiPillValues('focus-areas', DOM.newCaseForm);
@@ -611,7 +613,7 @@ ${notes ? '\nNotes & Dynamics: ' + notes : ''}
         intakeFields: {
           primaryContact, zipCode, mobility: patientMobility,
           patientAge, patientGender, patientStage, patientLanguage, livingSituation,
-          caregiverRel, caregiverAge, caregiverGender, caregiverStress,
+          caregiverRel, caregiverAge, caregiverGender, caregiverStress, caregiverRole,
           focusAreas, aiGoal, otherInfo, notes
         },
         timeline: [
@@ -768,13 +770,23 @@ function renderCaseCards() {
         </div>
       </div>
 
-      <p class="card-phase">Phase: ${c.phase}</p>
+      <p class="card-phase">Phase: ${
+        c.shared    ? `Case now shared with ${c.sharedWith || 'team member'}` :
+        c.sharedBy  ? `Shared by ${c.sharedBy}` :
+        c.phase
+      }</p>
       <p class="card-blurb">${c.blurb}</p>
 
       <div class="card-footer-row">
-        <select class="status-chip-select ${chipClass}" data-case-id="${c.id}">
-          ${statusOptions.map(opt => `<option value="${opt}" ${opt === c.cardStatus ? 'selected' : ''}>${opt}</option>`).join('')}
-        </select>
+        ${c.shared
+          ? `<span class="status-chip-shared">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+               Shared with ${c.sharedWith || 'team member'}
+             </span>`
+          : `<select class="status-chip-select ${chipClass}" data-case-id="${c.id}">
+               ${statusOptions.map(opt => `<option value="${opt}" ${opt === c.cardStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+             </select>`
+        }
       </div>
 
       ${c.cardStatus === 'Awaiting Follow Up' ? `
@@ -1329,6 +1341,7 @@ function openEditIntakePage(caseId) {
   setActivePillValue('ei-caregiver-age', f.caregiverAge, form);
   setActivePillValue('ei-caregiver-gender', f.caregiverGender, form);
   setActivePillValue('ei-caregiver-stress', f.caregiverStress, form);
+  setActivePillValue('ei-caregiver-role', f.caregiverRole || 'Primary Caregiver', form);
   setActiveMultiPillValues('ei-focus-areas', f.focusAreas, form);
   setActivePillValue('ei-ai-assist-goal', f.aiGoal, form);
 
@@ -1368,6 +1381,7 @@ function setupEditIntakePage() {
       caregiverAge: getSelectedPillValue('ei-caregiver-age', form) || 'Under 65',
       caregiverGender: getSelectedPillValue('ei-caregiver-gender', form) || '',
       caregiverStress: getSelectedPillValue('ei-caregiver-stress', form) || 'High / Burnout Risk',
+      caregiverRole: getSelectedPillValue('ei-caregiver-role', form) || 'Primary Caregiver',
       focusAreas: getSelectedMultiPillValues('ei-focus-areas', form),
       aiGoal: getSelectedPillValue('ei-ai-assist-goal', form) || 'Find local resources',
       otherInfo: DOM.eiOtherInfo.value.trim(),
@@ -1923,7 +1937,7 @@ Cultural/Language Notes: None reported.`,
           <p><strong>4. Apóyate en recursos locales.</strong> Incluimos algunos recursos del área de Berwyn y una guía de conversación específica para el tema de la negación.</p>
           <p><strong>Próxima Revisión:</strong> Se programará un seguimiento según la información compartida arriba.</p>
         `,
-        shared: true
+        sharedBy: 'Robert Mercer'
       };
 
       state.cases.push(whitakerCase);
@@ -1991,6 +2005,8 @@ function setupShareModal() {
       if (sharedCase) {
         if (handoffNote) sharedCase.handoffNotes = handoffNote;
         sharedCase.cardStatus = 'Follow up due';
+        sharedCase.shared = true;
+        sharedCase.sharedWith = checkedUsers.join(', ');
         renderCaseCards();
         renderStats();
         persistState();
@@ -2641,15 +2657,17 @@ function appendTokenToStreamingEl(el, rawText) {
 // Finalizes a streaming element: formats markdown, removes cursor,
 // appends resource cards, pushes the completed message to chat history.
 // If the model replied with the "not covered" fallback, resource cards are
-// suppressed — retrieval ran before the LLM responded, so we clear them here.
+// suppressed — UNLESS the user was asking for resources, in which case the
+// cards themselves are the answer and should always show.
 const NOT_COVERED_PHRASE = "That's not covered in the manual I have access to.";
-function finalizeStreamingMessage(el, fullText, resources, model) {
+function finalizeStreamingMessage(el, fullText, resources, model, query) {
   el.id = '';
   el.classList.remove('streaming');
 
-  // Suppress resource cards when the model says the answer isn't in the manual.
+  // Suppress resource cards on "not covered" — but keep them if the user was
+  // explicitly asking for resources (the cards are the answer in that case).
   const isFallback = fullText.trim().startsWith(NOT_COVERED_PHRASE);
-  const displayResources = isFallback ? [] : resources;
+  const displayResources = (isFallback && !isResourceSeekingQuery(query || '')) ? [] : resources;
 
   // model is stored in history for internal use but not shown in the UI
 
@@ -2694,7 +2712,7 @@ async function fetchWorkerChatResponse(query) {
 
     if (!res.ok || !res.body) {
       const errData = await res.json().catch(() => ({}));
-      finalizeStreamingMessage(streamEl, errData.error || 'Something went wrong reaching the assistant.', [], null);
+      finalizeStreamingMessage(streamEl, errData.error || 'Something went wrong reaching the assistant.', [], null, query);
       return;
     }
 
@@ -2738,15 +2756,15 @@ async function fetchWorkerChatResponse(query) {
           done = true;
           break;
         } else if (msg.type === 'error') {
-          finalizeStreamingMessage(streamEl, msg.message || 'Something went wrong.', [], null);
+          finalizeStreamingMessage(streamEl, msg.message || 'Something went wrong.', [], null, query);
           return;
         }
       }
     }
 
-    finalizeStreamingMessage(streamEl, rawText, resources, model);
+    finalizeStreamingMessage(streamEl, rawText, resources, model, query);
   } catch (err) {
-    finalizeStreamingMessage(streamEl, "Couldn't reach the assistant right now. Please try again in a moment.", [], null);
+    finalizeStreamingMessage(streamEl, "Couldn't reach the assistant right now. Please try again in a moment.", [], null, query);
   }
 }
 

@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=16">
 </head>
 <body>
   <!-- Login Gate: simple demo-wide password screen, shown until unlocked for this tab session -->
@@ -218,12 +218,12 @@
                   <!-- Top Basic Info Row -->
                   <div class="form-row-2col">
                     <div class="form-group">
-                      <label for="case-name" class="group-label">Patient Family Name <span class="required">*</span></label>
-                      <input type="text" id="case-name" placeholder="Enter patient family name..." required>
+                      <label for="case-name" class="group-label">Patient Name <span class="required">*</span></label>
+                      <input type="text" id="case-name" placeholder="Enter patient name..." required>
                     </div>
                     <div class="form-group">
-                      <label for="primary-contact-name" class="group-label">Primary Caregiver Name <span class="required">*</span></label>
-                      <input type="text" id="primary-contact-name" placeholder="Enter primary caregiver name..." required>
+                      <label for="primary-contact-name" class="group-label">Primary Contact Name: <span class="required">*</span></label>
+                      <input type="text" id="primary-contact-name" placeholder="Enter primary contact name..." required>
                     </div>
                   </div>
 
@@ -335,12 +335,21 @@
                     </div>
 
                     <!-- Caregiver Stress Level -->
-                    <div class="form-group mb-0">
+                    <div class="form-group">
                       <label class="group-label">Observed Caregiver Stress Level:</label>
                       <div class="pill-group single-select" data-field="caregiver-stress">
                         <button type="button" class="pill-btn" data-value="Low / Managing Well">Low / Managing Well</button>
                         <button type="button" class="pill-btn" data-value="Moderate / Needs Support">Moderate / Needs Support</button>
                         <button type="button" class="pill-btn active" data-value="High / Burnout Risk">High / Burnout Risk</button>
+                      </div>
+                    </div>
+
+                    <!-- Caregiver Role -->
+                    <div class="form-group mb-0">
+                      <label class="group-label">Caregiver Role:</label>
+                      <div class="pill-group single-select" data-field="caregiver-role">
+                        <button type="button" class="pill-btn active" data-value="Primary Caregiver">Primary Caregiver</button>
+                        <button type="button" class="pill-btn" data-value="Secondary Caregiver">Secondary Caregiver</button>
                       </div>
                     </div>
                   </div>
@@ -417,8 +426,8 @@
                     <p id="edit-intake-family-name-display" style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 6px 0 0;"></p>
                   </div>
                   <div class="form-group">
-                    <label for="edit-intake-primary-contact" class="group-label">Primary Caregiver Name <span class="required">*</span></label>
-                    <input type="text" id="edit-intake-primary-contact" placeholder="Enter primary caregiver name..." required>
+                    <label for="edit-intake-primary-contact" class="group-label">Primary Contact Name: <span class="required">*</span></label>
+                    <input type="text" id="edit-intake-primary-contact" placeholder="Enter primary contact name..." required>
                   </div>
                 </div>
 
@@ -517,12 +526,21 @@
                     </div>
                   </div>
 
-                  <div class="form-group mb-0">
+                  <div class="form-group">
                     <label class="group-label">Observed Caregiver Stress Level:</label>
                     <div class="pill-group single-select" data-field="ei-caregiver-stress">
                       <button type="button" class="pill-btn" data-value="Low / Managing Well">Low / Managing Well</button>
                       <button type="button" class="pill-btn" data-value="Moderate / Needs Support">Moderate / Needs Support</button>
                       <button type="button" class="pill-btn" data-value="High / Burnout Risk">High / Burnout Risk</button>
+                    </div>
+                  </div>
+
+                  <!-- Caregiver Role -->
+                  <div class="form-group mb-0">
+                    <label class="group-label">Caregiver Role:</label>
+                    <div class="pill-group single-select" data-field="ei-caregiver-role">
+                      <button type="button" class="pill-btn" data-value="Primary Caregiver">Primary Caregiver</button>
+                      <button type="button" class="pill-btn" data-value="Secondary Caregiver">Secondary Caregiver</button>
                     </div>
                   </div>
                 </div>
@@ -1068,6 +1086,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>

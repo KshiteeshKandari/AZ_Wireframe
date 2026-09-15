@@ -2586,7 +2586,7 @@ function buildResourceCardsHTML(resources) {
     const tagsHTML = (res.tags || []).map(t => `<span class="mini-tag">${escapeHTML(t)}</span>`).join('');
     const addToReportBtnHTML = state.activeChatCaseId
       ? `<button class="add-to-report-btn" data-res-idx="${resIdx}" ${res.addedToReport ? 'disabled' : ''}>
-          ${res.addedToReport ? '✓ Added to Family Report' : '+ Add to Family Report'}
+          ${res.addedToReport ? '✓ Added to Family Resources' : '+ Add to Family Resources'}
         </button>`
       : '';
     return `
@@ -2619,7 +2619,7 @@ function bindResourceCardButtons(containerEl, resources) {
       }
       res.addedToReport = true;
       addBtn.disabled = true;
-      addBtn.textContent = '✓ Added to Family Report';
+      addBtn.textContent = '✓ Added to Family Resources';
       persistState();
     });
   });
